@@ -1,0 +1,158 @@
+<template>
+    <div class="auth-form">
+      <h2 class="text-center mb-4">Create an Account</h2>
+      
+      <div v-if="error" class="alert alert-danger">
+        {{ error }}
+      </div>
+      
+      <form @submit.prevent="handleSubmit">
+        <div class="form-group">
+          <label for="email" class="form-label">Email</label>
+          <input
+            type="email"
+            id="email"
+            v-model="email"
+            class="form-control"
+            placeholder="Enter your email"
+            required
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <input
+            type="password"
+            id="password"
+            v-model="password"
+            class="form-control"
+            placeholder="Enter your password"
+            required
+          />
+          <small class="form-text text-muted">
+            Password must be at least 6 characters long.
+          </small>
+        </div>
+        
+        <div class="form-group">
+          <label for="passwordConfirm" class="form-label">Confirm Password</label>
+          <input
+            type="password"
+            id="passwordConfirm"
+            v-model="passwordConfirm"
+            class="form-control"
+            placeholder="Confirm your password"
+            required
+          />
+        </div>
+        
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary btn-block" :disabled="loading">
+            {{ loading ? 'Creating account...' : 'Sign Up' }}
+          </button>
+        </div>
+      </form>
+      
+      <div class="text-center mt-3">
+        <span>Or sign up with</span>
+        <button 
+          @click="handleGoogleLogin" 
+          class="btn btn-outline btn-block mt-2"
+          :disabled="loading"
+        >
+          Google
+        </button>
+      </div>
+      
+      <div class="text-center mt-3">
+        <span>Already have an account? </span>
+        <router-link to="/login">Sign In</router-link>
+      </div>
+    </div>
+  </template>
+  
+  <script>
+  import { ref, computed } from 'vue';
+  import { useRouter } from 'vue-router';
+  import { useStore } from 'vuex';
+  import AuthService from '@/services/auth.service';
+  
+  export default {
+    name: 'RegisterForm',
+    setup() {
+      const email = ref('');
+      const password = ref('');
+      const passwordConfirm = ref('');
+      const error = ref('');
+      const loading = ref(false);
+      
+      const router = useRouter();
+      const store = useStore();
+      
+      const passwordsMatch = computed(() => {
+        return password.value === passwordConfirm.value;
+      });
+      
+      const handleSubmit = async () => {
+        try {
+          loading.value = true;
+          error.value = '';
+          
+          if (!passwordsMatch.value) {
+            error.value = 'Passwords do not match';
+            return;
+          }
+          
+          if (password.value.length < 6) {
+            error.value = 'Password must be at least 6 characters long';
+            return;
+          }
+          
+          const user = await AuthService.register(email.value, password.value);
+          store.dispatch('auth/setUser', user);
+          router.push('/dashboard');
+        } catch (err) {
+          error.value = err.message || 'Failed to create account';
+        } finally {
+          loading.value = false;
+        }
+      };
+      
+      const handleGoogleLogin = async () => {
+        try {
+          loading.value = true;
+          error.value = '';
+          
+          const user = await AuthService.loginWithGoogle();
+          store.dispatch('auth/setUser', user);
+          router.push('/dashboard');
+        } catch (err) {
+          error.value = err.message || 'Failed to sign up with Google';
+        } finally {
+          loading.value = false;
+        }
+      };
+      
+      return {
+        email,
+        password,
+        passwordConfirm,
+        error,
+        loading,
+        handleSubmit,
+        handleGoogleLogin
+      };
+    }
+  }
+  </script>
+  
+  <style scoped>
+  .auth-form {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: var(--spacing-lg);
+    background-color: white;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-md);
+  }
+  </style>

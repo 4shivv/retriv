@@ -14,9 +14,21 @@
       
       <div class="material-view-card">
         <div class="material-view-header">
-          <h3>{{ selectedMaterial.title }}</h3>
-          <div class="material-view-meta">
-            <span>Created on {{ formatDate(selectedMaterial.createdAt) }}</span>
+          <div class="title-area">
+            <h3>{{ selectedMaterial.title }}</h3>
+            <div class="material-view-meta">
+              <span>Created on {{ formatDate(selectedMaterial.createdAt) }}</span>
+            </div>
+          </div>
+          
+          <div class="next-review-badge" v-if="nextReviewDate">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>Next Review: {{ formatDateWithTime(nextReviewDate) }}</span>
           </div>
         </div>
         
@@ -24,8 +36,47 @@
           <p>{{ selectedMaterial.content }}</p>
         </div>
         
+        <!-- Study Attempts History -->
+        <div v-if="studyAttempts && studyAttempts.length > 0" class="study-history-section">
+          <h4>Study History</h4>
+          <div class="attempts-list">
+            <div v-for="(attempt, index) in studyAttempts" :key="index" class="attempt-item">
+              <div class="attempt-header">
+                <div class="attempt-score">
+                  <div class="score-badge" :class="getScoreClass(attempt.matchPercentage)">
+                    {{ attempt.matchPercentage }}%
+                  </div>
+                </div>
+                <div class="attempt-date">
+                  {{ formatDateWithTime(attempt.timestamp) }}
+                  <span v-if="index === 0" class="latest-badge">Latest</span>
+                </div>
+              </div>
+              
+              <!-- Display the review schedule if available -->
+              <div v-if="attempt.reviewSchedule && attempt.reviewSchedule.length > 0" class="review-schedule">
+                <p class="schedule-heading">Review Schedule:</p>
+                <ul class="schedule-list">
+                  <li v-for="(date, i) in attempt.reviewSchedule" :key="i" class="schedule-item" :class="{ 'past-date': isPastDate(date), 'current-date': isCurrentDate(date) }">
+                    {{ formatDateWithTime(date) }}
+                    <span v-if="isPastDate(date)" class="status-badge completed">Completed</span>
+                    <span v-else-if="isCurrentDate(date)" class="status-badge due">Due Today</span>
+                    <span v-else class="status-badge upcoming">Upcoming</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        
         <div class="material-view-actions">
-          <button @click="studyMaterial" class="btn btn-primary">Start Study Session</button>
+          <button @click="studyMaterial" class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+            </svg>
+            Start Study Session
+          </button>
           <button @click="editMaterial" class="btn btn-outline">Edit Material</button>
         </div>
       </div>
@@ -142,6 +193,7 @@
           v-for="material in materials" 
           :key="material.id"
           class="material-card"
+          :class="{ 'has-review': material.hasReview }"
         >
           <div class="material-header">
             <div class="material-category">Study Material</div>
@@ -149,6 +201,17 @@
           </div>
           <h3 class="material-title" @click="viewMaterial(material)">{{ material.title }}</h3>
           <p class="material-excerpt" @click="viewMaterial(material)">{{ truncateText(material.content, 120) }}</p>
+          <div v-if="material.nextReview" class="material-review-info">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span class="review-date" :class="{ 'review-due': isReviewDue(material.nextReview) }">
+              Review: {{ formatReviewDate(material.nextReview) }}
+            </span>
+          </div>
           <div class="material-footer">
             <div class="material-actions">
               <button 
@@ -192,7 +255,7 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import StudyService from '@/services/study.service';
 
 export default {
@@ -214,9 +277,11 @@ export default {
     const editMode = ref(false);
     const selectedMaterial = ref(null);
     const error = ref('');
-    const isLoading = ref(false);  // Renamed from 'loading' to 'isLoading' to avoid duplicate
+    const isLoading = ref(false);
     const showDeleteModal = ref(false);
     const deleteLoading = ref(false);
+    const studyAttempts = ref([]);
+    const nextReviewDate = ref(null);
     
     // Form data for editing
     const editForm = ref({
@@ -241,18 +306,124 @@ export default {
         year: 'numeric'
       }).format(date);
     };
+
+    const formatDateWithTime = (timestamp) => {
+      if (!timestamp) return 'N/A';
+      
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      
+      return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric'
+      }).format(date);
+    };
+
+    const formatReviewDate = (timestamp) => {
+      if (!timestamp) return 'N/A';
+      
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      // Check if the date is today
+      if (date >= today && date < tomorrow) {
+        return 'Today';
+      }
+      
+      // Check if the date is tomorrow
+      const nextDay = new Date(today);
+      nextDay.setDate(today.getDate() + 1);
+      const dayAfter = new Date(today);
+      dayAfter.setDate(today.getDate() + 2);
+      
+      if (date >= nextDay && date < dayAfter) {
+        return 'Tomorrow';
+      }
+      
+      // Otherwise, return the formatted date
+      return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric'
+      }).format(date);
+    };
+
+    const isReviewDue = (timestamp) => {
+      if (!timestamp) return false;
+      
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      const now = new Date();
+      
+      // Review is due if it's today or in the past
+      return date <= now;
+    };
+
+    const isPastDate = (timestamp) => {
+      if (!timestamp) return false;
+      
+      const date = new Date(timestamp);
+      const now = new Date();
+      
+      // Check if the date is in the past
+      return date < now;
+    };
+
+    const isCurrentDate = (timestamp) => {
+      if (!timestamp) return false;
+      
+      const date = new Date(timestamp);
+      const now = new Date();
+      
+      // Check if the date is today
+      return date.toDateString() === now.toDateString();
+    };
+
+    const getScoreClass = (score) => {
+      if (score >= 90) return 'excellent';
+      if (score >= 80) return 'good';
+      if (score >= 70) return 'fair';
+      if (score >= 50) return 'poor';
+      return 'very-poor';
+    };
+    
+    // Fetch study attempts for a material
+    const fetchStudyAttempts = async (materialId) => {
+      try {
+        isLoading.value = true;
+        const attempts = await StudyService.getStudyAttempts(materialId);
+        studyAttempts.value = attempts;
+        
+        // Fetch next review date
+        const nextReview = await StudyService.getNextReviewDate(materialId);
+        nextReviewDate.value = nextReview;
+        
+      } catch (err) {
+        console.error('Failed to fetch study attempts:', err);
+        error.value = err.message || 'Failed to load study history';
+      } finally {
+        isLoading.value = false;
+      }
+    };
     
     // View material
-    const viewMaterial = (material) => {
+    const viewMaterial = async (material) => {
       selectedMaterial.value = material;
       viewMode.value = true;
       editMode.value = false;
+      
+      // Fetch study attempts for this material
+      await fetchStudyAttempts(material.id);
     };
     
     // Close view
     const closeView = () => {
       viewMode.value = false;
       selectedMaterial.value = null;
+      studyAttempts.value = [];
     };
     
     // Study material
@@ -294,7 +465,7 @@ export default {
       if (!selectedMaterial.value) return;
       
       try {
-        isLoading.value = true;  // Using isLoading instead of loading
+        isLoading.value = true;
         error.value = '';
         
         // Update material in database
@@ -324,7 +495,7 @@ export default {
         console.error('Failed to update material:', err);
         error.value = err.message || 'Failed to update material';
       } finally {
-        isLoading.value = false;  // Using isLoading instead of loading
+        isLoading.value = false;
       }
     };
     
@@ -364,6 +535,24 @@ export default {
         deleteLoading.value = false;
       }
     };
+
+    // Check if any materials have reviews due today
+    onMounted(async () => {
+      if (props.materials && props.materials.length > 0) {
+        // Add review information to materials
+        for (const material of props.materials) {
+          try {
+            const nextReview = await StudyService.getNextReviewDate(material.id);
+            if (nextReview) {
+              material.nextReview = nextReview;
+              material.hasReview = isReviewDue(nextReview);
+            }
+          } catch (err) {
+            console.error('Error fetching review date:', err);
+          }
+        }
+      }
+    });
     
     return {
       viewMode,
@@ -371,11 +560,19 @@ export default {
       selectedMaterial,
       editForm,
       error,
-      isLoading,  // Renamed from 'loading' to 'isLoading'
+      isLoading,
       showDeleteModal,
       deleteLoading,
+      studyAttempts,
+      nextReviewDate,
       truncateText,
       formatDate,
+      formatDateWithTime,
+      formatReviewDate,
+      isReviewDue,
+      isPastDate,
+      isCurrentDate,
+      getScoreClass,
       viewMaterial,
       closeView,
       studyMaterial,
@@ -463,12 +660,17 @@ export default {
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-normal);
   border: 1px solid var(--neutral-200);
+  position: relative;
 }
 
 .material-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-md);
   border-color: var(--primary-light);
+}
+
+.material-card.has-review {
+  border-left: 4px solid var(--primary-color);
 }
 
 .material-header {
@@ -506,6 +708,23 @@ export default {
   margin-bottom: var(--spacing-4);
   line-height: 1.6;
   cursor: pointer;
+}
+
+.material-review-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: var(--neutral-100);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--neutral-600);
+}
+
+.review-date.review-due {
+  color: var(--primary-color);
+  font-weight: var(--font-weight-medium);
 }
 
 .material-footer {
@@ -614,6 +833,15 @@ export default {
   margin-bottom: var(--spacing-6);
   border-bottom: 1px solid var(--neutral-200);
   padding-bottom: var(--spacing-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.title-area {
+  flex: 1;
 }
 
 .material-view-header h3 {
@@ -627,22 +855,183 @@ export default {
   font-size: var(--font-size-sm);
 }
 
+.next-review-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  background-color: rgba(99, 102, 241, 0.1);
+  border-radius: var(--radius-full);
+  color: var(--primary-color);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
 .material-view-content {
   padding: var(--spacing-6) 0;
   line-height: 1.8;
   font-size: var(--font-size-md);
   color: var(--neutral-800);
-  max-height: 500px;
+  max-height: 300px;
   overflow-y: auto;
   margin-bottom: var(--spacing-6);
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+/* Study History Section */
+.study-history-section {
+  margin-bottom: var(--spacing-6);
+}
+
+.study-history-section h4 {
+  margin-bottom: var(--spacing-4);
+  font-weight: var(--font-weight-semibold);
+  color: var(--neutral-800);
+}
+
+.attempts-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.attempt-item {
+  background-color: var(--neutral-50);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--neutral-300);
+}
+
+.attempt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-3);
+}
+
+.score-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+}
+
+.score-badge.excellent {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.score-badge.good {
+  background-color: rgba(6, 182, 212, 0.1);
+  color: #06b6d4;
+}
+
+.score-badge.fair {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.score-badge.poor {
+  background-color: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+}
+
+.score-badge.very-poor {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.attempt-date {
+  font-size: var(--font-size-sm);
+  color: var(--neutral-600);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.latest-badge {
+  background-color: rgba(99, 102, 241, 0.1);
+  color: var(--primary-color);
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.review-schedule {
+  margin-top: var(--spacing-3);
+}
+
+.schedule-heading {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--neutral-700);
+  margin-bottom: var(--spacing-2);
+}
+
+.schedule-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.schedule-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: white;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--neutral-700);
+}
+
+.schedule-item.past-date {
+  text-decoration: line-through;
+  color: var(--neutral-500);
+}
+
+.schedule-item.current-date {
+  border-left: 3px solid var(--primary-color);
+  font-weight: var(--font-weight-medium);
+}
+
+.status-badge {
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.status-badge.completed {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.status-badge.due {
+  background-color: rgba(99, 102, 241, 0.1);
+  color: var(--primary-color);
+}
+
+.status-badge.upcoming {
+  background-color: rgba(6, 182, 212, 0.1);
+  color: #06b6d4;
 }
 
 .material-view-actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--spacing-4);
-  border-top: 1px solid var(--neutral-200);
   padding-top: var(--spacing-6);
+}
+
+.material-view-actions .btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
 }
 
 /* Material Edit Mode */
@@ -729,6 +1118,10 @@ export default {
 @media (max-width: 768px) {
   .materials-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .material-view-header {
+    flex-direction: column;
   }
   
   .material-view-actions,

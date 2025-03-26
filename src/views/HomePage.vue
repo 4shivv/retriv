@@ -1145,3 +1145,50 @@
   }
 }
 </style>
+
+<script>
+// Add onMounted at import
+import { onMounted } from 'vue';
+
+export default {
+  setup() {
+    // Handle smooth scrolling for anchor links within the home page
+    const handleSmoothScroll = () => {
+      // Get all anchor links that point to sections on this page
+      const anchorLinks = document.querySelectorAll('a[href^="#"]');
+      
+      anchorLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          
+          // Get the target element
+          const targetId = link.getAttribute('href');
+          const targetElement = document.querySelector(targetId);
+          
+          if (targetElement) {
+            // Get the navbar height for offset (approx 80px, but can be adjusted)
+            const navbarOffset = 80;
+            
+            // Calculate the element's position
+            const elementPosition = targetElement.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - navbarOffset;
+            
+            // Scroll to the element
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            });
+          }
+        });
+      });
+    };
+    
+    onMounted(() => {
+      // Set up smooth scrolling for anchor links
+      handleSmoothScroll();
+    });
+    
+    return {};
+  }
+}
+</script>

@@ -14,10 +14,10 @@
         <div class="navbar-menu" :class="{ 'is-active': menuOpen }">
           <ul class="navbar-links">
             <li class="nav-item">
-              <a href="#how-it-works" class="nav-link" @click="closeMenu">How It Works</a>
+              <router-link to="/#how-it-works" class="nav-link" @click="closeMenu" :class="{ 'no-active': true }">How It Works</router-link>
             </li>
             <li class="nav-item">
-              <a href="#science" class="nav-link" @click="closeMenu">Science</a>
+              <router-link to="/#science" class="nav-link" @click="closeMenu" :class="{ 'no-active': true }">Science</router-link>
             </li>
             <li class="nav-item" v-if="isAuthenticated">
               <router-link to="/dashboard" class="nav-link" @click="closeMenu">Dashboard</router-link>
@@ -41,10 +41,10 @@
                     <p class="user-email">{{ userEmail }}</p>
                   </div>
                   <div class="user-dropdown-body">
-                    <router-link to="/dashboard" class="dropdown-item" @click="closeMenu">
+                    <router-link to="/dashboard" class="dropdown-item" @click="closeUserMenu">
                       Dashboard
                     </router-link>
-                    <router-link to="/profile" class="dropdown-item" @click="closeMenu">
+                    <router-link to="/profile" class="dropdown-item" @click="closeUserMenu">
                       Profile
                     </router-link>
                     <button class="dropdown-item text-danger" @click="handleLogout">
@@ -67,7 +67,7 @@
 
 <script>
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import AuthService from '@/services/auth.service';
 
@@ -91,10 +91,16 @@ export default {
   
   setup() {
     const router = useRouter();
+    const route = useRoute();
     const store = useStore();
     const menuOpen = ref(false);
     const userMenuOpen = ref(false);
     const scrolled = ref(false);
+    
+    // Check if on home page
+    const isHomePage = computed(() => {
+      return route.path === '/';
+    });
     
     const isAuthenticated = computed(() => {
       return store.getters['auth/isAuthenticated'];
@@ -139,6 +145,20 @@ export default {
       userMenuOpen.value = false;
     };
     
+    const navigateToHomeWithHash = (hash) => {
+      if (isHomePage.value) {
+        // If already on home page, just scroll to the section
+        const element = document.querySelector(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        // Navigate to home page with hash
+        router.push({ path: '/', hash });
+      }
+      closeMenu();
+    };
+    
     const handleLogout = async () => {
       try {
         await AuthService.logout();
@@ -158,6 +178,16 @@ export default {
     onMounted(() => {
       window.addEventListener('scroll', handleScroll);
       handleScroll(); // Check initial scroll position
+      
+      // Handle hash navigation if coming from a different page
+      if (route.hash) {
+        setTimeout(() => {
+          const element = document.querySelector(route.hash);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 500); // Small delay to ensure page is loaded
+      }
     });
     
     onBeforeUnmount(() => {
@@ -171,10 +201,12 @@ export default {
       menuOpen,
       userMenuOpen,
       scrolled,
+      isHomePage,
       toggleMenu,
       closeMenu,
       toggleUserMenu,
       closeUserMenu,
+      navigateToHomeWithHash,
       handleLogout
     };
   }
@@ -308,6 +340,22 @@ export default {
 .nav-link:hover::after,
 .nav-link.router-link-active::after {
   width: 100%;
+}
+
+/* Add this new style to prevent router-link-active on hash links */
+.no-active.router-link-active::after {
+  width: 0 !important; /* Override the active indicator */
+}
+.no-active.router-link-active {
+  color: var(--neutral-700) !important; /* Override the active text color */
+}
+
+/* But still allow hover to work */
+.no-active:hover::after {
+  width: 100% !important;
+}
+.no-active:hover {
+  color: var(--primary-color) !important;
 }
 
 .navbar-actions {

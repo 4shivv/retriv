@@ -77,7 +77,22 @@
             </svg>
             Start Study Session
           </button>
-          <button @click="editMaterial" class="btn btn-outline">Edit Material</button>
+          <button @click="editMaterial" class="btn btn-outline">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Edit Material
+          </button>
+          <button @click="deleteMaterial(selectedMaterial)" class="btn btn-danger">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+            Delete Material
+          </button>
         </div>
       </div>
     </div>
@@ -151,7 +166,7 @@
         </div>
         <div class="delete-modal-body">
           <p>Are you sure you want to delete "{{ selectedMaterial?.title }}"?</p>
-          <p class="text-danger">This action cannot be undone.</p>
+          <p class="text-danger">This action cannot be undone and will delete all study history associated with this material.</p>
         </div>
         <div class="delete-modal-footer">
           <button @click="cancelDelete" class="btn btn-outline">Cancel</button>
@@ -166,7 +181,7 @@
     <!-- Material List Mode -->
     <div v-else>
       <div v-if="loading" class="loading-state">
-        <div class="loading-spinner"></div>
+        <div class="loading-spinner-large"></div>
         <p>Loading materials...</p>
       </div>
       
@@ -197,8 +212,35 @@
         >
           <div class="material-header">
             <div class="material-category">Study Material</div>
-            <div class="material-date">{{ formatDate(material.createdAt) }}</div>
+            <div class="material-actions-menu">
+              <button class="action-menu-button" @click.stop="toggleActionMenu(material.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="1"></circle>
+                  <circle cx="12" cy="5" r="1"></circle>
+                  <circle cx="12" cy="19" r="1"></circle>
+                </svg>
+              </button>
+              <div v-if="activeActionMenu === material.id" class="action-menu">
+                <button class="action-menu-item" @click.stop="editMaterial(material)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                  <span>Edit</span>
+                </button>
+                <button class="action-menu-item danger" @click.stop="deleteMaterial(material)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                  </svg>
+                  <span>Delete</span>
+                </button>
+              </div>
+            </div>
           </div>
+          <div class="material-date">{{ formatDate(material.createdAt) }}</div>
           <h3 class="material-title" @click="viewMaterial(material)">{{ material.title }}</h3>
           <p class="material-excerpt" @click="viewMaterial(material)">{{ truncateText(material.content, 120) }}</p>
           <div v-if="material.nextReview" class="material-review-info">
@@ -215,7 +257,7 @@
           <div class="material-footer">
             <div class="material-actions">
               <button 
-                @click="studyDirectly(material)" 
+                @click.stop="studyDirectly(material)" 
                 class="btn btn-primary btn-sm material-action-btn"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -223,28 +265,6 @@
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
                 <span>Study</span>
-              </button>
-              <button 
-                @click="editMaterial(material)" 
-                class="btn btn-outline btn-sm material-action-btn"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-                <span>Edit</span>
-              </button>
-              <button 
-                @click="deleteMaterial(material)" 
-                class="btn btn-danger btn-sm material-action-btn"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  <line x1="10" y1="11" x2="10" y2="17"></line>
-                  <line x1="14" y1="11" x2="14" y2="17"></line>
-                </svg>
-                <span>Delete</span>
               </button>
             </div>
           </div>
@@ -255,7 +275,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import StudyService from '@/services/study.service';
 
 export default {
@@ -282,6 +302,7 @@ export default {
     const deleteLoading = ref(false);
     const studyAttempts = ref([]);
     const nextReviewDate = ref(null);
+    const activeActionMenu = ref(null);
     
     // Form data for editing
     const editForm = ref({
@@ -390,6 +411,26 @@ export default {
       return 'very-poor';
     };
     
+    // Toggle action menu
+    const toggleActionMenu = (materialId) => {
+      if (activeActionMenu.value === materialId) {
+        activeActionMenu.value = null;
+      } else {
+        activeActionMenu.value = materialId;
+      }
+    };
+    
+    // Close all action menus when clicking outside
+    const closeActionMenus = (event) => {
+      // If clicking on a menu button, don't close
+      if (event.target.closest('.action-menu-button')) {
+        return;
+      }
+      
+      // Otherwise, close any open menu
+      activeActionMenu.value = null;
+    };
+    
     // Fetch study attempts for a material
     const fetchStudyAttempts = async (materialId) => {
       try {
@@ -414,6 +455,7 @@ export default {
       selectedMaterial.value = material;
       viewMode.value = true;
       editMode.value = false;
+      activeActionMenu.value = null;
       
       // Fetch study attempts for this material
       await fetchStudyAttempts(material.id);
@@ -446,6 +488,7 @@ export default {
       editForm.value.content = selectedMaterial.value.content;
       editMode.value = true;
       viewMode.value = false;
+      activeActionMenu.value = null;
     };
     
     // Cancel edit
@@ -503,6 +546,7 @@ export default {
     const deleteMaterial = (material) => {
       selectedMaterial.value = material;
       showDeleteModal.value = true;
+      activeActionMenu.value = null;
     };
     
     // Cancel delete
@@ -535,23 +579,15 @@ export default {
         deleteLoading.value = false;
       }
     };
-
-    // Check if any materials have reviews due today
-    onMounted(async () => {
-      if (props.materials && props.materials.length > 0) {
-        // Add review information to materials
-        for (const material of props.materials) {
-          try {
-            const nextReview = await StudyService.getNextReviewDate(material.id);
-            if (nextReview) {
-              material.nextReview = nextReview;
-              material.hasReview = isReviewDue(nextReview);
-            }
-          } catch (err) {
-            console.error('Error fetching review date:', err);
-          }
-        }
-      }
+    
+    onMounted(() => {
+      // Add event listener to close action menus when clicking outside
+      document.addEventListener('click', closeActionMenus);
+    });
+    
+    onBeforeUnmount(() => {
+      // Remove event listener
+      document.removeEventListener('click', closeActionMenus);
     });
     
     return {
@@ -565,6 +601,7 @@ export default {
       deleteLoading,
       studyAttempts,
       nextReviewDate,
+      activeActionMenu,
       truncateText,
       formatDate,
       formatDateWithTime,
@@ -573,6 +610,7 @@ export default {
       isPastDate,
       isCurrentDate,
       getScoreClass,
+      toggleActionMenu,
       viewMaterial,
       closeView,
       studyMaterial,
@@ -603,10 +641,10 @@ export default {
   color: var(--neutral-600);
 }
 
-.loading-spinner {
+.loading-spinner-large {
   width: 2rem;
   height: 2rem;
-  border: 2px solid rgba(99, 102, 241, 0.2);
+  border: 3px solid rgba(99, 102, 241, 0.2);
   border-radius: 50%;
   border-top-color: var(--primary-color);
   animation: spin 1s linear infinite;
@@ -661,6 +699,8 @@ export default {
   transition: all var(--transition-normal);
   border: 1px solid var(--neutral-200);
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .material-card:hover {
@@ -677,7 +717,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-4);
+  margin-bottom: var(--spacing-2);
 }
 
 .material-category {
@@ -689,6 +729,7 @@ export default {
 .material-date {
   font-size: var(--font-size-xs);
   color: var(--neutral-500);
+  margin-bottom: var(--spacing-3);
 }
 
 .material-title {
@@ -708,6 +749,7 @@ export default {
   margin-bottom: var(--spacing-4);
   line-height: 1.6;
   cursor: pointer;
+  flex-grow: 1;
 }
 
 .material-review-info {
@@ -730,6 +772,7 @@ export default {
 .material-footer {
   border-top: 1px solid var(--neutral-200);
   padding-top: var(--spacing-4);
+  margin-top: auto;
 }
 
 .material-actions {
@@ -746,18 +789,72 @@ export default {
   font-size: var(--font-size-xs);
 }
 
-.btn-danger {
-  background-color: #ef4444;
-  color: white;
+/* Action Menu */
+.material-actions-menu {
+  position: relative;
 }
 
-.btn-danger:hover {
-  background-color: #dc2626;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.25);
+.action-menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background-color: transparent;
+  color: var(--neutral-500);
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
-/* Material View Mode */
+.action-menu-button:hover {
+  background-color: var(--neutral-200);
+  color: var(--neutral-700);
+}
+
+.action-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 150px;
+  background-color: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 10;
+  overflow: hidden;
+  border: 1px solid var(--neutral-200);
+  margin-top: var(--spacing-1);
+}
+
+.action-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: none;
+  background-color: transparent;
+  color: var(--neutral-700);
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.action-menu-item:hover {
+  background-color: var(--neutral-100);
+}
+
+.action-menu-item.danger {
+  color: #ef4444;
+}
+
+.action-menu-item.danger:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Material View */
 .material-view {
   animation: fadeIn 0.3s ease forwards;
 }
@@ -825,14 +922,14 @@ export default {
   background-color: white;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  padding: var(--spacing-6);
+  overflow: hidden;
   margin-bottom: var(--spacing-8);
 }
 
 .material-view-header {
   margin-bottom: var(--spacing-6);
   border-bottom: 1px solid var(--neutral-200);
-  padding-bottom: var(--spacing-4);
+  padding: var(--spacing-6) var(--spacing-6) var(--spacing-4);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -868,7 +965,7 @@ export default {
 }
 
 .material-view-content {
-  padding: var(--spacing-6) 0;
+  padding: 0 var(--spacing-6) var(--spacing-6);
   line-height: 1.8;
   font-size: var(--font-size-md);
   color: var(--neutral-800);
@@ -880,7 +977,7 @@ export default {
 
 /* Study History Section */
 .study-history-section {
-  margin-bottom: var(--spacing-6);
+  margin: var(--spacing-4) var(--spacing-6) var(--spacing-6);
 }
 
 .study-history-section h4 {
@@ -1025,7 +1122,7 @@ export default {
   display: flex;
   justify-content: flex-end;
   gap: var(--spacing-4);
-  padding-top: var(--spacing-6);
+  padding: 0 var(--spacing-6) var(--spacing-6);
 }
 
 .material-view-actions .btn {
@@ -1050,7 +1147,7 @@ export default {
   margin-top: var(--spacing-6);
 }
 
-/* Delete Modal */
+/* Delete Confirmation Modal */
 .delete-modal-backdrop {
   position: fixed;
   top: 0;
@@ -1082,6 +1179,7 @@ export default {
 .delete-modal-header h4 {
   margin: 0;
   font-weight: var(--font-weight-semibold);
+  color: #ef4444;
 }
 
 .delete-modal-body {
@@ -1105,6 +1203,60 @@ export default {
   gap: var(--spacing-3);
 }
 
+/* Button Styles */
+.btn {
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-normal);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: var(--primary-gradient);
+  color: white;
+  padding: 0.5rem 1rem;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--neutral-300);
+  color: var(--neutral-700);
+  padding: 0.5rem 1rem;
+}
+
+.btn-outline:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+  padding: 0.5rem 1rem;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.25);
+}
+
+.btn-sm {
+  font-size: var(--font-size-sm);
+  padding: 0.35rem 0.75rem;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -1115,6 +1267,7 @@ export default {
   to { transform: scale(1); opacity: 1; }
 }
 
+/* Responsive styles */
 @media (max-width: 768px) {
   .materials-grid {
     grid-template-columns: 1fr;

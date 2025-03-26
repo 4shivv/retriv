@@ -25,13 +25,71 @@
         </p>
         <div v-if="pastAttempts && pastAttempts.length > 0" class="past-attempts-summary">
           <h4>Your Past Performance</h4>
-          <div class="attempts-chart">
-            <div class="chart-bars">
-              <div v-for="(attempt, index) in pastAttempts.slice(0, 5)" :key="index" class="chart-bar-container">
-                <div class="chart-bar" :style="{ height: `${attempt.matchPercentage}%` }" :class="getScoreClass(attempt.matchPercentage)">
-                  <span class="chart-value">{{ attempt.matchPercentage }}%</span>
+          <div class="performance-chart-container">
+            <div class="chart-header">
+              <div class="chart-title">Recall Score History</div>
+              <div class="chart-legend">
+                <div class="legend-item">
+                  <span class="legend-color excellent"></span>
+                  <span>Excellent (90%+)</span>
                 </div>
-                <div class="chart-label">{{ formatShortDate(attempt.timestamp) }}</div>
+                <div class="legend-item">
+                  <span class="legend-color good"></span>
+                  <span>Good (80-89%)</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-color fair"></span>
+                  <span>Fair (70-79%)</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-color poor"></span>
+                  <span>Poor (&lt; 70%)</span>
+                </div>
+              </div>
+            </div>
+            <div class="performance-trend-chart">
+              <div class="y-axis">
+                <div v-for="tick in 6" :key="'y-' + tick" class="axis-tick">
+                  {{ 100 - (tick - 1) * 20 }}%
+                </div>
+              </div>
+              <div class="chart-area">
+                <!-- Reference lines -->
+                <div class="reference-line" style="bottom: 90%;">Excellent (90%)</div>
+                <div class="reference-line" style="bottom: 70%;">Fair (70%)</div>
+                
+                <!-- Data points and connecting curve -->
+                <svg class="trend-curve" preserveAspectRatio="none" :viewBox="`0 0 ${pastAttempts.length - 1} 100`">
+                  <path :d="getChartPath()" fill="none" stroke="rgba(99, 102, 241, 0.7)" stroke-width="2"></path>
+                </svg>
+                
+                <div 
+                  v-for="(attempt, index) in pastAttempts" 
+                  :key="'point-' + index" 
+                  class="data-point" 
+                  :class="getScoreClass(attempt.matchPercentage)"
+                  :style="{
+                    left: `${(index / (pastAttempts.length - 1)) * 100}%`, 
+                    bottom: `${attempt.matchPercentage}%`
+                  }"
+                  @mouseenter="activatePoint(index)"
+                  @mouseleave="deactivatePoint()"
+                >
+                  <div v-if="activePoint === index" class="data-tooltip">
+                    <div class="tooltip-date">{{ formatDateWithTime(attempt.timestamp) }}</div>
+                    <div class="tooltip-score">{{ attempt.matchPercentage }}%</div>
+                  </div>
+                </div>
+              </div>
+              <div class="x-axis">
+                <div 
+                  v-for="(attempt, index) in pastAttempts" 
+                  :key="'x-' + index" 
+                  class="axis-label"
+                  :style="{ left: `${(index / (pastAttempts.length - 1)) * 100}%` }"
+                >
+                  {{ formatShortDate(attempt.timestamp) }}
+                </div>
               </div>
             </div>
           </div>
@@ -181,44 +239,134 @@
             <div v-else-if="activeTab === 'history'" class="history-view">
               <h5>Study History</h5>
               <div v-if="pastAttempts && pastAttempts.length > 0" class="performance-history">
-                <div class="history-chart">
-                  <div class="chart-line">
-                    <div class="chart-y-axis">
-                      <div class="y-axis-tick">100%</div>
-                      <div class="y-axis-tick">75%</div>
-                      <div class="y-axis-tick">50%</div>
-                      <div class="y-axis-tick">25%</div>
-                      <div class="y-axis-tick">0%</div>
+                <!-- Enhanced Performance History Chart -->
+                <div class="enhanced-chart-container">
+                  <!-- Chart Header with Performance Insights -->
+                  <div class="chart-header">
+                    <div class="performance-trend">
+                      <div class="trend-indicator" :class="performanceTrendClass">
+                        <svg v-if="isImproving" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                        <svg v-else-if="isDecreasing" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>{{ performanceTrendText }}</span>
+                      </div>
+                      <div class="insight-badge" v-if="performanceInsight">
+                        {{ performanceInsight }}
+                      </div>
                     </div>
-                    <div class="chart-content">
-                      <div class="threshold-line" style="bottom: 80%;">Excellent (80%)</div>
-                      <div class="threshold-line" style="bottom: 50%;">Average (50%)</div>
-                      <div class="chart-points">
+                    <div class="chart-legend">
+                      <div class="legend-item">
+                        <span class="legend-color excellent"></span>
+                        <span>Excellent (80%+)</span>
+                      </div>
+                      <div class="legend-item">
+                        <span class="legend-color good"></span>
+                        <span>Good (70-80%)</span>
+                      </div>
+                      <div class="legend-item">
+                        <span class="legend-color average"></span>
+                        <span>Average (50-70%)</span>
+                      </div>
+                      <div class="legend-item">
+                        <span class="legend-color poor"></span>
+                        <span>Poor (&lt;50%)</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Enhanced Chart Area -->
+                  <div class="enhanced-chart">
+                    <!-- Y-Axis -->
+                    <div class="chart-y-axis">
+                      <div class="y-axis-tick"><span>100%</span></div>
+                      <div class="y-axis-tick"><span>75%</span></div>
+                      <div class="y-axis-tick"><span>50%</span></div>
+                      <div class="y-axis-tick"><span>25%</span></div>
+                      <div class="y-axis-tick"><span>0%</span></div>
+                    </div>
+                    
+                    <!-- Chart Content Area -->
+                    <div class="chart-content-area">
+                      <!-- Threshold Lines -->
+                      <div class="threshold-line excellent-threshold" style="bottom: 80%;">
+                        <span class="threshold-label">Excellent (80%)</span>
+                      </div>
+                      <div class="threshold-line average-threshold" style="bottom: 50%;">
+                        <span class="threshold-label">Average (50%)</span>
+                      </div>
+                      
+                      <!-- Data Visualization -->
+                      <div class="data-visualization">
+                        <!-- Area Chart Background -->
+                        <svg class="area-chart" :viewBox="`0 0 ${pastAttempts.length - 1} 100`" preserveAspectRatio="none">
+                          <defs>
+                            <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                              <stop offset="0%" stop-color="rgba(99, 102, 241, 0.6)" />
+                              <stop offset="100%" stop-color="rgba(99, 102, 241, 0.1)" />
+                            </linearGradient>
+                          </defs>
+                          <path 
+                            :d="getAreaChartPath()" 
+                            fill="url(#areaGradient)"
+                            stroke="none"
+                          />
+                        </svg>
+                        
+                        <!-- Line Chart -->
+                        <svg class="line-chart" :viewBox="`0 0 ${pastAttempts.length - 1} 100`" preserveAspectRatio="none">
+                          <defs>
+                            <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="0%" stop-color="#4f46e5" />
+                              <stop offset="100%" stop-color="#8b5cf6" />
+                            </linearGradient>
+                          </defs>
+                          <polyline 
+                            :points="getChartLinePoints()" 
+                            fill="none" 
+                            stroke="url(#lineGradient)" 
+                            stroke-width="3"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          />
+                        </svg>
+                        
+                        <!-- Data Points -->
                         <div 
                           v-for="(attempt, index) in pastAttempts" 
                           :key="index" 
-                          class="chart-point" 
+                          class="data-point" 
                           :class="getScoreClass(attempt.matchPercentage)"
                           :style="{ left: `${(index / (pastAttempts.length - 1)) * 100}%`, bottom: `${attempt.matchPercentage}%` }"
-                          @mouseover="showTooltip(index)"
+                          @mouseenter="showTooltip(index)"
                           @mouseleave="hideTooltip()"
                         >
-                          <div v-if="tooltipIndex === index" class="chart-tooltip">
+                          <div v-if="tooltipIndex === index" class="enhanced-tooltip">
                             <div class="tooltip-date">{{ formatDateWithTime(attempt.timestamp) }}</div>
-                            <div class="tooltip-score">Score: {{ attempt.matchPercentage }}%</div>
+                            <div class="tooltip-score" :class="getScoreClass(attempt.matchPercentage)">
+                              <span>Score: {{ attempt.matchPercentage }}%</span>
+                            </div>
+                            <div class="tooltip-interval" v-if="attempt.calculatedInterval">
+                              <span>Next interval: {{ formatInterval(attempt.calculatedInterval) }}</span>
+                            </div>
                           </div>
+                          <svg v-if="index === 0" class="pulse-ring" width="40" height="40" viewBox="0 0 40 40">
+                            <circle cx="20" cy="20" r="15" fill="none" stroke="rgba(99, 102, 241, 0.3)" stroke-width="2">
+                              <animate attributeName="r" from="15" to="20" dur="1.5s" begin="0s" repeatCount="indefinite"/>
+                              <animate attributeName="opacity" from="1" to="0" dur="1.5s" begin="0s" repeatCount="indefinite"/>
+                            </circle>
+                          </svg>
                         </div>
                       </div>
-                      <svg class="chart-line-svg" :viewBox="`0 0 ${pastAttempts.length - 1} 100`" preserveAspectRatio="none">
-                        <polyline 
-                          :points="getChartLinePoints()" 
-                          fill="none" 
-                          stroke="rgba(99, 102, 241, 0.6)" 
-                          stroke-width="2"
-                        />
-                      </svg>
                     </div>
                   </div>
+                  
+                  <!-- X-Axis -->
                   <div class="chart-x-axis">
                     <div 
                       v-for="(attempt, index) in pastAttempts" 
@@ -227,6 +375,32 @@
                       :style="{ left: `${(index / (pastAttempts.length - 1)) * 100}%` }"
                     >
                       {{ formatShortDate(attempt.timestamp) }}
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Spaced Repetition Schedule -->
+                <div class="enhanced-schedule-section">
+                  <h5>Spaced Repetition Schedule</h5>
+                  <div class="timeline-container">
+                    <div class="timeline-line"></div>
+                    <div 
+                      v-for="(date, index) in reviewSchedule" 
+                      :key="index" 
+                      class="timeline-event"
+                      :class="{ 
+                        'past-event': isPastDate(date), 
+                        'current-event': isCurrentDate(date),
+                        'future-event': !isPastDate(date) && !isCurrentDate(date)
+                      }"
+                    >
+                      <div class="event-dot" :class="{
+                        'pulse': isCurrentDate(date) 
+                      }"></div>
+                      <div class="event-content">
+                        <div class="event-time">{{ formatDateWithTime(date) }}</div>
+                        <div class="event-label">{{ getEventLabel(date) }}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -241,20 +415,41 @@
         <div class="next-steps">
           <h5>Spaced Repetition Schedule</h5>
           <p class="schedule-intro">
-            Based on your performance, you should review this material at these times to strengthen your memory:
+            Based on your performance, we've created a scientifically-optimized review schedule to strengthen your long-term memory:
           </p>
-          <ul class="schedule-list">
-            <li v-for="(date, index) in reviewSchedule" :key="index" class="schedule-item">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-              <span>{{ formatDateWithTime(date) }}</span>
-              <span class="interval-label">{{ getIntervalLabel(date) }}</span>
-            </li>
-          </ul>
+          
+          <div class="schedule-timeline">
+            <div class="timeline-track"></div>
+            <div v-for="(date, index) in reviewSchedule" :key="'timeline-' + index" 
+              class="timeline-point" 
+              :class="{ 'current': isCurrentDate(date), 'past': isPastDate(date) }"
+              :style="{ left: calculateTimelinePosition(date, reviewSchedule) + '%' }">
+              <div class="timeline-marker"></div>
+              <div class="timeline-label" :class="{ 'alt-position': index % 2 === 1 }">
+                <div class="timeline-date">{{ formatReviewDate(date) }}</div>
+                <div class="timeline-gap">{{ getIntervalLabel(date) }}</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="schedule-explanation">
+            <div class="explanation-card">
+              <div class="card-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"></path>
+                  <path d="m9 12 2 2 4-4"></path>
+                </svg>
+              </div>
+              <div class="card-content">
+                <h6>Why This Schedule Works</h6>
+                <p>
+                  This schedule is based on the Ebbinghaus Forgetting Curve and proven spaced repetition research. 
+                  By reviewing material right before you're likely to forget it, you strengthen neural pathways more effectively.
+                </p>
+              </div>
+            </div>
+          </div>
           
           <div class="actions-row">
             <button @click="handleReset" class="btn btn-primary">
@@ -308,8 +503,10 @@ export default {
     const originalText = ref(props.content);
     const pastAttempts = ref([]);
     const attemptNumber = ref(1);
+    const activePoint = ref(null);
     const tooltipIndex = ref(null);
-    const error = ref(''); // Add error state
+    const error = ref('');
+    const nextReviewDate = ref(null);
     
     const router = useRouter();
     
@@ -366,13 +563,15 @@ export default {
         
         // Set the attempt number based on past attempts
         attemptNumber.value = attempts.length + 1;
+        
+        // Get next review date if available
+        nextReviewDate.value = await StudyService.getNextReviewDate(props.materialId);
       } catch (err) {
         console.error('Failed to fetch past attempts:', err);
         error.value = `Failed to fetch past attempts: ${err.message}`;
       }
     };
     
-    // Changed function name to avoid confusion with form's submit event
     const handleSubmitRecall = async () => {
       try {
         // Reset error
@@ -499,6 +698,52 @@ export default {
         day: 'numeric'
       }).format(date);
     };
+    
+    const formatReviewDate = (dateString) => {
+      if (!dateString) return '';
+      
+      const date = typeof dateString === 'object' && dateString.toDate ?
+        dateString.toDate() : new Date(dateString);
+      
+      const now = new Date();
+      
+      // If it's today
+      if (date.toDateString() === now.toDateString()) {
+        return new Intl.DateTimeFormat('en-US', {
+          hour: 'numeric',
+          minute: 'numeric'
+        }).format(date);
+      }
+      
+      // If it's tomorrow
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      if (date.toDateString() === tomorrow.toDateString()) {
+        return 'Tomorrow, ' + new Intl.DateTimeFormat('en-US', {
+          hour: 'numeric',
+          minute: 'numeric'
+        }).format(date);
+      }
+      
+      // If it's within a week
+      const oneWeek = new Date(now);
+      oneWeek.setDate(oneWeek.getDate() + 7);
+      if (date < oneWeek) {
+        return new Intl.DateTimeFormat('en-US', {
+          weekday: 'long',
+          hour: 'numeric',
+          minute: 'numeric'
+        }).format(date);
+      }
+      
+      // Otherwise, show the full date
+      return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric'
+      }).format(date);
+    };
 
     const getIntervalLabel = (dateString) => {
       if (!dateString) return '';
@@ -526,7 +771,157 @@ export default {
       if (score >= 50) return 'poor';
       return 'very-poor';
     };
+    
+    const getChangeClass = (currentScore, previousScore) => {
+      const difference = currentScore - previousScore;
+      if (difference >= 10) return 'increase-large';
+      if (difference > 0) return 'increase-small';
+      if (difference <= -10) return 'decrease-large';
+      if (difference < 0) return 'decrease-small';
+      return 'no-change';
+    };
+    
+    const calculateChange = (currentScore, previousScore) => {
+      const difference = currentScore - previousScore;
+      return difference > 0 ? `+${difference.toFixed(1)}%` : `${difference.toFixed(1)}%`;
+    };
 
+    const activatePoint = (index) => {
+      activePoint.value = index;
+    };
+
+    const deactivatePoint = () => {
+      activePoint.value = null;
+    };
+
+    const isPastDate = (timestamp) => {
+      if (!timestamp) return false;
+      
+      const date = new Date(timestamp);
+      const now = new Date();
+      
+      // Check if the date is in the past
+      return date < now;
+    };
+
+    const isCurrentDate = (timestamp) => {
+      if (!timestamp) return false;
+      
+      const date = new Date(timestamp);
+      const now = new Date();
+      
+      // Check if the date is today
+      return date.toDateString() === now.toDateString();
+    };
+    
+    const getChartPath = () => {
+      if (!pastAttempts.value || pastAttempts.value.length < 2) return '';
+      
+      // Create the SVG path data
+      let pathData = '';
+      
+      pastAttempts.value.forEach((attempt, index) => {
+        const x = index / (pastAttempts.value.length - 1) * (pastAttempts.value.length - 1);
+        const y = 100 - attempt.matchPercentage;
+        
+        if (index === 0) {
+          pathData = `M${x},${y}`;
+        } else {
+          // Use curve for smoother line
+          pathData += ` L${x},${y}`;
+        }
+      });
+      
+      return pathData;
+    };
+    
+    // Generate a retention curve path based on Ebbinghaus forgetting curve principles
+    const getRetentionCurvePath = () => {
+      if (!pastAttempts.value || pastAttempts.value.length === 0) return '';
+      
+      // Start from the current performance
+      const startY = 100 - matchPercentage.value;
+      
+      // The theoretical forgetting curve follows a negative exponential
+      // We'll approximate it with a bezier curve
+      let pathData = `M0,${startY}`;
+      
+      // If performance is very high (>90%), show a flatter curve
+      if (matchPercentage.value > 90) {
+        pathData += ` C30,${startY + 10} 50,${startY + 15} 100,${startY + 25}`;
+      } 
+      // If performance is good (>80%), show a moderate decline
+      else if (matchPercentage.value > 80) {
+        pathData += ` C30,${startY + 15} 50,${startY + 25} 100,${startY + 40}`;
+      }
+      // If performance is moderate (>70%), show a steeper decline
+      else if (matchPercentage.value > 70) {
+        pathData += ` C20,${startY + 20} 40,${startY + 35} 100,${startY + 55}`;
+      }
+      // For poor performance, show a very steep initial decline
+      else {
+        pathData += ` C15,${startY + 30} 30,${startY + 45} 100,${Math.min(95, startY + 65)}`;
+      }
+      
+      return pathData;
+    };
+    
+    // Calculate the position for the next review indicator on the timeline
+    const calculateNextReviewPosition = () => {
+      if (!nextReviewDate.value) return 50; // Default to middle if no date
+      
+      const now = new Date();
+      const nextReview = new Date(nextReviewDate.value);
+      const timeDiff = nextReview - now;
+      
+      // Convert to days
+      const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+      
+      // Map days to position percentage (0 days = 0%, 90 days = 100%)
+      // Use logarithmic scale to better represent early reviews
+      if (daysDiff < 1) {
+        // Less than a day - position between 0-25%
+        return Math.max(5, (daysDiff * 25));
+      } else if (daysDiff < 7) {
+        // Less than a week - position between 25-50%
+        return 25 + ((daysDiff - 1) / 6 * 25);
+      } else if (daysDiff < 30) {
+        // Less than a month - position between 50-75%
+        return 50 + ((daysDiff - 7) / 23 * 25);
+      } else {
+        // More than a month - position between 75-95%
+        return Math.min(95, 75 + ((daysDiff - 30) / 60 * 20));
+      }
+    };
+    
+    // Calculate position for timeline points
+    const calculateTimelinePosition = (date, allDates) => {
+      if (!date || !allDates || allDates.length === 0) return 0;
+      
+      const now = new Date();
+      const reviewDate = new Date(date);
+      
+      // Find earliest and latest dates
+      let earliestDate = now;
+      let latestDate = now;
+      
+      if (allDates.length > 0) {
+        const dates = allDates.map(d => new Date(d));
+        latestDate = new Date(Math.max.apply(null, dates));
+        
+        // Add buffer to latest date (20% more than the actual span)
+        const timeSpan = latestDate - now;
+        latestDate = new Date(latestDate.getTime() + timeSpan * 0.2);
+      }
+      
+      // Calculate position as percentage of the timeline
+      const timelineSpan = latestDate - earliestDate;
+      const datePosition = reviewDate - earliestDate;
+      
+      return Math.min(100, Math.max(0, (datePosition / timelineSpan) * 100));
+    };
+    
+    // New methods for the enhanced chart
     const showTooltip = (index) => {
       tooltipIndex.value = index;
     };
@@ -535,13 +930,119 @@ export default {
       tooltipIndex.value = null;
     };
 
+    const getAreaChartPath = () => {
+      if (!pastAttempts.value || pastAttempts.value.length < 2) return '';
+      
+      const width = pastAttempts.value.length - 1;
+      let path = 'M0 ' + (100 - pastAttempts.value[0].matchPercentage);
+      
+      // Add points for the top line
+      for (let i = 1; i < pastAttempts.value.length; i++) {
+        const x = i;
+        const y = 100 - pastAttempts.value[i].matchPercentage;
+        path += ` L${x} ${y}`;
+      }
+      
+      // Complete the path to create the area
+      path += ` L${width} 100 L0 100 Z`;
+      
+      return path;
+    };
+
     const getChartLinePoints = () => {
       if (!pastAttempts.value || pastAttempts.value.length < 2) return '';
       
       return pastAttempts.value.map((attempt, index) => 
-        `${index}, ${attempt.matchPercentage}`
+        `${index}, ${100 - attempt.matchPercentage}`
       ).join(' ');
     };
+    
+    // Format an interval (in days) to a human-readable string
+    const formatInterval = (interval) => {
+      if (!interval) return '';
+      
+      if (interval < 0.04) return 'Less than 1 hour';
+      if (interval < 1) {
+        const hours = Math.round(interval * 24);
+        return hours === 1 ? '1 hour' : `${hours} hours`;
+      }
+      if (interval < 7) {
+        const days = Math.round(interval * 10) / 10;
+        return days === 1 ? '1 day' : `${days} days`;
+      }
+      if (interval < 30) {
+        const weeks = Math.round(interval / 7 * 10) / 10;
+        return weeks === 1 ? '1 week' : `${weeks} weeks`;
+      }
+      const months = Math.round(interval / 30 * 10) / 10;
+      return months === 1 ? '1 month' : `${months} months`;
+    };
+    
+    // Get event label based on the date and index
+    const getEventLabel = (date) => {
+      if (isPastDate(date)) {
+        return 'Completed';
+      }
+      
+      if (isCurrentDate(date)) {
+        return 'Due now';
+      }
+      
+      // For future events, show the relative time
+      const now = new Date();
+      const reviewDate = new Date(date);
+      
+      const diffTime = Math.abs(reviewDate - now);
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 0) {
+        const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+        return `Due in ${diffHours} hour${diffHours !== 1 ? 's' : ''}`;
+      }
+      
+      if (diffDays === 1) return 'Due tomorrow';
+      if (diffDays < 7) return `Due in ${diffDays} days`;
+      if (diffDays < 14) return 'Due next week';
+      if (diffDays < 30) return `Due in ${Math.floor(diffDays / 7)} weeks`;
+      if (diffDays < 60) return 'Due next month';
+      
+      return `Due in ${Math.floor(diffDays / 30)} months`;
+    };
+
+    // Computed properties for enhanced chart
+    const performanceTrendClass = computed(() => {
+      if (isImproving.value) return 'improving';
+      if (isDecreasing.value) return 'decreasing';
+      return 'stable';
+    });
+    
+    const performanceTrendText = computed(() => {
+      if (isImproving.value) return 'Improving';
+      if (isDecreasing.value) return 'Decreasing';
+      return 'Stable';
+    });
+    
+    const performanceInsight = computed(() => {
+      if (!pastAttempts.value || pastAttempts.value.length < 2) return '';
+      
+      const latestScore = pastAttempts.value[0].matchPercentage;
+      
+      if (isImproving.value && latestScore > 80) {
+        return 'Great progress! Retention is excellent.';
+      } else if (isImproving.value) {
+        return 'Making good progress!';
+      } else if (isDecreasing.value && latestScore < 60) {
+        return 'Consider reviewing more frequently';
+      } else if (isDecreasing.value) {
+        return 'Retention declining slightly';
+      } else if (latestScore > 80) {
+        return 'Consistently strong performance';
+      } else if (latestScore < 50) {
+        return 'Material may need more focus';
+      }
+      
+      return '';
+    });
     
     onMounted(async () => {
       console.log("BlurtingForm mounted with materialId:", props.materialId);
@@ -571,21 +1072,40 @@ export default {
       originalText,
       pastAttempts,
       attemptNumber,
+      activePoint,
       tooltipIndex,
       isImproving,
       isDecreasing,
       error,
+      nextReviewDate,
+      performanceTrendClass,
+      performanceTrendText,
+      performanceInsight,
       handleSubmitRecall,
       handleReset,
       handleStudyAgain,
       formatDate,
       formatDateWithTime,
       formatShortDate,
+      formatReviewDate,
       getIntervalLabel,
       getScoreClass,
+      getChangeClass,
+      calculateChange,
+      activatePoint,
+      deactivatePoint,
       showTooltip,
       hideTooltip,
-      getChartLinePoints
+      getAreaChartPath,
+      getChartLinePoints,
+      formatInterval,
+      getEventLabel,
+      isPastDate,
+      isCurrentDate,
+      getChartPath,
+      getRetentionCurvePath,
+      calculateNextReviewPosition,
+      calculateTimelinePosition
     };
   }
 }
@@ -652,7 +1172,7 @@ export default {
   border-radius: var(--radius-md);
 }
 
-/* Past Attempts Summary in Instructions */
+/* Performance Chart in Instructions */
 .past-attempts-summary {
   margin-top: var(--spacing-4);
   padding-top: var(--spacing-4);
@@ -666,70 +1186,202 @@ export default {
   color: var(--neutral-700);
 }
 
-.attempts-chart {
+.performance-chart-container {
   margin-top: var(--spacing-3);
+  background-color: white;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  box-shadow: var(--shadow-sm);
 }
 
-.chart-bars {
+.chart-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  height: 100px;
-  gap: var(--spacing-2);
-}
-
-.chart-bar-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  height: 100%;
-  position: relative;
+  margin-bottom: var(--spacing-3);
 }
 
-.chart-bar {
-  width: 100%;
-  background-color: rgba(99, 102, 241, 0.3);
-  position: absolute;
-  bottom: 0;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding-top: 5px;
-  max-width: 40px;
-}
-
-.chart-bar.excellent {
-  background-color: rgba(16, 185, 129, 0.6);
-}
-
-.chart-bar.good {
-  background-color: rgba(6, 182, 212, 0.6);
-}
-
-.chart-bar.fair {
-  background-color: rgba(245, 158, 11, 0.6);
-}
-
-.chart-bar.poor {
-  background-color: rgba(249, 115, 22, 0.6);
-}
-
-.chart-bar.very-poor {
-  background-color: rgba(239, 68, 68, 0.6);
-}
-
-.chart-value {
-  font-size: var(--font-size-xs);
+.chart-title {
   font-weight: var(--font-weight-semibold);
-  color: white;
+  font-size: var(--font-size-md);
+  color: var(--neutral-800);
 }
 
-.chart-label {
-  position: absolute;
-  bottom: -20px;
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
   font-size: var(--font-size-xs);
   color: var(--neutral-600);
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-sm);
+}
+
+.legend-color.excellent {
+  background-color: rgba(16, 185, 129, 0.7);
+}
+
+.legend-color.good {
+  background-color: rgba(6, 182, 212, 0.7);
+}
+
+.legend-color.fair {
+  background-color: rgba(245, 158, 11, 0.7);
+}
+
+.legend-color.poor {
+  background-color: rgba(239, 68, 68, 0.7);
+}
+
+.legend-color.matched {
+  background-color: rgba(16, 185, 129, 0.15);
+  border-bottom: 2px solid #10b981;
+}
+
+.legend-color.unmatched {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-bottom: 2px solid #ef4444;
+}
+
+.performance-trend-chart {
+  position: relative;
+  height: 200px;
+  margin-top: var(--spacing-4);
+}
+
+.y-axis {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.axis-tick {
+  font-size: var(--font-size-xs);
+  color: var(--neutral-500);
+}
+
+.chart-area {
+  position: absolute;
+  top: 0;
+  left: 40px;
+  right: 0;
+  bottom: 25px;
+  border-bottom: 1px solid var(--neutral-300);
+  border-left: 1px solid var(--neutral-300);
+}
+
+.reference-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  border-top: 1px dashed var(--neutral-300);
+  font-size: var(--font-size-xs);
+  color: var(--neutral-500);
+  padding-left: var(--spacing-2);
+}
+
+.reference-line.dashed {
+  border-top-style: dashed;
+}
+
+.data-point {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transform: translate(-50%, 50%);
+  z-index: 2;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.data-point.excellent {
+  background-color: rgba(16, 185, 129, 0.7);
+}
+
+.data-point.good {
+  background-color: rgba(6, 182, 212, 0.7);
+}
+
+.data-point.fair {
+  background-color: rgba(245, 158, 11, 0.7);
+}
+
+.data-point.poor {
+  background-color: rgba(239, 68, 68, 0.7);
+}
+
+.data-point.very-poor {
+  background-color: rgba(239, 68, 68, 0.9);
+}
+
+.data-point:hover, .data-point:focus {
+  transform: translate(-50%, 50%) scale(1.5);
+}
+
+.data-tooltip {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--neutral-800);
+  color: white;
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: var(--shadow-lg);
+}
+
+.tooltip-date {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: 2px;
+}
+
+.tooltip-score {
+  font-weight: var(--font-weight-semibold);
+}
+
+.trend-curve {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.x-axis {
+  position: absolute;
+  left: 40px;
+  right: 0;
+  bottom: 0;
+  height: 25px;
+}
+
+.axis-label {
+  position: absolute;
+  font-size: var(--font-size-xs);
+  color: var(--neutral-500);
+  transform: translateX(-50%);
 }
 
 .form-actions {
@@ -960,30 +1612,6 @@ export default {
   justify-content: center;
 }
 
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  font-size: var(--font-size-sm);
-  color: var(--neutral-700);
-}
-
-.legend-color {
-  width: 16px;
-  height: 16px;
-  border-radius: var(--radius-sm);
-}
-
-.legend-color.matched {
-  background-color: rgba(16, 185, 129, 0.15);
-  border-bottom: 2px solid #10b981;
-}
-
-.legend-color.unmatched {
-  background-color: rgba(239, 68, 68, 0.1);
-  border-bottom: 2px solid #ef4444;
-}
-
 /* Split View */
 .split-view {
   display: grid;
@@ -1014,149 +1642,285 @@ export default {
   margin-bottom: var(--spacing-4);
 }
 
-.performance-history {
-  background-color: var(--neutral-50);
+/* Memory Curve Chart */
+.memory-curve-chart {
+  background-color: white;
+  border-radius: var(--radius-lg);
   padding: var(--spacing-4);
-  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-6);
+  box-shadow: var(--shadow-sm);
 }
 
-.history-chart {
-  height: 300px;
-  position: relative;
-}
-
-.chart-line {
-  display: flex;
-  height: 250px;
-  width: 100%;
-  position: relative;
-}
-
-.chart-y-axis {
-  width: 40px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding-right: var(--spacing-2);
-  border-right: 1px solid var(--neutral-300);
-}
-
-.y-axis-tick {
+.chart-subtitle {
   font-size: var(--font-size-xs);
   color: var(--neutral-500);
-  transform: translateY(50%);
+  margin-top: 2px;
 }
 
-.chart-content {
-  flex: 1;
-  height: 100%;
+.chart-view {
   position: relative;
-  padding-left: var(--spacing-2);
+  height: 180px;
+  margin-top: var(--spacing-4);
 }
 
-.threshold-line {
+.forgetting-curve, .retention-curve {
   position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
   left: 0;
-  right: 0;
-  height: 1px;
-  background-color: var(--neutral-300);
+}
+
+.next-review-indicator {
+  position: absolute;
+  bottom: 0;
+  top: 0;
+  z-index: 2;
+}
+
+.indicator-line {
+  position: absolute;
+  width: 1px;
+  height: 100%;
+  background-color: var(--primary-color);
+  left: 0;
+}
+
+.indicator-label {
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  transform: translateX(-50%);
+  background-color: var(--primary-color);
+  color: white;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
   font-size: var(--font-size-xs);
-  color: var(--neutral-600);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+/* History Table */
+.attempt-history-table {
+  background-color: white;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  box-shadow: var(--shadow-sm);
+}
+
+.attempt-history-table h6 {
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-3);
+  font-size: var(--font-size-md);
+}
+
+.history-table {
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.history-table-header {
+  display: flex;
+  background-color: var(--neutral-100);
+  font-weight: var(--font-weight-semibold);
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+.history-table-row {
+  display: flex;
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+.history-table-row:last-child {
+  border-bottom: none;
+}
+
+.history-cell {
+  padding: var(--spacing-2) var(--spacing-3);
+}
+
+.date-cell {
+  flex: 2;
+}
+
+.score-cell {
+  flex: 1;
   display: flex;
   align-items: center;
-  padding-left: var(--spacing-2);
+  justify-content: center;
 }
 
-.chart-points {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-
-.chart-point {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-left: -5px;
-  margin-bottom: -5px;
-  z-index: 2;
-  cursor: pointer;
-}
-
-.chart-point.excellent {
-  background-color: #10b981;
-}
-
-.chart-point.good {
-  background-color: #06b6d4;
-}
-
-.chart-point.fair {
-  background-color: #f59e0b;
-}
-
-.chart-point.poor {
-  background-color: #f97316;
-}
-
-.chart-point.very-poor {
-  background-color: #ef4444;
-}
-
-.chart-tooltip {
-  position: absolute;
-  bottom: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: var(--neutral-800);
-  color: white;
-  padding: var(--spacing-2) var(--spacing-3);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-xs);
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 3;
-}
-
-.tooltip-date {
-  font-weight: var(--font-weight-medium);
-  margin-bottom: 2px;
-}
-
-.chart-line-svg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-}
-
-.chart-x-axis {
-  height: 30px;
+.change-cell {
+  flex: 1;
   display: flex;
-  width: 100%;
-  position: relative;
-  margin-left: 40px;
-  border-top: 1px solid var(--neutral-300);
+  align-items: center;
+  justify-content: center;
 }
 
-.x-axis-tick {
-  position: absolute;
-  transform: translateX(-50%);
+.score-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
   font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: white;
+}
+
+.score-pill.excellent {
+  background-color: rgba(16, 185, 129, 0.9);
+}
+
+.score-pill.good {
+  background-color: rgba(6, 182, 212, 0.9);
+}
+
+.score-pill.fair {
+  background-color: rgba(245, 158, 11, 0.9);
+}
+
+.score-pill.poor {
+  background-color: rgba(249, 115, 22, 0.9);
+}
+
+.score-pill.very-poor {
+  background-color: rgba(239, 68, 68, 0.9);
+}
+
+.change-indicator {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.change-indicator.increase-large {
+  color: #10b981;
+}
+
+.change-indicator.increase-small {
+  color: #14b8a6;
+}
+
+.change-indicator.decrease-large {
+  color: #ef4444;
+}
+
+.change-indicator.decrease-small {
+  color: #f97316;
+}
+
+.change-indicator.no-change {
   color: var(--neutral-500);
-  top: 5px;
 }
 
 .no-history {
   text-align: center;
   padding: var(--spacing-6);
   color: var(--neutral-600);
+}
+
+/* Schedule Timeline */
+.schedule-timeline {
+  position: relative;
+  height: 100px;
+  margin: var(--spacing-6) 0;
+}
+
+.timeline-track {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--neutral-300);
+  transform: translateY(-50%);
+}
+
+.timeline-point {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.timeline-marker {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  position: relative;
+  z-index: 1;
+  transform: translateX(-50%);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.timeline-point.current .timeline-marker {
+  background-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.timeline-point.past .timeline-marker {
+  background-color: var(--neutral-400);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-label {
+  position: absolute;
+  top: 15px;
+  left: 0;
+  transform: translateX(-50%);
+  text-align: center;
+  min-width: 100px;
+}
+
+.timeline-label.alt-position {
+  top: -45px;
+}
+
+.timeline-date {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-1);
+  color: var(--neutral-800);
+}
+
+.timeline-gap {
+  font-size: var(--font-size-xs);
+  color: var(--neutral-600);
+}
+
+/* Schedule Explanation */
+.schedule-explanation {
+  margin: var(--spacing-6) 0;
+}
+
+.explanation-card {
+  background-color: var(--neutral-50);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-4);
+}
+
+.card-icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+  background-color: rgba(99, 102, 241, 0.1);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-content h6 {
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-2);
+  font-size: var(--font-size-md);
+}
+
+.card-content p {
+  color: var(--neutral-700);
+  margin-bottom: 0;
 }
 
 /* Next Steps */
@@ -1176,35 +1940,10 @@ export default {
   color: var(--neutral-700);
 }
 
-.schedule-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 var(--spacing-6) 0;
-}
-
-.schedule-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-3) 0;
-  border-bottom: 1px solid var(--neutral-300);
-  font-weight: var(--font-weight-medium);
-}
-
-.schedule-item:last-child {
-  border-bottom: none;
-}
-
-.interval-label {
-  margin-left: auto;
-  font-size: var(--font-size-sm);
-  color: var(--neutral-600);
-  font-weight: var(--font-weight-normal);
-}
-
 .actions-row {
   display: flex;
   gap: var(--spacing-4);
+  margin-top: var(--spacing-6);
 }
 
 .loading-spinner {
@@ -1221,32 +1960,443 @@ export default {
   to { transform: rotate(360deg); }
 }
 
-/* Responsive styles */
+/* Enhanced History View */
+.history-view {
+  margin-bottom: var(--spacing-4);
+}
+
+.history-view h5 {
+  margin-bottom: var(--spacing-4);
+  font-weight: var(--font-weight-semibold);
+}
+
+.performance-history {
+  background-color: white;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  box-shadow: var(--shadow-md);
+}
+
+/* Chart Header & Legend */
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+}
+
+.performance-trend {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.trend-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  box-shadow: var(--shadow-sm);
+}
+
+.trend-indicator.improving {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.trend-indicator.decreasing {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.trend-indicator.stable {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.insight-badge {
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  background-color: rgba(99, 102, 241, 0.1);
+  color: var(--primary-color);
+}
+
+.chart-legend {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  color: var(--neutral-600);
+}
+
+.legend-color {
+  width: 16px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.legend-color.excellent {
+  background-color: #10b981;
+}
+
+.legend-color.good {
+  background-color: #06b6d4;
+}
+
+.legend-color.average {
+  background-color: #f59e0b;
+}
+
+.legend-color.poor {
+  background-color: #ef4444;
+}
+
+/* Enhanced Chart Container */
+.enhanced-chart-container {
+  margin-bottom: var(--spacing-6);
+}
+
+.enhanced-chart {
+  display: flex;
+  height: 280px;
+  position: relative;
+  margin-bottom: var(--spacing-4);
+}
+
+.chart-y-axis {
+  width: 40px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-right: var(--spacing-2);
+  border-right: 1px dashed var(--neutral-300);
+}
+
+.y-axis-tick {
+  font-size: var(--font-size-xs);
+  color: var(--neutral-500);
+  transform: translateY(50%);
+  position: relative;
+}
+
+.y-axis-tick span {
+  position: absolute;
+  right: var(--spacing-2);
+  transform: translateY(-50%);
+}
+
+.chart-content-area {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.threshold-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--neutral-200);
+  z-index: 1;
+}
+
+.threshold-line.excellent-threshold {
+  background-color: rgba(16, 185, 129, 0.2);
+}
+
+.threshold-line.average-threshold {
+  background-color: rgba(245, 158, 11, 0.2);
+}
+
+.threshold-label {
+  position: absolute;
+  right: var(--spacing-2);
+  top: -10px;
+  font-size: var(--font-size-xs);
+  color: var(--neutral-500);
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+}
+
+.data-visualization {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+}
+
+.area-chart, .line-chart {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.data-point {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-left: -6px;
+  margin-bottom: -6px;
+  z-index: 10;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.data-point:hover {
+  transform: scale(1.3);
+}
+
+.data-point.excellent {
+  background-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+.data-point.good {
+  background-color: #06b6d4;
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+}
+
+.data-point.fair {
+  background-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.data-point.poor {
+  background-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9;
+  pointer-events: none;
+}
+
+.enhanced-tooltip {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  color: var(--neutral-700);
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 20;
+  box-shadow: var(--shadow-lg);
+  min-width: 160px;
+  border: 1px solid var(--neutral-200);
+}
+
+.tooltip-date {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-1);
+  color: var(--neutral-800);
+}
+
+.tooltip-score {
+  margin-bottom: var(--spacing-1);
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-medium);
+  display: inline-block;
+}
+
+.tooltip-score.excellent {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.tooltip-score.good {
+  background-color: rgba(6, 182, 212, 0.1);
+  color: #06b6d4;
+}
+
+.tooltip-score.fair {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.tooltip-score.poor {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.tooltip-interval {
+  font-size: var(--font-size-xs);
+  color: var(--neutral-600);
+}
+
+.chart-x-axis {
+  height: 30px;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px dashed var(--neutral-300);
+  padding-left: 40px;
+}
+
+.x-axis-tick {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: var(--font-size-xs);
+  color: var(--neutral-500);
+  top: var(--spacing-2);
+  white-space: nowrap;
+}
+
+/* Enhanced Spaced Repetition Schedule */
+.enhanced-schedule-section {
+  margin-top: var(--spacing-6);
+  padding-top: var(--spacing-6);
+  border-top: 1px solid var(--neutral-200);
+}
+
+.timeline-container {
+  position: relative;
+  padding: var(--spacing-6) 0;
+  margin-left: 20px;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--primary-light), var(--primary-dark));
+}
+
+.timeline-event {
+  position: relative;
+  padding-left: 30px;
+  margin-bottom: var(--spacing-6);
+}
+
+.timeline-event:last-child {
+  margin-bottom: 0;
+}
+
+.event-dot {
+  position: absolute;
+  left: -5px;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.past-event .event-dot {
+  background-color: var(--neutral-400);
+}
+
+.current-event .event-dot {
+  background-color: var(--primary-color);
+}
+
+.future-event .event-dot {
+  background-color: var(--primary-light);
+}
+
+.event-dot.pulse {
+  box-shadow: 0 0 0 rgba(99, 102, 241, 0.7);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
+}
+
+.event-content {
+  background-color: white;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-3) var(--spacing-4);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--neutral-200);
+  transition: all 0.3s ease;
+}
+
+.past-event .event-content {
+  opacity: 0.7;
+}
+
+.current-event .event-content {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.2);
+}
+
+.timeline-event:hover .event-content {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.event-time {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-1);
+  color: var(--neutral-800);
+}
+
+.event-label {
+  font-size: var(--font-size-sm);
+  color: var(--neutral-600);
+}
+
+.past-event .event-label {
+  text-decoration: line-through;
+  color: var(--neutral-500);
+}
+
+.current-event .event-label {
+  color: var(--primary-color);
+  font-weight: var(--font-weight-medium);
+}
+
 @media (max-width: 768px) {
-  .split-view {
-    grid-template-columns: 1fr;
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
   
-  .actions-row {
-    flex-direction: column;
+  .chart-legend {
+    flex-wrap: wrap;
+    margin-top: var(--spacing-2);
   }
   
-  .actions-row .btn {
-    width: 100%;
-  }
-
-  .tabs {
-    flex-direction: column;
-  }
-
-  .tab-button {
-    padding: var(--spacing-2) var(--spacing-4);
-  }
-
-  .tab-button.active {
-    border-bottom: none;
-    border-left: 2px solid var(--primary-color);
-    background-color: rgba(99, 102, 241, 0.05);
+  .enhanced-chart {
+    height: 240px;
   }
 }
 </style>

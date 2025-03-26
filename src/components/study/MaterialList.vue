@@ -82,8 +82,8 @@
               <button type="button" @click="cancelEdit" class="btn btn-outline">
                 Cancel
               </button>
-              <button type="submit" class="btn btn-primary" :disabled="loading">
-                <span v-if="loading" class="loading-spinner"></span>
+              <button type="submit" class="btn btn-primary" :disabled="isLoading">
+                <span v-if="isLoading" class="loading-spinner"></span>
                 <span v-else>Save Changes</span>
               </button>
             </div>
@@ -214,7 +214,7 @@ export default {
     const editMode = ref(false);
     const selectedMaterial = ref(null);
     const error = ref('');
-    const loading = ref(false);
+    const isLoading = ref(false);  // Renamed from 'loading' to 'isLoading' to avoid duplicate
     const showDeleteModal = ref(false);
     const deleteLoading = ref(false);
     
@@ -294,7 +294,7 @@ export default {
       if (!selectedMaterial.value) return;
       
       try {
-        loading.value = true;
+        isLoading.value = true;  // Using isLoading instead of loading
         error.value = '';
         
         // Update material in database
@@ -324,7 +324,7 @@ export default {
         console.error('Failed to update material:', err);
         error.value = err.message || 'Failed to update material';
       } finally {
-        loading.value = false;
+        isLoading.value = false;  // Using isLoading instead of loading
       }
     };
     
@@ -371,7 +371,7 @@ export default {
       selectedMaterial,
       editForm,
       error,
-      loading,
+      isLoading,  // Renamed from 'loading' to 'isLoading'
       showDeleteModal,
       deleteLoading,
       truncateText,

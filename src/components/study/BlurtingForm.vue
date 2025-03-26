@@ -164,7 +164,7 @@
 <script>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+// Removed unused store import
 import StudyService from '@/services/study.service';
 import ComparisonService from '@/services/comparison.service';
 import { auth } from '@/services/firebase';
@@ -200,7 +200,7 @@ export default {
     const originalText = ref(props.content);
     
     const router = useRouter();
-    const store = useStore();
+    // Removed unused store variable
     
     const timeLeft = computed(() => {
       const minutes = Math.floor(countdownTimerValue.value / 60);

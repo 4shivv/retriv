@@ -44,18 +44,28 @@
                 <div class="stat-content">
                   <div class="stat-value-container">
                     <h3 class="stat-value">{{ studySessions }}</h3>
-                    <div class="stat-change positive" v-if="studySessions > 0">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="18 15 12 9 6 15"></polyline>
-                      </svg>
-                      <span>3 this week</span>
+                    <div class="goal-info">
+                      <span class="goal-label">Goal: {{ studySessionGoal }}/month</span>
+                      <button @click="showGoalModal = true" class="goal-edit-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                      </button>
                     </div>
                   </div>
                   <div class="stat-progress">
                     <div class="progress-container">
-                      <div class="progress-bar" :style="{ width: `${(studySessions / 20) * 100}%` }"></div>
+                      <div 
+                        class="progress-bar" 
+                        :style="{ width: `${Math.min(100, (studySessions / studySessionGoal) * 100)}%` }"
+                        :class="{ 'goal-complete': studySessions >= studySessionGoal }"
+                      ></div>
                     </div>
-                    <div class="progress-label">{{ Math.floor((studySessions / 20) * 100) }}% of monthly goal</div>
+                    <div class="progress-label">
+                      {{ Math.min(100, Math.floor((studySessions / studySessionGoal) * 100)) }}% of monthly goal
+                      <span v-if="studySessions >= studySessionGoal" class="goal-complete-badge">Goal Complete!</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -276,6 +286,33 @@
           />
         </div>
       </template>
+    </div>
+
+    <!-- Goal Setting Modal -->
+    <div v-if="showGoalModal" class="modal-backdrop" @click="showGoalModal = false">
+      <div class="modal-container" @click.stop>
+        <div class="modal-header">
+          <h3>Set Monthly Study Goal</h3>
+        </div>
+        <div class="modal-body">
+          <p>Set your monthly study session goal to track your progress.</p>
+          <div class="form-group">
+            <label for="goalValue" class="form-label">Sessions per month</label>
+            <input 
+              type="number" 
+              id="goalValue" 
+              v-model="newGoalValue" 
+              class="form-control" 
+              min="1" 
+              max="100"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" @click="showGoalModal = false">Cancel</button>
+          <button class="btn btn-primary" @click="updateStudySessionGoal">Save Goal</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -574,6 +611,49 @@ export default {
       filterMaterials();
     });
     
+    // Inside the setup() function, add these new refs:
+    const studySessionGoal = ref(20); // Default goal is 20 sessions per month
+    const showGoalModal = ref(false);
+    const newGoalValue = ref(20);
+    const error = ref(''); // Added error ref that was missing
+    
+    // Add new methods
+    const loadStudySessionGoal = async () => {
+      try {
+        const goal = await StudyService.getStudySessionGoal();
+        studySessionGoal.value = goal;
+      } catch (err) {
+        console.error("Error loading study session goal:", err);
+        // Keep the default value
+      }
+    };
+    
+    const updateStudySessionGoal = async () => {
+      try {
+        if (newGoalValue.value < 1) {
+          newGoalValue.value = 1;
+        }
+        
+        await StudyService.setStudySessionGoal(newGoalValue.value);
+        studySessionGoal.value = newGoalValue.value;
+        showGoalModal.value = false;
+      } catch (err) {
+        console.error("Error updating study session goal:", err);
+        error.value = "Failed to update your study goal.";
+      }
+    };
+    
+    const loadStudySessions = async () => {
+      try {
+        const sessions = await StudyService.getMonthlyStudySessions();
+        studySessions.value = sessions;
+      } catch (err) {
+        console.error("Error loading study sessions:", err);
+        // Keep the default or previous value
+      }
+    };
+    
+    // Update the onMounted hook to include the new fetch:
     onMounted(async () => {
       // Check authentication
       const user = store.getters['auth/user'];
@@ -583,8 +663,12 @@ export default {
       }
       
       try {
-        // Fetch materials when component mounts
-        await fetchMaterials();
+        // Load all data in parallel
+        await Promise.all([
+          fetchMaterials(),
+          loadStudySessionGoal(),
+          loadStudySessions()
+        ]);
       } catch (err) {
         console.error("Error initializing dashboard:", err);
       }
@@ -627,7 +711,14 @@ export default {
       getStreakStatus,
       getDayLabel,
       getRetentionClass,
-      reviewMaterial
+      reviewMaterial,
+      studySessionGoal,
+      showGoalModal,
+      newGoalValue,
+      error,
+      updateStudySessionGoal,
+      loadStudySessionGoal,
+      loadStudySessions,
     };
   }
 }
@@ -1234,5 +1325,166 @@ export default {
     grid-template-columns: 1fr;
     gap: var(--spacing-4);
   }
+}
+
+/* New CSS rules */
+.edit-goal {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--neutral-100);
+  color: var(--neutral-600);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.edit-goal:hover {
+  background-color: var(--neutral-200);
+  color: var(--primary-color);
+}
+
+/* Modal Styles */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-container {
+  background-color: white;
+  border-radius: var(--radius-lg);
+  width: 400px;
+  max-width: 90%;
+  box-shadow: var(--shadow-xl);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-header {
+  padding: var(--spacing-4) var(--spacing-6);
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-weight: var(--font-weight-semibold);
+}
+
+.modal-body {
+  padding: var(--spacing-6);
+}
+
+.modal-body p {
+  color: var(--neutral-600);
+  margin-bottom: var(--spacing-4);
+}
+
+.form-group {
+  margin-bottom: var(--spacing-4);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--spacing-2);
+  color: var(--neutral-700);
+  font-weight: var(--font-weight-medium);
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  transition: all var(--transition-normal);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+}
+
+.modal-footer {
+  padding: var(--spacing-4) var(--spacing-6);
+  border-top: 1px solid var(--neutral-200);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-3);
+}
+
+.modal-footer .btn {
+  min-width: 100px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.goal-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.goal-label {
+  font-size: var(--font-size-sm);
+  color: var(--neutral-600);
+  background-color: var(--neutral-100);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+.goal-edit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--neutral-500);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.goal-edit-btn:hover {
+  color: var(--primary-color);
+  background-color: var(--neutral-100);
+}
+
+.goal-complete {
+  background: linear-gradient(90deg, var(--primary-color) 0%, #10b981 100%);
+}
+
+.goal-complete-badge {
+  display: inline-block;
+  margin-left: var(--spacing-2);
+  color: #10b981;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-xs);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
 }
 </style>

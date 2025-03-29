@@ -1,5 +1,155 @@
 <template>
   <div class="material-list">
+    <!-- Material List Mode -->
+    <div v-if="!viewMode && !editMode">
+      <div v-if="loading" class="loading-state">
+        <div class="loading-spinner-large"></div>
+        <p>Loading materials...</p>
+      </div>
+      
+      <div v-else-if="!materials || materials.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+            <line x1="7" y1="2" x2="7" y2="22"></line>
+            <line x1="17" y1="2" x2="17" y2="22"></line>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <line x1="2" y1="7" x2="7" y2="7"></line>
+            <line x1="2" y1="17" x2="7" y2="17"></line>
+            <line x1="17" y1="17" x2="22" y2="17"></line>
+            <line x1="17" y1="7" x2="22" y2="7"></line>
+          </svg>
+        </div>
+        <h3>No study materials yet</h3>
+        <p>Start creating your first study material to begin your learning journey.</p>
+        <button @click="$emit('create-new')" class="btn btn-primary">Create Your First Material</button>
+      </div>
+      
+      <div v-else>
+        <!-- Add filter menu -->
+        <div class="filter-menu" v-if="showFilterMenu">
+          <div class="filter-option filter-section">
+            <h5 class="filter-section-title">View Options</h5>
+            <label class="filter-checkbox">
+              <input type="checkbox" v-model="filters.dueReview"> 
+              <span>Show Due Reviews Only</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" v-model="filters.recentlyAdded"> 
+              <span>Recently Added</span>
+            </label>
+          </div>
+          
+          <div class="filter-option filter-section">
+            <h5 class="filter-section-title">Categories</h5>
+            <div class="category-filter-list">
+              <label v-for="category in availableCategories" :key="category" class="filter-checkbox">
+                <input 
+                  type="checkbox" 
+                  :value="category" 
+                  v-model="selectedCategoryFilters"
+                > 
+                <span class="category-name">{{ category }}</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="filter-actions">
+            <button class="btn btn-sm btn-outline" @click="applyFilters">Apply</button>
+            <button class="btn btn-sm btn-outline" @click="resetFilters">Reset</button>
+          </div>
+        </div>
+        
+        <!-- Category filter chips -->
+        <div class="category-filter">
+          <button 
+            class="category-chip" 
+            :class="{ active: activeCategory === '' }"
+            @click="filterByCategory('')"
+          >
+            All
+          </button>
+          <button 
+            v-for="category in availableCategories" 
+            :key="category"
+            class="category-chip" 
+            :class="{ active: activeCategory === category }"
+            @click="filterByCategory(category)"
+          >
+            {{ category }}
+          </button>
+        </div>
+        
+        <div class="materials-grid">
+          <div 
+            v-for="material in filteredMaterials" 
+            :key="material.id"
+            class="material-card"
+            :class="{ 'has-review': material.hasReview }"
+          >
+            <div class="material-header">
+              <div class="material-category">{{ material.category || 'Uncategorized' }}</div>
+              <div class="material-actions-menu">
+                <button class="action-menu-button" @click.stop="toggleActionMenu(material.id)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="1"></circle>
+                    <circle cx="12" cy="5" r="1"></circle>
+                    <circle cx="12" cy="19" r="1"></circle>
+                  </svg>
+                </button>
+                <div v-if="activeActionMenu === material.id" class="action-menu">
+                  <button class="action-menu-item" @click.stop="editMaterial(material)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    <span>Edit</span>
+                  </button>
+                  <button class="action-menu-item danger" @click.stop="deleteMaterial(material)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="material-date">{{ formatDate(material.createdAt) }}</div>
+            <h3 class="material-title" @click="viewMaterial(material)">{{ material.title }}</h3>
+            <p class="material-excerpt" @click="viewMaterial(material)">{{ truncateText(material.content, 120) }}</p>
+            <div v-if="material.nextReview" class="material-review-info">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <span class="review-date" :class="{ 'review-due': isReviewDue(material.nextReview) }">
+                Review: {{ formatReviewDate(material.nextReview) }}
+              </span>
+            </div>
+            <div class="material-footer">
+              <div class="material-actions">
+                <button 
+                  @click.stop="studyDirectly(material)" 
+                  class="btn btn-primary btn-sm material-action-btn"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <span>Study</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <!-- View Material Details Mode -->
     <div v-if="viewMode && selectedMaterial" class="material-view">
       <div class="view-header">
@@ -15,6 +165,7 @@
       <div class="material-view-card">
         <div class="material-view-header">
           <div class="title-area">
+            <div class="material-category-badge">{{ selectedMaterial.category || 'Uncategorized' }}</div>
             <h3>{{ selectedMaterial.title }}</h3>
             <div class="material-view-meta">
               <span>Created on {{ formatDate(selectedMaterial.createdAt) }}</span>
@@ -134,6 +285,26 @@
             </div>
             
             <div class="form-group">
+              <label class="form-label">Category</label>
+              <div class="category-select-container">
+                <select
+                  v-model="editForm.category"
+                  class="form-control"
+                  required
+                >
+                  <option value="" disabled>Select a category</option>
+                  <option value="Programming">Programming</option>
+                  <option value="Languages">Languages</option>
+                  <option value="Science">Science</option>
+                  <option value="Math">Math</option>
+                  <option value="History">History</option>
+                  <option value="Art">Art</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-group">
               <label class="form-label">Content</label>
               <textarea
                 v-model="editForm.content"
@@ -177,105 +348,11 @@
         </div>
       </div>
     </div>
-    
-    <!-- Material List Mode -->
-    <div v-else>
-      <div v-if="loading" class="loading-state">
-        <div class="loading-spinner-large"></div>
-        <p>Loading materials...</p>
-      </div>
-      
-      <div v-else-if="!materials || materials.length === 0" class="empty-state">
-        <div class="empty-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
-            <line x1="7" y1="2" x2="7" y2="22"></line>
-            <line x1="17" y1="2" x2="17" y2="22"></line>
-            <line x1="2" y1="12" x2="22" y2="12"></line>
-            <line x1="2" y1="7" x2="7" y2="7"></line>
-            <line x1="2" y1="17" x2="7" y2="17"></line>
-            <line x1="17" y1="17" x2="22" y2="17"></line>
-            <line x1="17" y1="7" x2="22" y2="7"></line>
-          </svg>
-        </div>
-        <h3>No study materials yet</h3>
-        <p>Start creating your first study material to begin your learning journey.</p>
-        <button @click="$emit('create-new')" class="btn btn-primary">Create Your First Material</button>
-      </div>
-      
-      <div v-else class="materials-grid">
-        <div 
-          v-for="material in materials" 
-          :key="material.id"
-          class="material-card"
-          :class="{ 'has-review': material.hasReview }"
-        >
-          <div class="material-header">
-            <div class="material-category">Study Material</div>
-            <div class="material-actions-menu">
-              <button class="action-menu-button" @click.stop="toggleActionMenu(material.id)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="1"></circle>
-                  <circle cx="12" cy="5" r="1"></circle>
-                  <circle cx="12" cy="19" r="1"></circle>
-                </svg>
-              </button>
-              <div v-if="activeActionMenu === material.id" class="action-menu">
-                <button class="action-menu-item" @click.stop="editMaterial(material)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
-                  <span>Edit</span>
-                </button>
-                <button class="action-menu-item danger" @click.stop="deleteMaterial(material)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    <line x1="10" y1="11" x2="10" y2="17"></line>
-                    <line x1="14" y1="11" x2="14" y2="17"></line>
-                  </svg>
-                  <span>Delete</span>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="material-date">{{ formatDate(material.createdAt) }}</div>
-          <h3 class="material-title" @click="viewMaterial(material)">{{ material.title }}</h3>
-          <p class="material-excerpt" @click="viewMaterial(material)">{{ truncateText(material.content, 120) }}</p>
-          <div v-if="material.nextReview" class="material-review-info">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-            <span class="review-date" :class="{ 'review-due': isReviewDue(material.nextReview) }">
-              Review: {{ formatReviewDate(material.nextReview) }}
-            </span>
-          </div>
-          <div class="material-footer">
-            <div class="material-actions">
-              <button 
-                @click.stop="studyDirectly(material)" 
-                class="btn btn-primary btn-sm material-action-btn"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-                <span>Study</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
 import StudyService from '@/services/study.service';
 
 export default {
@@ -303,12 +380,51 @@ export default {
     const studyAttempts = ref([]);
     const nextReviewDate = ref(null);
     const activeActionMenu = ref(null);
+    const activeCategory = ref('');
+    const availableCategories = ref([]);
+    const selectedCategoryFilters = ref([]);
+    const showFilterMenu = ref(false);
+    const searchQuery = ref('');
+    const filters = ref({
+      dueReview: false,
+      recentlyAdded: false
+    });
+    
+    // Computed property for filtered materials by category
+    const filteredMaterials = computed(() => {
+      if (!activeCategory.value) {
+        return props.materials;
+      }
+      return props.materials.filter(m => m.category === activeCategory.value);
+    });
     
     // Form data for editing
     const editForm = ref({
       title: '',
-      content: ''
+      content: '',
+      category: ''
     });
+    
+    // Load available categories
+    const loadCategories = async () => {
+      try {
+        // Extract unique categories from materials
+        const uniqueCategories = new Set();
+        props.materials.forEach(material => {
+          if (material.category) {
+            uniqueCategories.add(material.category);
+          }
+        });
+        availableCategories.value = Array.from(uniqueCategories);
+      } catch (err) {
+        console.error("Error loading categories:", err);
+      }
+    };
+    
+    // Filter materials by category
+    const filterByCategory = (category) => {
+      activeCategory.value = category;
+    };
     
     const truncateText = (text, maxLength) => {
       if (!text) return '';
@@ -486,6 +602,7 @@ export default {
       selectedMaterial.value = material || selectedMaterial.value;
       editForm.value.title = selectedMaterial.value.title;
       editForm.value.content = selectedMaterial.value.content;
+      editForm.value.category = selectedMaterial.value.category || ''; // Include category in edit form
       editMode.value = true;
       viewMode.value = false;
       activeActionMenu.value = null;
@@ -511,11 +628,12 @@ export default {
         isLoading.value = true;
         error.value = '';
         
-        // Update material in database
+        // Update material in database with category
         await StudyService.updateStudyMaterial(
           selectedMaterial.value.id,
           editForm.value.title,
-          editForm.value.content
+          editForm.value.content,
+          editForm.value.category
         );
         
         // Update the material object
@@ -523,6 +641,7 @@ export default {
           ...selectedMaterial.value,
           title: editForm.value.title,
           content: editForm.value.content,
+          category: editForm.value.category, // Update with new category
           updatedAt: new Date()
         };
         
@@ -533,6 +652,9 @@ export default {
         selectedMaterial.value = updatedMaterial;
         editMode.value = false;
         viewMode.value = true;
+        
+        // Reload categories
+        loadCategories();
         
       } catch (err) {
         console.error('Failed to update material:', err);
@@ -572,6 +694,9 @@ export default {
         selectedMaterial.value = null;
         viewMode.value = false;
         
+        // Reload categories
+        loadCategories();
+        
       } catch (err) {
         console.error('Failed to delete material:', err);
         error.value = err.message || 'Failed to delete material';
@@ -580,9 +705,78 @@ export default {
       }
     };
     
+    // Watch for changes in materials to update categories
+    watch(() => props.materials, () => {
+      loadCategories();
+    }, { immediate: true });
+    
+    // Update filterMaterials method
+    const filterMaterials = () => {
+      let filtered = [...props.materials];
+      
+      // Apply search filter
+      if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase();
+        filtered = filtered.filter(material => 
+          material.title.toLowerCase().includes(query) || 
+          material.content.toLowerCase().includes(query)
+        );
+      }
+      
+      // Apply due review filter
+      if (filters.value.dueReview) {
+        filtered = filtered.filter(material => material.hasReview);
+      }
+      
+      // Apply category filters from dropdown
+      if (selectedCategoryFilters.value.length > 0) {
+        filtered = filtered.filter(material => 
+          selectedCategoryFilters.value.includes(material.category)
+        );
+      } else if (activeCategory.value) {
+        // Apply selected category chip filter if no dropdown categories selected
+        filtered = filtered.filter(m => m.category === activeCategory.value);
+      }
+      
+      // Apply recently added filter
+      if (filters.value.recentlyAdded) {
+        // Sort by creation date (newest first)
+        filtered.sort((a, b) => {
+          const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+          const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+          return dateB - dateA;
+        });
+        
+        // Take only the 5 most recent
+        filtered = filtered.slice(0, 5);
+      }
+      
+      filteredMaterials.value = filtered;
+    };
+
+    // Add reset filters method
+    const resetFilters = () => {
+      filters.value.dueReview = false;
+      filters.value.recentlyAdded = false;
+      selectedCategoryFilters.value = [];
+      activeCategory.value = '';
+      searchQuery.value = '';
+      filterMaterials();
+      showFilterMenu.value = false;
+    };
+
+    // Add applyFilters method
+    const applyFilters = () => {
+      filterMaterials();
+      showFilterMenu.value = false;
+    };
+    
     onMounted(() => {
       // Add event listener to close action menus when clicking outside
       document.addEventListener('click', closeActionMenus);
+      
+      // Load categories
+      loadCategories();
     });
     
     onBeforeUnmount(() => {
@@ -602,6 +796,9 @@ export default {
       studyAttempts,
       nextReviewDate,
       activeActionMenu,
+      activeCategory,
+      availableCategories,
+      filteredMaterials,
       truncateText,
       formatDate,
       formatDateWithTime,
@@ -620,7 +817,15 @@ export default {
       saveEdit,
       deleteMaterial,
       cancelDelete,
-      confirmDelete
+      confirmDelete,
+      filterByCategory,
+      selectedCategoryFilters,
+      showFilterMenu,
+      searchQuery,
+      filters,
+      filterMaterials,
+      resetFilters,
+      applyFilters,
     };
   }
 }
@@ -629,6 +834,62 @@ export default {
 <style scoped>
 .material-list {
   width: 100%;
+}
+
+/* Category Filter Styles */
+.category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.category-chip {
+  background-color: white;
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.75rem;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--neutral-700);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.category-chip:hover {
+  background-color: var(--neutral-100);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.category-chip.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Material category badge */
+.material-category {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  background-color: var(--neutral-100);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--primary-color);
+}
+
+.material-category-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  background-color: var(--primary-color);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: white;
+  margin-bottom: 0.5rem;
 }
 
 /* Loading State */
@@ -718,12 +979,6 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-2);
-}
-
-.material-category {
-  font-size: var(--font-size-xs);
-  color: var(--primary-color);
-  font-weight: var(--font-weight-medium);
 }
 
 .material-date {
@@ -1296,5 +1551,43 @@ export default {
     flex: 1;
     min-width: 80px;
   }
+  
+  .category-filter {
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Add filter menu styles */
+.filter-menu {
+  min-width: 220px;
+  max-width: 300px;
+}
+
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
+  cursor: pointer;
+}
+
+.category-name {
+  white-space: normal;
+  word-break: break-word;
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-3);
+}
+
+.category-filter-list {
+  max-height: 150px;
+  overflow-y: auto;
+  padding-right: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
 }
 </style>

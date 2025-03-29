@@ -25,6 +25,37 @@
         </div>
         
         <div class="form-group">
+          <label for="category" class="form-label">Category</label>
+          <div class="category-input-group">
+            <select
+              id="category"
+              v-model="selectedCategoryOption"
+              class="form-control category-select"
+              @change="handleCategorySelect"
+            >
+              <option value="" disabled>Select a category</option>
+              <option value="Programming">Programming</option>
+              <option value="Languages">Languages</option>
+              <option value="Science">Science</option>
+              <option value="Math">Math</option>
+              <option value="History">History</option>
+              <option value="Art">Art</option>
+              <option value="custom">+ Add Custom Category</option>
+              <option v-for="cat in userCustomCategories" :key="cat" :value="cat">{{ cat }}</option>
+            </select>
+            
+            <input
+              v-if="showCustomCategoryInput"
+              type="text"
+              v-model="customCategory"
+              class="form-control custom-category-input"
+              placeholder="Enter custom category"
+              @blur="handleCustomCategoryBlur"
+            />
+          </div>
+        </div>
+        
+        <div class="form-group">
           <label for="content" class="form-label">Content</label>
           <textarea
             id="content"
@@ -74,9 +105,8 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-// Removed unused store import
 import StudyService from '@/services/study.service';
 import { auth } from '@/services/firebase';
 
@@ -87,13 +117,67 @@ export default {
   setup(props, { emit }) {
     const title = ref('');
     const content = ref('');
+    const selectedCategoryOption = ref('');
+    const customCategory = ref('');
+    const showCustomCategoryInput = ref(false);
+    const userCustomCategories = ref([]);
     const error = ref('');
     const loading = ref(false);
     const fileName = ref('');
     
     const router = useRouter();
-    // Removed unused store variable
     
+    const category = computed(() => {
+      if (selectedCategoryOption.value === 'custom') {
+        return customCategory.value;
+      }
+      return selectedCategoryOption.value;
+    });
+
+    const handleCategorySelect = () => {
+      if (selectedCategoryOption.value === 'custom') {
+        showCustomCategoryInput.value = true;
+        setTimeout(() => {
+          document.querySelector('.custom-category-input')?.focus();
+        }, 0);
+      } else {
+        showCustomCategoryInput.value = false;
+      }
+    };
+
+    const handleCustomCategoryBlur = () => {
+      if (customCategory.value.trim()) {
+        if (!userCustomCategories.value.includes(customCategory.value.trim())) {
+          userCustomCategories.value.push(customCategory.value.trim());
+        }
+      } else {
+        selectedCategoryOption.value = '';
+        showCustomCategoryInput.value = false;
+      }
+    };
+
+    const loadUserCustomCategories = async () => {
+      try {
+        const materials = await StudyService.getStudyMaterials();
+        const presetCategories = ['Programming', 'Languages', 'Science', 'Math', 'History', 'Art'];
+        const customCats = new Set();
+        
+        materials.forEach(material => {
+          if (material.category && !presetCategories.includes(material.category)) {
+            customCats.add(material.category);
+          }
+        });
+        
+        userCustomCategories.value = Array.from(customCats);
+      } catch (err) {
+        console.error('Failed to load custom categories:', err);
+      }
+    };
+
+    onMounted(() => {
+      loadUserCustomCategories();
+    });
+
     const handleFileUpload = (event) => {
       const file = event.target.files[0];
       if (!file) return;
@@ -145,7 +229,8 @@ export default {
         const materialId = await StudyService.saveStudyMaterial(
           auth.currentUser.uid,
           title.value,
-          content.value
+          content.value,
+          category.value // Add category parameter
         );
         
         console.log("Material saved with ID:", materialId);
@@ -157,6 +242,7 @@ export default {
             id: materialId,
             title: title.value,
             content: content.value,
+            category: category.value, // Add category to the material object
             createdAt: new Date(),
             userId: auth.currentUser.uid
           };
@@ -167,6 +253,9 @@ export default {
           // Clear form
           title.value = '';
           content.value = '';
+          selectedCategoryOption.value = '';
+          customCategory.value = '';
+          showCustomCategoryInput.value = false;
           fileName.value = '';
         } else {
           error.value = 'Failed to save material. Please try again.';
@@ -183,11 +272,18 @@ export default {
     return {
       title,
       content,
+      category,
+      selectedCategoryOption,
+      customCategory,
+      showCustomCategoryInput,
+      userCustomCategories,
       error,
       loading,
       fileName,
       handleFileUpload,
-      handleSubmit
+      handleSubmit,
+      handleCategorySelect,
+      handleCustomCategoryBlur
     };
   }
 }
@@ -293,5 +389,37 @@ export default {
   .file-name {
     max-width: 100%;
   }
+}
+
+.category-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  width: 100%;
+}
+
+.custom-category-input {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-top: none;
+  animation: fadeIn 0.3s;
+}
+
+/* Category Select Styling */
+.category-select {
+  width: 100%;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  padding-right: 2rem;
+}
+
+.category-select option {
+  padding: 0.5rem;
+  white-space: normal;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>

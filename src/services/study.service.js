@@ -10,12 +10,13 @@ import {
   getDoc,
   deleteDoc,
   orderBy,
-  limit
+  limit,
+  setDoc
 } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
 const StudyService = {
-  async saveStudyMaterial(userId, title, content) {
+  async saveStudyMaterial(userId, title, content, category = 'Other') {
     // First check if the user is authenticated
     if (!auth.currentUser) {
       throw new Error("You must be logged in to save materials");
@@ -25,6 +26,7 @@ const StudyService = {
       console.log("Saving material with:", {
         userId: auth.currentUser.uid,
         title,
+        category,
         contentLength: content ? content.length : 0
       });
       
@@ -33,6 +35,7 @@ const StudyService = {
         userId: auth.currentUser.uid,
         title,
         content,
+        category,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
@@ -84,6 +87,9 @@ const StudyService = {
         matchPercentage,
         timestamp: serverTimestamp()
       });
+      
+      // Add session tracking
+      await this.incrementStudySessions();
       
       return docRef.id;
     } catch (error) {
@@ -574,7 +580,7 @@ const StudyService = {
     return result;
   },
 
-  async updateStudyMaterial(materialId, title, content) {
+  async updateStudyMaterial(materialId, title, content, category) {
     // First check if the user is authenticated
     if (!auth.currentUser) {
       throw new Error("You must be logged in to update materials");
@@ -601,6 +607,7 @@ const StudyService = {
       await updateDoc(materialRef, {
         title,
         content,
+        category,
         updatedAt: serverTimestamp()
       });
       
@@ -678,6 +685,145 @@ const StudyService = {
     } catch (error) {
       console.error("Error deleting material:", error);
       throw new Error(`Failed to delete material: ${error.message}`);
+    }
+  },
+
+  async getStudyMaterialsByCategory(category) {
+    if (!auth.currentUser) {
+      throw new Error("You must be logged in to view materials");
+    }
+    
+    try {
+      const q = query(
+        collection(db, 'materials'),
+        where('userId', '==', auth.currentUser.uid),
+        where('category', '==', category)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error("Error fetching materials by category:", error);
+      throw new Error(`Failed to fetch materials by category: ${error.message}`);
+    }
+  },
+
+  async getUserCategories() {
+    // Implementation needed
+  },
+
+  async getStudySessionGoal() {
+    if (!auth.currentUser) {
+      throw new Error("You must be logged in to access study goals");
+    }
+    
+    try {
+      const userRef = doc(db, 'users', auth.currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      
+      if (userSnap.exists() && userSnap.data().studySessionGoal) {
+        return userSnap.data().studySessionGoal;
+      }
+      return 20; // Default goal
+    } catch (error) {
+      console.error("Error fetching study session goal:", error);
+      return 20;
+    }
+  },
+
+  async setStudySessionGoal(newGoal) {
+    if (!auth.currentUser) {
+      throw new Error("You must be logged in to set study goals");
+    }
+    
+    if (newGoal < 1) {
+      throw new Error("Goal must be at least 1 session");
+    }
+    
+    try {
+      const userRef = doc(db, 'users', auth.currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      
+      if (userSnap.exists()) {
+        await updateDoc(userRef, { studySessionGoal: newGoal });
+      } else {
+        await setDoc(userRef, { studySessionGoal: newGoal });
+      }
+      return newGoal;
+    } catch (error) {
+      console.error("Error setting study session goal:", error);
+      throw new Error(`Failed to set study session goal: ${error.message}`);
+    }
+  },
+
+  async getMonthlyStudySessions() {
+    if (!auth.currentUser) {
+      throw new Error("You must be logged in to access study sessions");
+    }
+    
+    try {
+      const userRef = doc(db, 'users', auth.currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      
+      if (userSnap.exists() && userSnap.data().studySessions) {
+        const sessions = userSnap.data().studySessions;
+        const now = new Date();
+        if (sessions.currentMonth && 
+            sessions.monthStart && 
+            new Date(sessions.monthStart).getMonth() === now.getMonth()) {
+          return sessions.currentMonth;
+        }
+      }
+      return 0;
+    } catch (error) {
+      console.error("Error fetching monthly study sessions:", error);
+      return 0;
+    }
+  },
+
+  async incrementStudySessions() {
+    if (!auth.currentUser) {
+      throw new Error("You must be logged in to update study sessions");
+    }
+    
+    try {
+      const now = new Date();
+      const userRef = doc(db, 'users', auth.currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        let sessions = userData.studySessions || {};
+        
+        if (!sessions.monthStart || 
+            new Date(sessions.monthStart).getMonth() !== now.getMonth()) {
+          sessions = {
+            currentMonth: 1,
+            monthStart: now.toISOString(),
+            total: (sessions.total || 0) + 1
+          };
+        } else {
+          sessions.currentMonth = (sessions.currentMonth || 0) + 1;
+          sessions.total = (sessions.total || 0) + 1;
+        }
+        
+        await updateDoc(userRef, { studySessions: sessions });
+        return sessions.currentMonth;
+      } else {
+        const sessions = {
+          currentMonth: 1,
+          monthStart: now.toISOString(),
+          total: 1
+        };
+        await setDoc(userRef, { studySessions: sessions });
+        return 1;
+      }
+    } catch (error) {
+      console.error("Error incrementing study sessions:", error);
+      return null;
     }
   }
 };

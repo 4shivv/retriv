@@ -470,6 +470,7 @@ export default {
     const reviewsDueToday = computed(() => {
       if (!dueReviews.value || dueReviews.value.length === 0) return 0;
       
+      // Count materials with Due Today label or that are overdue
       return dueReviews.value.filter(review => 
         review.dueLabel === 'Due Today' || review.isOverdue
       ).length;
@@ -555,7 +556,10 @@ export default {
       
       // Apply due review filter
       if (filters.value.dueReview) {
-        filtered = filtered.filter(material => material.hasReview);
+        // Filter to find materials that are due for review based on their scheduled review dates
+        // First get the list of all materials that are in the dueReviews array
+        const dueReviewIds = dueReviews.value.map(review => review.materialId);
+        filtered = filtered.filter(material => dueReviewIds.includes(material.id));
       }
       
       // Apply category filter
@@ -802,29 +806,29 @@ export default {
             retentionPercentage = attempts[0].matchPercentage;
           }
           
-          // Calculate if it's overdue
+          // Calculate if it's overdue or due today
           const now = new Date();
           const reviewDate = new Date(nextReview);
           const isOverdue = reviewDate < now;
           
-          // Format the due label
+          // Format the due label based on upcoming review schedule
           let dueLabel = "";
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           const tomorrow = new Date(today);
           tomorrow.setDate(tomorrow.getDate() + 1);
           
-          if (reviewDate < today) {
+          if (isOverdue) {
             dueLabel = "Past Due";
-          } else if (reviewDate < tomorrow) {
-            dueLabel = "Due Today";
           } else {
-            const nextDay = new Date(today);
-            nextDay.setDate(today.getDate() + 1);
-            const dayAfter = new Date(today);
-            dayAfter.setDate(today.getDate() + 2);
-            
-            if (reviewDate < dayAfter) {
+            // Check if it's due today
+            if (reviewDate.getDate() === today.getDate() && 
+                reviewDate.getMonth() === today.getMonth() && 
+                reviewDate.getFullYear() === today.getFullYear()) {
+              dueLabel = "Due Today";
+            } else if (reviewDate.getDate() === tomorrow.getDate() && 
+                       reviewDate.getMonth() === tomorrow.getMonth() && 
+                       reviewDate.getFullYear() === tomorrow.getFullYear()) {
               dueLabel = "Due Tomorrow";
             } else {
               dueLabel = `Due on ${reviewDate.toLocaleDateString()}`;
@@ -889,10 +893,13 @@ export default {
         filteredMaterials.value = fetchedMaterials;
         totalMaterials.value = fetchedMaterials.length;
         
+        // Generate due reviews data
+        await generateDueReviews();
+        
         // Update material categories counts based on actual material categories
         if (fetchedMaterials.length > 0) {
           // First extract real categories from materials
-        materialCategories.value = extractRealCategories(fetchedMaterials);
+          materialCategories.value = extractRealCategories(fetchedMaterials);
         }
         
         // Load actual study sessions from the service
@@ -955,6 +962,9 @@ export default {
       // Remove the material from the local arrays
       materials.value = materials.value.filter(m => m.id !== materialId);
       filteredMaterials.value = filteredMaterials.value.filter(m => m.id !== materialId);
+      
+      // Also remove from the dueReviews array if present
+      dueReviews.value = dueReviews.value.filter(review => review.materialId !== materialId);
       
       // Update the total count
       totalMaterials.value = materials.value.length;
@@ -1050,14 +1060,15 @@ export default {
       try {
         loading.value = true;
         
-        // Load all data in parallel
+        // Load materials first (this will also call generateDueReviews internally)
+        await fetchMaterials();
+        
+        // Then load additional data in parallel
         await Promise.all([
-          fetchMaterials(),
           loadStudySessionGoal(),
           loadStudySessions(),
           calculateStreak(),
-          calculateAvgRetention(),
-          generateDueReviews()
+          calculateAvgRetention()
         ]);
         
         // Add event listener to close filter menu when clicking outside

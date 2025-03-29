@@ -274,178 +274,16 @@
               </div>
             </div>
 
-            <div v-else-if="activeTab === 'history'" class="history-view">
-              <h5>Study History</h5>
-              <div v-if="pastAttempts && pastAttempts.length > 0" class="performance-history">
-                <!-- Enhanced Performance History Chart -->
-                <div class="enhanced-chart-container">
-                  <!-- Chart Header with Performance Insights -->
-                  <div class="chart-header">
-                    <div class="performance-trend">
-                      <div class="trend-indicator" :class="performanceTrendClass">
-                        <svg v-if="isImproving" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <polyline points="18 15 12 9 6 15"></polyline>
-                        </svg>
-                        <svg v-else-if="isDecreasing" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                        <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        <span>{{ performanceTrendText }}</span>
-                      </div>
-                      <div class="insight-badge" v-if="performanceInsight">
-                        {{ performanceInsight }}
-                      </div>
-                    </div>
-                    <div class="chart-legend">
-                      <div class="legend-item">
-                        <span class="legend-color excellent"></span>
-                        <span>Excellent (80%+)</span>
-                      </div>
-                      <div class="legend-item">
-                        <span class="legend-color good"></span>
-                        <span>Good (70-80%)</span>
-                      </div>
-                      <div class="legend-item">
-                        <span class="legend-color average"></span>
-                        <span>Average (50-70%)</span>
-                      </div>
-                      <div class="legend-item">
-                        <span class="legend-color poor"></span>
-                        <span>Poor (&lt;50%)</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Enhanced Chart Area -->
-                  <div class="enhanced-chart">
-                    <!-- Y-Axis -->
-                    <div class="chart-y-axis">
-                      <div class="y-axis-tick"><span>100%</span></div>
-                      <div class="y-axis-tick"><span>75%</span></div>
-                      <div class="y-axis-tick"><span>50%</span></div>
-                      <div class="y-axis-tick"><span>25%</span></div>
-                      <div class="y-axis-tick"><span>0%</span></div>
-                    </div>
-                    
-                    <!-- Chart Content Area -->
-                    <div class="chart-content-area">
-                      <!-- Threshold Lines -->
-                      <div class="threshold-line excellent-threshold" style="bottom: 80%;">
-                        <span class="threshold-label">Excellent (80%)</span>
-                      </div>
-                      <div class="threshold-line average-threshold" style="bottom: 50%;">
-                        <span class="threshold-label">Average (50%)</span>
-                      </div>
-                      
-                      <!-- Data Visualization -->
-                      <div class="data-visualization">
-                        <!-- Area Chart Background -->
-                        <svg class="area-chart" :viewBox="`0 0 ${pastAttempts.length - 1} 100`" preserveAspectRatio="none">
-                          <defs>
-                            <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                              <stop offset="0%" stop-color="rgba(99, 102, 241, 0.6)" />
-                              <stop offset="100%" stop-color="rgba(99, 102, 241, 0.1)" />
-                            </linearGradient>
-                          </defs>
-                          <path 
-                            :d="getAreaChartPath()" 
-                            fill="url(#areaGradient)"
-                            stroke="none"
-                          />
-                        </svg>
-                        
-                        <!-- Line Chart -->
-                        <svg class="line-chart" :viewBox="`0 0 ${pastAttempts.length - 1} 100`" preserveAspectRatio="none">
-                          <defs>
-                            <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                              <stop offset="0%" stop-color="#4f46e5" />
-                              <stop offset="100%" stop-color="#8b5cf6" />
-                            </linearGradient>
-                          </defs>
-                          <polyline 
-                            :points="getChartLinePoints()" 
-                            fill="none" 
-                            stroke="url(#lineGradient)" 
-                            stroke-width="3"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          />
-                        </svg>
-                        
-                        <!-- Data Points -->
-                        <div 
-                          v-for="(attempt, index) in pastAttempts" 
-                          :key="index" 
-                          class="data-point" 
-                          :class="getScoreClass(attempt.matchPercentage)"
-                          :style="{ left: `${(index / (pastAttempts.length - 1)) * 100}%`, bottom: `${attempt.matchPercentage}%` }"
-                          @mouseenter="showTooltip(index)"
-                          @mouseleave="hideTooltip()"
-                        >
-                          <div v-if="tooltipIndex === index" class="enhanced-tooltip">
-                            <div class="tooltip-date">{{ formatDateWithTime(attempt.timestamp) }}</div>
-                            <div class="tooltip-score" :class="getScoreClass(attempt.matchPercentage)">
-                              <span>Score: {{ attempt.matchPercentage }}%</span>
-                            </div>
-                            <div class="tooltip-interval" v-if="attempt.calculatedInterval">
-                              <span>Next interval: {{ formatInterval(attempt.calculatedInterval) }}</span>
-                            </div>
-                          </div>
-                          <svg v-if="index === 0" class="pulse-ring" width="40" height="40" viewBox="0 0 40 40">
-                            <circle cx="20" cy="20" r="15" fill="none" stroke="rgba(99, 102, 241, 0.3)" stroke-width="2">
-                              <animate attributeName="r" from="15" to="20" dur="1.5s" begin="0s" repeatCount="indefinite"/>
-                              <animate attributeName="opacity" from="1" to="0" dur="1.5s" begin="0s" repeatCount="indefinite"/>
-                            </circle>
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- X-Axis -->
-                  <div class="chart-x-axis">
-                    <div 
-                      v-for="(attempt, index) in pastAttempts" 
-                      :key="index" 
-                      class="x-axis-tick"
-                      :style="{ left: `${(index / (pastAttempts.length - 1)) * 100}%` }"
-                    >
-                      {{ formatShortDate(attempt.timestamp) }}
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- Spaced Repetition Schedule -->
-                <div class="enhanced-schedule-section">
-                  <h5>Spaced Repetition Schedule</h5>
-                  <div class="timeline-container">
-                    <div class="timeline-line"></div>
-                    <div 
-                      v-for="(date, index) in reviewSchedule" 
-                      :key="index" 
-                      class="timeline-event"
-                      :class="{ 
-                        'past-event': isPastDate(date), 
-                        'current-event': isCurrentDate(date),
-                        'future-event': !isPastDate(date) && !isCurrentDate(date)
-                      }"
-                    >
-                      <div class="event-dot" :class="{
-                        'pulse': isCurrentDate(date) 
-                      }"></div>
-                      <div class="event-content">
-                        <div class="event-time">{{ formatDateWithTime(date) }}</div>
-                        <div class="event-label">{{ getEventLabel(date) }}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div v-else class="no-history">
-                <p>No previous study history for this material.</p>
-              </div>
+            <div v-else-if="activeTab === 'history'">
+              <ModernHistoryView 
+                :pastAttempts="pastAttempts" 
+                :reviewSchedule="reviewSchedule"
+                :isImproving="isImproving"
+                :isDecreasing="isDecreasing"
+                :performanceTrendText="performanceTrendText"
+                :performanceInsight="performanceInsight"
+                @add-to-calendar="addToCalendar"
+              />
             </div>
           </div>
         </div>
@@ -499,6 +337,14 @@
                     :class="getReviewPointClass(date)"
                     @mouseenter="activeReviewPoint = index"
                     @mouseleave="activeReviewPoint = null"
+                  ></circle>
+                  
+                  <!-- Add pulsing effect to today's review point -->
+                  <circle v-if="isCurrentDate(date)"
+                    :cx="50 + calculateGraphPosition(date)" 
+                    :cy="calculateRetentionPoint(date)" 
+                    r="8"
+                    class="review-point-pulse"
                   ></circle>
                   
                   <!-- Review Point Tooltip -->
@@ -588,9 +434,13 @@ import { useRouter } from 'vue-router';
 import StudyService from '@/services/study.service';
 import ComparisonService from '@/services/comparison.service';
 import { auth } from '@/services/firebase';
+import ModernHistoryView from './ModernHistoryView.vue';
 
 export default {
   name: 'BlurtingForm',
+  components: {
+    ModernHistoryView
+  },
   props: {
     materialId: {
       type: String,
@@ -841,7 +691,8 @@ export default {
       const tomorrow = new Date(now);
       tomorrow.setDate(tomorrow.getDate() + 1);
       if (date.toDateString() === tomorrow.toDateString()) {
-        return 'Tomorrow, ' + new Intl.DateTimeFormat('en-US', {
+        // Just show the time for tomorrow since the tag already says "Tomorrow"
+        return new Intl.DateTimeFormat('en-US', {
           hour: 'numeric',
           minute: 'numeric'
         }).format(date);
@@ -1122,7 +973,15 @@ export default {
     // Get CSS class for schedule tag
     const getScheduleTagClass = (date) => {
       if (isPastDate(date)) return 'tag-past';
-      if (isCurrentDate(date)) return 'tag-current';
+      if (isCurrentDate(date)) {
+        const now = new Date();
+        const reviewDate = new Date(date);
+        const diffHours = (reviewDate - now) / (1000 * 60 * 60);
+        
+        // If it's due within the next hour, make it more urgent
+        if (diffHours < 1) return 'tag-due-now';
+        return 'tag-current';
+      }
       
       const reviewDate = new Date(date);
       const now = new Date();
@@ -1138,15 +997,21 @@ export default {
     // Get text for schedule tag
     const getScheduleTagText = (date) => {
       if (isPastDate(date)) return 'Completed';
-      if (isCurrentDate(date)) return 'Due Now';
+      if (isCurrentDate(date)) {
+        const now = new Date();
+        const reviewDate = new Date(date);
+        const diffHours = (reviewDate - now) / (1000 * 60 * 60);
+        
+        // If it's due within the next hour, make it more urgent
+        if (diffHours < 1) return 'Due Now';
+        return 'Due Today';
+      }
       
       const reviewDate = new Date(date);
       const now = new Date();
       
-      // If it's today
+      // If it's today but later
       if (reviewDate.toDateString() === now.toDateString()) {
-        const diffHours = (reviewDate - now) / (1000 * 60 * 60);
-        if (diffHours < 1) return 'Soon';
         return 'Later Today';
       }
       
@@ -1317,7 +1182,7 @@ export default {
       }
       
       if (isCurrentDate(date)) {
-        return 'Due now';
+        return 'Due today';
       }
       
       // For future events, show the relative time
@@ -2572,6 +2437,22 @@ export default {
   fill: var(--primary-color);
   stroke-width: 2;
   filter: drop-shadow(0 0 3px rgba(99, 102, 241, 0.5));
+  z-index: 5;
+}
+
+.review-point-pulse {
+  fill: transparent;
+  stroke: var(--primary-color);
+  stroke-width: 1;
+  stroke-opacity: 0.7;
+  animation: pulse-ring 2s infinite;
+  z-index: 4;
+}
+
+@keyframes pulse-ring {
+  0% { r: 8; stroke-opacity: 0.7; }
+  50% { r: 12; stroke-opacity: 0.3; }
+  100% { r: 8; stroke-opacity: 0.7; }
 }
 
 .review-point.future {
@@ -2643,7 +2524,10 @@ export default {
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--neutral-200);
   transition: all 0.3s ease;
+  position: relative;
 }
+
+
 
 .schedule-card:hover {
   transform: translateY(-3px);
@@ -2657,6 +2541,13 @@ export default {
 .schedule-card.current-review {
   border-color: var(--primary-color);
   box-shadow: 0 4px 14px rgba(99, 102, 241, 0.2);
+  animation: highlight-pulse 2s infinite;
+}
+
+@keyframes highlight-pulse {
+  0% { box-shadow: 0 4px 14px rgba(99, 102, 241, 0.2); }
+  50% { box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4); }
+  100% { box-shadow: 0 4px 14px rgba(99, 102, 241, 0.2); }
 }
 
 .schedule-card.next-review {
@@ -2685,6 +2576,19 @@ export default {
 .schedule-tag.tag-current {
   background-color: rgba(16, 185, 129, 0.1);
   color: #10b981;
+}
+
+.schedule-tag.tag-due-now {
+  background-color: rgba(220, 38, 38, 0.2);
+  color: #dc2626;
+  font-weight: var(--font-weight-bold);
+  animation: tag-pulse 1.5s infinite;
+}
+
+@keyframes tag-pulse {
+  0% { background-color: rgba(220, 38, 38, 0.2); }
+  50% { background-color: rgba(220, 38, 38, 0.4); }
+  100% { background-color: rgba(220, 38, 38, 0.2); }
 }
 
 .schedule-tag.tag-immediate {

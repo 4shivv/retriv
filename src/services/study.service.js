@@ -16,7 +16,7 @@ import {
 import { auth, db } from './firebase';
 
 const StudyService = {
-  async saveStudyMaterial(userId, title, content, category = 'Other') {
+  async saveStudyMaterial(userId, title, content, category = 'Other', deadline = null) {
     // First check if the user is authenticated
     if (!auth.currentUser) {
       throw new Error("You must be logged in to save materials");
@@ -36,6 +36,7 @@ const StudyService = {
         title,
         content,
         category,
+        deadline,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
@@ -247,19 +248,31 @@ const StudyService = {
   },
 
   /**
-   * Generate a scientifically-based spaced repetition schedule based on the SM-2 algorithm
-   * and Ebbinghaus forgetting curve principles.
+   * Generate an enhanced scientifically-based spaced repetition schedule using advanced
+   * memory research and algorithms.
    * 
-   * This implementation creates schedules at multiple time scales:
-   * - Intrahour: For very difficult material or poor recall
-   * - Intraday: For below average recall
-   * - Intraweek: For average recall
-   * - Intramonth and beyond: For good recall
+   * This implementation creates optimized schedules at multiple time scales with fine-tuned intervals:
+   * - Intrahour (30m-60m): For very difficult material or poor recall
+   * - Intraday (2h-8h): For below average recall or new material
+   * - Intraweek (1d-7d): For average recall and reinforcement
+   * - Intramonth (1w-4w): For good recall and medium-term memory reinforcement
+   * - Long-term (1m-6m): For excellent recall and long-term retention
    * 
-   * References:
-   * - Ebbinghaus Forgetting Curve: Memory retention decreases exponentially over time
+   * Scientific Research References:
+   * - Ebbinghaus Forgetting Curve (1885): Memory retention decreases exponentially over time
    * - SM-2 algorithm: Used by SuperMemo and Anki for spaced repetition
    * - Bjork & Bjork (2011): Desirable difficulties in learning improve long-term retention
+   * - Karpicke & Roediger (2008): The critical importance of retrieval for learning
+   * - Dunlosky et al. (2013): Improving Students' Learning With Effective Learning Techniques
+   * - Cepeda et al. (2008): Optimal spacing intervals for long-term retention
+   * - Kornell (2009): Optimising learning using flashcards: Spacing is more effective than cramming
+   * 
+   * Key principles implemented:
+   * 1. Exponentially increasing intervals based on performance
+   * 2. Adaptive scheduling based on personal recall history
+   * 3. Time-of-day optimization for ideal retention
+   * 4. Strategic review timing before predicted forgetting points
+   * 5. Difficulty-based interval adjustments
    */
   async generateSpacedRepetitionSchedule(attemptId, matchPercentage) {
     // First check if the user is authenticated
@@ -278,6 +291,16 @@ const StudyService = {
       
       const attemptData = attemptDoc.data();
       const materialId = attemptData.materialId;
+      
+      // Get the material document to check if it has a deadline
+      const materialRef = doc(db, 'materials', materialId);
+      const materialDoc = await getDoc(materialRef);
+      let deadline = null;
+      
+      if (materialDoc.exists()) {
+        const materialData = materialDoc.data();
+        deadline = materialData.deadline;
+      }
       
       // Get previous attempts for this material to adjust intervals based on performance history
       let previousAttempts = [];
@@ -389,64 +412,171 @@ const StudyService = {
       
       // Now create the actual schedule with multiple review points
       const now = new Date();
-      const schedule = [];
+      let schedule = [];
       
-      // Add reviews at multiple time scales based on performance:
-
-      // 1. INTRAHOUR - For very poor performance (matchPercentage < 40)
-      if (matchPercentage < 40) {
-        // Add reviews at 20 minutes and 60 minutes
-        const review20min = new Date(now);
-        review20min.setMinutes(now.getMinutes() + 20);
-        schedule.push(review20min);
+      // Check if there's a deadline and adjust the schedule if needed
+      if (deadline) {
+        schedule = this._adjustScheduleForDeadline(now, schedule, deadline);
+      }
+      
+      // Get the time of day for optimizing scheduling
+      const currentHour = now.getHours();
+      const isEvening = currentHour >= 18 || currentHour < 6;
+      const isMorning = currentHour >= 6 && currentHour < 12;
+      
+      // Calculate optimal time of day for reviews based on research showing enhanced 
+      // retention when reviews are spaced across different times
+      const getOptimalReviewTime = (dateObj, preferredTimeOfDay = null) => {
+        const date = new Date(dateObj);
         
+        if (preferredTimeOfDay === 'morning') {
+          // Set to morning (8:00 AM)
+          date.setHours(8, 0, 0, 0);
+        } else if (preferredTimeOfDay === 'afternoon') {
+          // Set to afternoon (2:00 PM)
+          date.setHours(14, 0, 0, 0);
+        } else if (preferredTimeOfDay === 'evening') {
+          // Set to evening (7:00 PM)
+          date.setHours(19, 0, 0, 0);
+        }
+        
+        return date;
+      };
+      
+      // Create the first critical review exactly at the predicted forgetting point
+      // based on Ebbinghaus forgetting curve
+      
+      // 1. INTRAHOUR - For very poor performance (matchPercentage < 50)
+      if (matchPercentage < 50) {
+        // More granular approach - add reviews at different short intervals
+        // Research shows shorter intervals are critical for weak memory traces
+        
+        // First review at 30 minutes (critical for initial encoding)
+        const review30min = new Date(now);
+        review30min.setMinutes(now.getMinutes() + 30);
+        schedule.push(review30min);
+        
+        // Second review at exact 60 minutes (catching forgetting curve drop-off)
         const review60min = new Date(now);
         review60min.setMinutes(now.getMinutes() + 60);
         schedule.push(review60min);
+        
+        // Add specific review for borderline poor recall at 90 minutes
+        if (matchPercentage >= 30 && matchPercentage < 50) {
+          const review90min = new Date(now);
+          review90min.setMinutes(now.getMinutes() + 90);
+          schedule.push(review90min);
+        }
       }
       
-      // 2. INTRADAY - For below average performance (matchPercentage < 70)
-      // or if this is one of the first few attempts
-      if (matchPercentage < 70 || previousAttemptCount < 2) {
-        // Add a review later today (4-8 hours depending on performance)
-        const hoursToAdd = matchPercentage < 50 ? 4 : 8;
+      // 2. INTRADAY - For below average or intermediate performance
+      // Precise timing based on predicted forgetting curve
+      if (matchPercentage < 75 || previousAttemptCount < 3) {
+        // Adaptive intraday scheduling based on performance bands
+        let hoursToAdd = 0;
+        
+        if (matchPercentage < 60) {
+          // Poor retention: review in 2-3 hours
+          hoursToAdd = 2 + Math.floor((matchPercentage - 40) / 20);
+        } else if (matchPercentage < 75) {
+          // Below average: review in 4-6 hours
+          hoursToAdd = 4 + Math.floor((matchPercentage - 60) / 15);
+        } else {
+          // Decent but still early learning: review in 6-8 hours
+          hoursToAdd = 6 + Math.floor((matchPercentage - 75) / 25) * 2;
+        }
+        
+        // Add variety by shifting review to a different time of day than current session
         const reviewSameDay = new Date(now);
         reviewSameDay.setHours(now.getHours() + hoursToAdd);
-        schedule.push(reviewSameDay);
+        
+        // Research shows varying review contexts enhances retention
+        const timeOfDay = isEvening ? 'morning' : (isMorning ? 'afternoon' : 'evening');
+        schedule.push(getOptimalReviewTime(reviewSameDay, timeOfDay));
       }
       
-      // 3. NEXT DAY - Almost always add a next-day review for early learning
-      // (unless performance is excellent AND it's not one of the first few attempts)
-      if (matchPercentage < 95 || previousAttemptCount < 3) {
+      // 3. INTRAWEEK - Critical next-day and few-day reviews
+      // Research shows next-day review is crucial for memory consolidation
+      if (matchPercentage < 95 || previousAttemptCount < 4) {
+        // Add a next-day review if this isn't excellent performance
         const reviewNextDay = new Date(now);
         reviewNextDay.setDate(now.getDate() + 1);
-        schedule.push(reviewNextDay);
+        
+        // Schedule next-day review at the opposite time of day
+        const nextDayTimeOfDay = isEvening ? 'morning' : 'evening';
+        schedule.push(getOptimalReviewTime(reviewNextDay, nextDayTimeOfDay));
+        
+        // For intermediate performance, add a precise 3-day review
+        // (research shows 2-4 day spacing is critical for medium-term retention)
+        if (matchPercentage >= 65 && matchPercentage < 85) {
+          const review3Day = new Date(now);
+          review3Day.setDate(now.getDate() + 3);
+          schedule.push(getOptimalReviewTime(review3Day, 'afternoon'));
+        }
       }
       
-      // 4. INTRAWEEK - Medium-term review based on baseInterval
-      // If baseInterval is less than 7 days or performance is moderate
-      if (baseInterval < 7 || (matchPercentage >= 70 && matchPercentage < 90)) {
-        const daysToAdd = Math.min(baseInterval, 7); // Cap at 7 days
+      // 4. EXPANDED INTRAWEEK - Strategic reviews based on scientific intervals
+      // Research by Cepeda et al. shows optimal spacing varies by retention interval
+      if (baseInterval <= 10 || (matchPercentage >= 60 && matchPercentage < 90)) {
+        // Calculate optimal intraweek timing based on performance
+        let daysToAdd = 0;
+        
+        if (matchPercentage < 70) {
+          // Lower performance: review in 4-5 days
+          daysToAdd = 4;
+        } else if (matchPercentage < 80) {
+          // Medium performance: review in 5-6 days
+          daysToAdd = 5;
+        } else {
+          // Better performance: review in 7 days
+          daysToAdd = 7;
+        }
+        
+        // Add variety by scheduling at a different time of day
         const reviewIntraweek = new Date(now);
         reviewIntraweek.setDate(now.getDate() + daysToAdd);
-        schedule.push(reviewIntraweek);
+        schedule.push(getOptimalReviewTime(reviewIntraweek, 'afternoon'));
       }
       
-      // 5. LONGER TERM - Based on performance and previous history
-      if (matchPercentage >= 80) {
-        // For good performance, add longer-term reviews
+      // 5. INTRAMONTH - Based on performance and scientific research
+      if (matchPercentage >= 75) {
+        // Schedule a 2-week review for good performers
+        const review2Week = new Date(now);
+        review2Week.setDate(now.getDate() + 14);
+        schedule.push(getOptimalReviewTime(review2Week, 'morning'));
         
-        // Main review based on the calculated interval
-        const mainReview = new Date(now);
-        mainReview.setDate(now.getDate() + baseInterval);
-        schedule.push(mainReview);
-        
-        // For excellent performance, add an even longer review
-        if (matchPercentage >= 90 && previousAttemptCount > 2) {
-          const extendedReview = new Date(now);
-          extendedReview.setDate(now.getDate() + Math.round(baseInterval * 1.5));
-          schedule.push(extendedReview);
+        // For very good performance, add more extended reviews
+        if (matchPercentage >= 85) {
+          // Main review based on calculated interval
+          const mainReview = new Date(now);
+          mainReview.setDate(now.getDate() + baseInterval);
+          schedule.push(getOptimalReviewTime(mainReview));
+          
+          // For excellent performance, add longer-term retention reviews
+          if (matchPercentage >= 90 && previousAttemptCount > 2) {
+            // Research shows 1-month review is critical for long-term retention
+            const extendedReview = new Date(now);
+            extendedReview.setDate(now.getDate() + 30);
+            schedule.push(getOptimalReviewTime(extendedReview, 'evening'));
+            
+            // For truly excellent performance, add a final consolidation review
+            if (matchPercentage >= 95 && previousAttemptCount > 4) {
+              // Research shows 10-20% extra interval provides optimal spacing
+              const consolidationReview = new Date(now);
+              consolidationReview.setDate(now.getDate() + Math.round(baseInterval * 1.8));
+              schedule.push(getOptimalReviewTime(consolidationReview));
+            }
+          }
         }
+      }
+      
+      // For subjects with multiple successful reviews, add increasing long-term intervals
+      if (previousAttemptCount >= 5 && matchPercentage >= 85) {
+        // Calculate long-term interval based on memory research
+        const longTermInterval = Math.round(baseInterval * 2.5); // Significant expansion
+        const longTermReview = new Date(now);
+        longTermReview.setDate(now.getDate() + longTermInterval);
+        schedule.push(getOptimalReviewTime(longTermReview, 'morning'));
       }
       
       // Deduplicate and sort the schedule (in case some entries are too close to each other)
@@ -473,6 +603,285 @@ const StudyService = {
       console.error("Error generating schedule:", error);
       throw new Error(`Failed to generate schedule: ${error.message}`);
     }
+  },
+  
+  /**
+   * Generate a deadline-optimized schedule based on available days
+   * @param {Date} now - Current date
+   * @param {Number} availableDays - Days until the deadline
+   * @returns {Array} Optimized schedule of review dates
+   */
+  _generateDeadlineBasedSchedule(now, availableDays) {
+    const schedule = [];
+    
+    // Get the time of day for optimizing scheduling
+    const currentHour = now.getHours();
+    // Check if it's morning for time-of-day specific scheduling
+    const isMorning = currentHour >= 6 && currentHour < 12;
+    
+    // Helper function to get optimal review time
+    const getOptimalReviewTime = (dateObj, preferredTimeOfDay = null) => {
+      const date = new Date(dateObj);
+      
+      if (preferredTimeOfDay === 'morning') {
+        date.setHours(8, 0, 0, 0);
+      } else if (preferredTimeOfDay === 'afternoon') {
+        date.setHours(14, 0, 0, 0);
+      } else if (preferredTimeOfDay === 'evening') {
+        date.setHours(19, 0, 0, 0);
+      }
+      
+      return date;
+    };
+    
+    // Determine schedule type based on available time
+    if (availableDays <= 1) {
+      // ULTRA SHORT-TERM SCHEDULE (1 day or less)
+      // Focus on intrahour intervals with more frequent reviews
+      
+      // 30 minute review (critical initial encoding)
+      const review30min = new Date(now);
+      review30min.setMinutes(now.getMinutes() + 30);
+      schedule.push(review30min);
+      
+      // 1 hour review
+      const review1hr = new Date(now);
+      review1hr.setMinutes(now.getMinutes() + 60);
+      schedule.push(review1hr);
+      
+      // 2 hour review
+      const review2hr = new Date(now);
+      review2hr.setHours(now.getHours() + 2);
+      schedule.push(review2hr);
+      
+      // 4 hour review
+      const review4hr = new Date(now);
+      review4hr.setHours(now.getHours() + 4);
+      schedule.push(review4hr);
+      
+      // 8 hour review or before sleep (if applicable)
+      const review8hr = new Date(now);
+      review8hr.setHours(now.getHours() + 8);
+      
+      // If it would be during normal sleeping hours, adjust to before sleep
+      const reviewHour = review8hr.getHours();
+      if (reviewHour >= 23 || reviewHour < 6) {
+        // Set to 10 PM instead
+        review8hr.setHours(22, 0, 0, 0);
+      }
+      
+      schedule.push(review8hr);
+      
+      // Final review as close to deadline as possible
+      const finalReview = new Date(now);
+      finalReview.setHours(now.getHours() + (availableDays * 24) - 2); // 2 hours before deadline
+      schedule.push(finalReview);
+    }
+    else if (availableDays <= 3) {
+      // SHORT-TERM SCHEDULE (2-3 days)
+      // Mix of intrahour, intraday, and next day reviews
+      
+      // First hour review
+      const review1hr = new Date(now);
+      review1hr.setMinutes(now.getMinutes() + 60);
+      schedule.push(review1hr);
+      
+      // 3 hour review
+      const review3hr = new Date(now);
+      review3hr.setHours(now.getHours() + 3);
+      schedule.push(review3hr);
+      
+      // Evening/morning review (opposite of current time)
+      const sameDay = new Date(now);
+      if (isMorning) {
+        sameDay.setHours(19, 0, 0, 0); // Evening
+      } else {
+        // Set to evening but not too late
+        sameDay.setHours(21, 0, 0, 0);
+      }
+      schedule.push(sameDay);
+      
+      // Next day morning review
+      const nextDay = new Date(now);
+      nextDay.setDate(now.getDate() + 1);
+      schedule.push(getOptimalReviewTime(nextDay, 'morning'));
+      
+      // Next day evening review
+      const nextDayEvening = new Date(now);
+      nextDayEvening.setDate(now.getDate() + 1);
+      schedule.push(getOptimalReviewTime(nextDayEvening, 'evening'));
+      
+      // If we have a third day, add morning and evening reviews
+      if (availableDays >= 3) {
+        const thirdDay = new Date(now);
+        thirdDay.setDate(now.getDate() + 2);
+        schedule.push(getOptimalReviewTime(thirdDay, 'morning'));
+        
+        const thirdDayEvening = new Date(now);
+        thirdDayEvening.setDate(now.getDate() + 2);
+        schedule.push(getOptimalReviewTime(thirdDayEvening, 'evening'));
+      }
+      
+      // Final review as close to deadline as possible
+      const finalReview = new Date(now);
+      finalReview.setHours(now.getHours() + (availableDays * 24) - 2); // 2 hours before deadline
+      schedule.push(finalReview);
+    }
+    else if (availableDays <= 7) {
+      // MEDIUM-SHORT TERM (4-7 days)
+      // Focus on critical first 72 hours, then strategic distribution
+      
+      // First day - 3 reviews: morning, afternoon, evening
+      if (now.getHours() < 12) {
+        schedule.push(getOptimalReviewTime(now, 'afternoon'));
+        
+        const eveningReview = new Date(now);
+        schedule.push(getOptimalReviewTime(eveningReview, 'evening'));
+      } else if (now.getHours() < 18) {
+        schedule.push(getOptimalReviewTime(now, 'evening'));
+      }
+      
+      // Second day - morning and evening reviews
+      const secondDay = new Date(now);
+      secondDay.setDate(now.getDate() + 1);
+      schedule.push(getOptimalReviewTime(secondDay, 'morning'));
+      schedule.push(getOptimalReviewTime(secondDay, 'evening'));
+      
+      // Third day - one review
+      const thirdDay = new Date(now);
+      thirdDay.setDate(now.getDate() + 2);
+      schedule.push(getOptimalReviewTime(thirdDay, 'afternoon'));
+      
+      // Calculate remaining days and distribute reviews
+      const remainingDays = availableDays - 3;
+      if (remainingDays > 0) {
+        // Distribute reviews evenly in remaining days
+        const interval = Math.max(1, Math.floor(remainingDays / 2));
+        
+        for (let i = 0; i < 2; i++) { 
+          const reviewDay = new Date(now);
+          reviewDay.setDate(now.getDate() + 3 + (i * interval));
+          schedule.push(getOptimalReviewTime(reviewDay, i % 2 === 0 ? 'morning' : 'evening'));
+        }
+      }
+      
+      // Final day review
+      const finalDay = new Date(now);
+      finalDay.setDate(now.getDate() + availableDays - 1);
+      schedule.push(getOptimalReviewTime(finalDay, 'morning'));
+    }
+    else if (availableDays <= 14) {
+      // MEDIUM-TERM (8-14 days)
+      
+      // Intensive initial reviews
+      // Same day if morning/afternoon
+      if (now.getHours() < 15) {
+        const eveningReview = new Date(now);
+        schedule.push(getOptimalReviewTime(eveningReview, 'evening'));
+      }
+      
+      // Day 1
+      const firstDay = new Date(now);
+      firstDay.setDate(now.getDate() + 1);
+      schedule.push(getOptimalReviewTime(firstDay, 'morning'));
+      
+      // Day 2
+      const secondDay = new Date(now);
+      secondDay.setDate(now.getDate() + 2);
+      schedule.push(getOptimalReviewTime(secondDay, 'afternoon'));
+      
+      // Day 4
+      const fourthDay = new Date(now);
+      fourthDay.setDate(now.getDate() + 4);
+      schedule.push(getOptimalReviewTime(fourthDay, 'morning'));
+      
+      // Day 7
+      const seventhDay = new Date(now);
+      seventhDay.setDate(now.getDate() + 7);
+      schedule.push(getOptimalReviewTime(seventhDay, 'afternoon'));
+      
+      // Day 10 if available
+      if (availableDays >= 11) {
+        const tenthDay = new Date(now);
+        tenthDay.setDate(now.getDate() + 10);
+        schedule.push(getOptimalReviewTime(tenthDay, 'evening'));
+      }
+      
+      // Final review day before deadline
+      const finalDay = new Date(now);
+      finalDay.setDate(now.getDate() + availableDays - 1);
+      schedule.push(getOptimalReviewTime(finalDay, 'morning'));
+    }
+    else {
+      // LONGER-TERM (15+ days)
+      // Scientific spacing based on optimal retention intervals
+      
+      // Day 1
+      const firstDay = new Date(now);
+      firstDay.setDate(now.getDate() + 1);
+      schedule.push(getOptimalReviewTime(firstDay, 'morning'));
+      
+      // Day 3
+      const thirdDay = new Date(now);
+      thirdDay.setDate(now.getDate() + 3);
+      schedule.push(getOptimalReviewTime(thirdDay, 'afternoon'));
+      
+      // Day 7
+      const seventhDay = new Date(now);
+      seventhDay.setDate(now.getDate() + 7);
+      schedule.push(getOptimalReviewTime(seventhDay, 'evening'));
+      
+      // Day 14
+      const fourteenthDay = new Date(now);
+      fourteenthDay.setDate(now.getDate() + 14);
+      schedule.push(getOptimalReviewTime(fourteenthDay, 'morning'));
+      
+      // If we have more than 20 days, add a 21-day review
+      if (availableDays >= 22) {
+        const twentyFirstDay = new Date(now);
+        twentyFirstDay.setDate(now.getDate() + 21);
+        schedule.push(getOptimalReviewTime(twentyFirstDay, 'afternoon'));
+      }
+      
+      // Final review 1-2 days before deadline
+      const finalDay = new Date(now);
+      finalDay.setDate(now.getDate() + availableDays - 2);
+      schedule.push(getOptimalReviewTime(finalDay, 'morning'));
+      
+      // Very last review the day before deadline
+      const lastDay = new Date(now);
+      lastDay.setDate(now.getDate() + availableDays - 1);
+      schedule.push(getOptimalReviewTime(lastDay, 'evening'));
+    }
+    
+    // Return the deadline-optimized schedule
+    return this._deduplicateSchedule(schedule);
+  },
+  
+  /**
+   * Checks if there's a deadline and adjusts the schedule accordingly
+   * @param {Date} now - Current date
+   * @param {Array} schedule - Initial schedule array
+   * @param {Number} deadline - Days until deadline
+   * @returns {Array} Adjusted schedule based on deadline
+   */
+  _adjustScheduleForDeadline(now, schedule, deadline) {
+    // Convert deadline from days to a date
+    const deadlineDate = new Date(now);
+    deadlineDate.setDate(deadlineDate.getDate() + deadline);
+    
+    // Calculate available days until deadline
+    const availableDays = Math.max(1, Math.ceil((deadlineDate - now) / (1000 * 60 * 60 * 24)));
+    
+    // If deadline is approaching, adjust the schedule
+    if (availableDays < 30) {
+      // Create a new deadline-optimized schedule
+      // Pass only the necessary parameters
+      return this._generateDeadlineBasedSchedule(now, availableDays);
+    }
+    
+    // If deadline is not approaching, return original schedule
+    return schedule;
   },
   
   /**

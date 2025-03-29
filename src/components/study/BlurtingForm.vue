@@ -451,46 +451,125 @@
         </div>
         
         <div class="next-steps">
-          <h5>Spaced Repetition Schedule</h5>
+          <h5>Your Personalized Learning Journey</h5>
           <p class="schedule-intro">
-            Based on your performance, we've created a scientifically-optimized review schedule to strengthen your long-term memory:
+            We've created a scientifically-optimized review schedule based on your performance pattern and the latest memory research. This personalized plan maximizes your long-term retention with minimal time investment.
           </p>
           
-          <div class="schedule-timeline">
-            <div class="timeline-track"></div>
-            <div v-for="(date, index) in reviewSchedule" :key="'timeline-' + index" 
-              class="timeline-point" 
-              :class="{ 'current': isCurrentDate(date), 'past': isPastDate(date) }"
-              :style="{ left: calculateTimelinePosition(date, reviewSchedule) + '%' }">
-              <div class="timeline-marker"></div>
-              <div class="timeline-label" :class="{ 'alt-position': index % 2 === 1 }">
-                <div class="timeline-date">{{ formatReviewDate(date) }}</div>
-                <div class="timeline-gap">{{ getIntervalLabel(date) }}</div>
+          <!-- Forgetting Curve Visualization -->
+          <div class="forgetting-curve-container">
+            <h6>Your Memory Retention Curve</h6>
+            <div class="curve-visualization">
+              <svg viewBox="0 0 500 200" class="curve-graph">
+                <!-- Axis -->
+                <line x1="50" y1="150" x2="450" y2="150" stroke="#e5e7eb" stroke-width="1"></line> <!-- X axis -->
+                <line x1="50" y1="30" x2="50" y2="150" stroke="#e5e7eb" stroke-width="1"></line> <!-- Y axis -->
+                
+                <!-- Axis Labels -->
+                <text x="250" y="180" text-anchor="middle" class="axis-label">Time</text>
+                <text x="20" y="90" text-anchor="middle" class="axis-label" transform="rotate(-90, 20, 90)">Retention</text>
+                
+                <!-- Timepoint Markers -->
+                <line x1="50" y1="145" x2="50" y2="155" stroke="#9ca3af" stroke-width="1"></line>
+                <text x="50" y="170" text-anchor="middle" class="time-label">Now</text>
+                
+                <!-- Retention Markers -->
+                <line x1="45" y1="50" x2="55" y2="50" stroke="#9ca3af" stroke-width="1"></line>
+                <text x="35" y="55" text-anchor="end" class="retention-label">90%</text>
+                
+                <line x1="45" y1="100" x2="55" y2="100" stroke="#9ca3af" stroke-width="1"></line>
+                <text x="35" y="105" text-anchor="end" class="retention-label">50%</text>
+                
+                <line x1="45" y1="130" x2="55" y2="130" stroke="#9ca3af" stroke-width="1"></line>
+                <text x="35" y="135" text-anchor="end" class="retention-label">20%</text>
+                
+                <!-- Forgetting Curve without practice -->
+                <path :d="getRetentionCurvePath(false)" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,5"></path>
+                
+                <!-- Optimized Curve with spaced repetition -->
+                <path :d="getRetentionCurvePath(true)" fill="none" stroke="#6366f1" stroke-width="2"></path>
+                
+                <!-- Review Points -->
+                <g v-for="(date, index) in reviewSchedule" :key="'review-point-' + index">
+                  <!-- Calculate x position based on days from now -->
+                  <circle 
+                    :cx="50 + calculateGraphPosition(date)" 
+                    :cy="calculateRetentionPoint(date)" 
+                    r="5" 
+                    :class="getReviewPointClass(date)"
+                    @mouseenter="activeReviewPoint = index"
+                    @mouseleave="activeReviewPoint = null"
+                  ></circle>
+                  
+                  <!-- Review Point Tooltip -->
+                  <g v-if="activeReviewPoint === index">
+                    <rect 
+                      :x="45 + calculateGraphPosition(date) - 60" 
+                      :y="calculateRetentionPoint(date) - 55" 
+                      width="120" 
+                      height="45" 
+                      rx="4" 
+                      class="tooltip-bg"></rect>
+                    <text 
+                      :x="45 + calculateGraphPosition(date)" 
+                      :y="calculateRetentionPoint(date) - 35" 
+                      text-anchor="middle" 
+                      class="tooltip-text">{{ formatReviewDate(date) }}</text>
+                    <text 
+                      :x="45 + calculateGraphPosition(date)" 
+                      :y="calculateRetentionPoint(date) - 15" 
+                      text-anchor="middle" 
+                      class="tooltip-subtext">{{ getReviewTypeLabel(date) }}</text>
+                  </g>
+                </g>
+              </svg>
+              
+              <div class="curve-legend">
+                <div class="legend-item">
+                  <span class="legend-color no-practice"></span>
+                  <span>Without Practice</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-color with-practice"></span>
+                  <span>With Retriv's Spaced Repetition</span>
+                </div>
               </div>
             </div>
           </div>
           
-          <div class="schedule-explanation">
-            <div class="explanation-card">
-              <div class="card-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"></path>
-                  <path d="m9 12 2 2 4-4"></path>
-                </svg>
-              </div>
-              <div class="card-content">
-                <h6>Why This Schedule Works</h6>
-                <p>
-                  This schedule is based on the Ebbinghaus Forgetting Curve and proven spaced repetition research. 
-                  By reviewing material right before you're likely to forget it, you strengthen neural pathways more effectively.
-                </p>
+          <!-- Review Schedule Cards -->
+          <div class="review-schedule-container">
+            <h6>Your Upcoming Review Schedule</h6>
+            <div class="schedule-grid">
+              <div v-for="(date, index) in reviewSchedule.slice(0, 5)" :key="'schedule-' + index" class="schedule-card" :class="getScheduleCardClass(date, index)">
+                <div class="schedule-card-header">
+                  <div class="schedule-tag" :class="getScheduleTagClass(date)">{{ getScheduleTagText(date) }}</div>
+                  <div class="schedule-time">{{ formatReviewDate(date) }}</div>
+                </div>
+                <div class="schedule-interval">{{ getIntervalLabel(date) }}</div>
+                <div class="schedule-note">{{ getScheduleNote(date) }}</div>
               </div>
             </div>
           </div>
+          
           
           <div class="actions-row">
-            <button @click="handleReset" class="btn btn-primary">
+            <button @click="addToCalendar" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+                <path d="M8 14h.01"></path>
+                <path d="M12 14h.01"></path>
+                <path d="M16 14h.01"></path>
+                <path d="M8 18h.01"></path>
+                <path d="M12 18h.01"></path>
+                <path d="M16 18h.01"></path>
+              </svg>
+              Add Reviews to Calendar
+            </button>
+            <button @click="handleReset" class="btn btn-outline">
               Study Something Else
             </button>
             <button @click="handleStudyAgain" class="btn btn-outline">
@@ -535,6 +614,7 @@ export default {
     const matchPercentage = ref(0);
     const heatmapData = ref({ original: [], recalled: [] });
     const reviewSchedule = ref([]);
+    const activeReviewPoint = ref(null);
     const countdownTimerValue = ref(300); // 5 minutes in seconds
     const countdownTimer = ref(null);
     const activeTab = ref('heatmap');
@@ -878,34 +958,244 @@ export default {
     };
     
     // Generate a retention curve path based on Ebbinghaus forgetting curve principles
-    const getRetentionCurvePath = () => {
-      if (!pastAttempts.value || pastAttempts.value.length === 0) return '';
-      
+    const getRetentionCurvePath = (withPractice = false) => {
       // Start from the current performance
-      const startY = 100 - matchPercentage.value;
+      const startY = withPractice ? 50 : 50; // Start at the same point
       
-      // The theoretical forgetting curve follows a negative exponential
-      // We'll approximate it with a bezier curve
-      let pathData = `M0,${startY}`;
+      if (withPractice) {
+        // Enhanced retention curve with spaced repetition
+        let pathData = `M50,${startY}`;
+        
+        // Plot the curve with recovery at review points
+        // This creates a sawtooth pattern that rises at each review
+        let xPos = 50;
+        let yPos = startY;
+        
+        // Sort review schedule by time
+        const sortedSchedule = [...reviewSchedule.value].sort((a, b) => new Date(a) - new Date(b));
+        
+        // Initial decline (first segment before any reviews)
+        if (sortedSchedule.length > 0) {
+          const firstReviewX = 50 + calculateGraphPosition(sortedSchedule[0]);
+          
+          // Calculate natural memory decay to first review point
+          const decayY = Math.min(140, startY + 30);
+          pathData += ` C${xPos + 20},${startY + 10} ${firstReviewX - 20},${decayY - 5} ${firstReviewX},${decayY}`;
+          
+          // Update position
+          xPos = firstReviewX;
+          yPos = decayY;
+          
+          // Add each review point with a boost in retention
+          sortedSchedule.forEach((date, i) => {
+            const reviewX = 50 + calculateGraphPosition(date);
+            
+            // Skip if this is the first point (already handled)
+            if (i === 0) return;
+            
+            // Calculate natural memory decay between review points
+            const nextDecayY = Math.min(140, yPos + 15 - (i * 3));
+            
+            // Add curve segment to next review point
+            pathData += ` C${xPos + 20},${yPos + 5} ${reviewX - 20},${nextDecayY - 5} ${reviewX},${nextDecayY}`;
+            
+            // Update position for next segment
+            xPos = reviewX;
+            yPos = nextDecayY;
+          });
+          
+          // Final segment after last review
+          pathData += ` C${xPos + 20},${yPos + 5} ${400 - 20},${yPos + 10} ${400},${yPos + 15}`;
+        } else {
+          // If no review schedule, show a generic curve
+          pathData += ` C150,${startY + 20} 300,${startY + 40} 400,${startY + 60}`;
+        }
+        
+        return pathData;
+      } else {
+        // Standard forgetting curve without practice (exponential decay)
+        let pathData = `M50,${startY}`;
+        
+        // Create exponential forgetting curve based on Ebbinghaus
+        pathData += ` C100,${startY + 30} 150,${startY + 60} 200,${startY + 80}`;
+        pathData += ` C250,${startY + 90} 300,${startY + 95} 400,${startY + 100}`;
+        
+        return pathData;
+      }
+    };
+    
+    // Calculate position on the graph based on time difference from now
+    const calculateGraphPosition = (date) => {
+      if (!date) return 0;
       
-      // If performance is very high (>90%), show a flatter curve
-      if (matchPercentage.value > 90) {
-        pathData += ` C30,${startY + 10} 50,${startY + 15} 100,${startY + 25}`;
-      } 
-      // If performance is good (>80%), show a moderate decline
-      else if (matchPercentage.value > 80) {
-        pathData += ` C30,${startY + 15} 50,${startY + 25} 100,${startY + 40}`;
+      const reviewDate = new Date(date);
+      const now = new Date();
+      
+      // Calculate days difference
+      const diffTime = Math.abs(reviewDate - now);
+      const diffDays = diffTime / (1000 * 60 * 60 * 24);
+      
+      // Scale the position logarithmically to fit the graph
+      // First day takes 40% of the x-axis, remaining 60% for longer-term
+      if (diffDays < 1) {
+        // Less than 1 day - map to 0-100 range
+        return diffDays * 100;
+      } else if (diffDays < 7) {
+        // 1-7 days - map to 100-220 range
+        return 100 + ((diffDays - 1) / 6) * 120;
+      } else if (diffDays < 30) {
+        // 7-30 days - map to 220-300 range
+        return 220 + ((diffDays - 7) / 23) * 80;
+      } else {
+        // >30 days - map to 300-400 range
+        return Math.min(400, 300 + (diffDays - 30) / 30 * 100);
       }
-      // If performance is moderate (>70%), show a steeper decline
-      else if (matchPercentage.value > 70) {
-        pathData += ` C20,${startY + 20} 40,${startY + 35} 100,${startY + 55}`;
-      }
-      // For poor performance, show a very steep initial decline
-      else {
-        pathData += ` C15,${startY + 30} 30,${startY + 45} 100,${Math.min(95, startY + 65)}`;
+    };
+    
+    // Calculate the retention point for a specific review date
+    const calculateRetentionPoint = (date) => {
+      if (!date) return 50; // Default
+      
+      const reviewDate = new Date(date);
+      const now = new Date();
+      
+      // Get index in the review schedule
+      const sortedSchedule = [...reviewSchedule.value].sort((a, b) => new Date(a) - new Date(b));
+      const index = sortedSchedule.findIndex(d => new Date(d).getTime() === reviewDate.getTime());
+      
+      // First review point is always at a lower retention
+      if (index === 0) {
+        return 80;
       }
       
-      return pathData;
+      // Calculate days difference
+      const diffTime = Math.abs(reviewDate - now);
+      const diffDays = diffTime / (1000 * 60 * 60 * 24);
+      
+      // Retention improves with successive reviews
+      const baseRetention = 80 - (index * 5);
+      
+      // Adjust for time - more distant reviews show lower pre-review retention
+      let timeAdjustment = 0;
+      if (diffDays < 1) {
+        timeAdjustment = 0;
+      } else if (diffDays < 7) {
+        timeAdjustment = diffDays * 2;
+      } else {
+        timeAdjustment = 14 + (diffDays - 7);
+      }
+      
+      return Math.min(130, baseRetention + timeAdjustment);
+    };
+    
+    // Get the CSS class for a review point
+    const getReviewPointClass = (date) => {
+      if (isPastDate(date)) return 'review-point past';
+      if (isCurrentDate(date)) return 'review-point current';
+      return 'review-point future';
+    };
+    
+    // Get a label for the review type based on position in schedule
+    const getReviewTypeLabel = (date) => {
+      if (!date) return '';
+      
+      const reviewDate = new Date(date);
+      const now = new Date();
+      const diffTime = Math.abs(reviewDate - now);
+      const diffHours = diffTime / (1000 * 60 * 60);
+      
+      if (diffHours < 2) return 'Rapid Reinforcement';
+      if (diffHours < 8) return 'Same Day Review';
+      if (diffHours < 24) return 'Next Day Review';
+      if (diffHours < 24 * 7) return 'Spaced Review';
+      return 'Long-term Review';
+    };
+    
+    // Get CSS class for schedule card
+    const getScheduleCardClass = (date, index) => {
+      if (isPastDate(date)) return 'past-review';
+      if (isCurrentDate(date)) return 'current-review';
+      if (index === 0) return 'next-review';
+      return '';
+    };
+    
+    // Get CSS class for schedule tag
+    const getScheduleTagClass = (date) => {
+      if (isPastDate(date)) return 'tag-past';
+      if (isCurrentDate(date)) return 'tag-current';
+      
+      const reviewDate = new Date(date);
+      const now = new Date();
+      const diffTime = Math.abs(reviewDate - now);
+      const diffHours = diffTime / (1000 * 60 * 60);
+      
+      if (diffHours < 2) return 'tag-immediate';
+      if (diffHours < 24) return 'tag-today';
+      if (diffHours < 24 * 2) return 'tag-tomorrow';
+      return 'tag-future';
+    };
+    
+    // Get text for schedule tag
+    const getScheduleTagText = (date) => {
+      if (isPastDate(date)) return 'Completed';
+      if (isCurrentDate(date)) return 'Due Now';
+      
+      const reviewDate = new Date(date);
+      const now = new Date();
+      
+      // If it's today
+      if (reviewDate.toDateString() === now.toDateString()) {
+        const diffHours = (reviewDate - now) / (1000 * 60 * 60);
+        if (diffHours < 1) return 'Soon';
+        return 'Later Today';
+      }
+      
+      // If it's tomorrow
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      if (reviewDate.toDateString() === tomorrow.toDateString()) {
+        return 'Tomorrow';
+      }
+      
+      // Otherwise, return the type
+      return getReviewTypeShortLabel(date);
+    };
+    
+    // Get a short label for review type
+    const getReviewTypeShortLabel = (date) => {
+      const reviewDate = new Date(date);
+      const now = new Date();
+      const diffTime = reviewDate - now;
+      const diffDays = diffTime / (1000 * 60 * 60 * 24);
+      
+      if (diffDays < 7) return 'Week 1';
+      if (diffDays < 14) return 'Week 2';
+      if (diffDays < 30) return 'Month 1';
+      if (diffDays < 90) return 'Month 2-3';
+      return 'Long-term';
+    };
+    
+    // Get explanatory note for each schedule card
+    const getScheduleNote = (date) => {
+      if (isPastDate(date)) return 'This review has been completed.';
+      if (isCurrentDate(date)) return 'This review is due today. Complete it to boost retention.';
+      
+      const reviewDate = new Date(date);
+      const now = new Date();
+      const diffTime = reviewDate - now;
+      const diffHours = diffTime / (1000 * 60 * 60);
+      
+      if (diffHours < 2) return 'Critical time for new memory formation.';
+      if (diffHours < 8) return 'Reinforces memory before sleep consolidation.';
+      if (diffHours < 24) return 'Strengthens neural connections while still fresh.';
+      if (diffHours < 24 * 7) return 'Prevents forgetting during critical first week.';
+      return 'Moves knowledge to long-term memory.';      
+    };
+    
+    // Add study sessions to calendar (mock implementation)
+    const addToCalendar = () => {
+      // In a real implementation, this would generate a calendar file or use calendar API
+      alert('Review sessions would be added to your calendar. This feature is coming soon!');
     };
     
     // Calculate the position for the next review indicator on the timeline
@@ -1248,6 +1538,17 @@ export default {
       getScoreClass,
       getChangeClass,
       calculateChange,
+      getRetentionCurvePath,
+      calculateGraphPosition,
+      calculateRetentionPoint,
+      getReviewPointClass,
+      getReviewTypeLabel,
+      getScheduleCardClass,
+      getScheduleTagClass,
+      getScheduleTagText,
+      getScheduleNote,
+      addToCalendar,
+      activeReviewPoint,
       activatePoint,
       deactivatePoint,
       showTooltip,
@@ -1259,7 +1560,6 @@ export default {
       isPastDate,
       isCurrentDate,
       getChartPath,
-      getRetentionCurvePath,
       calculateNextReviewPosition,
       calculateTimelinePosition
     };
@@ -2196,27 +2496,293 @@ export default {
   margin-bottom: 0;
 }
 
-/* Next Steps */
+/* Next Steps - Redesigned */
 .next-steps {
   background-color: var(--neutral-50);
   padding: var(--spacing-6);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .next-steps h5 {
   margin-bottom: var(--spacing-4);
   font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xl);
+  color: var(--neutral-900);
+}
+
+.next-steps h6 {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-md);
+  margin-bottom: var(--spacing-3);
+  color: var(--neutral-800);
 }
 
 .schedule-intro {
-  margin-bottom: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
   color: var(--neutral-700);
+  line-height: 1.6;
 }
 
+/* Forgetting Curve Visualization */
+.forgetting-curve-container {
+  margin-bottom: var(--spacing-8);
+  background-color: white;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  box-shadow: var(--shadow-sm);
+}
+
+.curve-visualization {
+  margin-top: var(--spacing-4);
+}
+
+.curve-graph {
+  width: 100%;
+  height: 200px;
+  overflow: visible;
+}
+
+.axis-label {
+  font-size: 10px;
+  fill: var(--neutral-500);
+}
+
+.time-label, .retention-label {
+  font-size: 9px;
+  fill: var(--neutral-600);
+}
+
+.review-point {
+  stroke-width: 1;
+  stroke: white;
+  cursor: pointer;
+  transition: r 0.2s ease;
+}
+
+.review-point:hover {
+  r: 7;
+}
+
+.review-point.past {
+  fill: var(--neutral-400);
+}
+
+.review-point.current {
+  fill: var(--primary-color);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 3px rgba(99, 102, 241, 0.5));
+}
+
+.review-point.future {
+  fill: var(--primary-light);
+}
+
+.tooltip-bg {
+  fill: var(--neutral-800);
+  opacity: 0.9;
+}
+
+.tooltip-text {
+  font-size: 10px;
+  fill: white;
+  font-weight: var(--font-weight-medium);
+}
+
+.tooltip-subtext {
+  font-size: 8px;
+  fill: rgba(255, 255, 255, 0.8);
+}
+
+.curve-legend {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-3);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  color: var(--neutral-600);
+}
+
+.legend-color {
+  width: 16px;
+  height: 3px;
+  border-radius: 1px;
+}
+
+.legend-color.no-practice {
+  background-color: #ef4444;
+  border: 1px dashed #ef4444;
+}
+
+.legend-color.with-practice {
+  background-color: #6366f1;
+}
+
+/* Review Schedule Cards */
+.review-schedule-container {
+  margin-bottom: var(--spacing-8);
+}
+
+.schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-4);
+}
+
+.schedule-card {
+  background-color: white;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--neutral-200);
+  transition: all 0.3s ease;
+}
+
+.schedule-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.schedule-card.past-review {
+  opacity: 0.7;
+}
+
+.schedule-card.current-review {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.2);
+}
+
+.schedule-card.next-review {
+  border-color: var(--primary-light);
+}
+
+.schedule-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-3);
+}
+
+.schedule-tag {
+  font-size: var(--font-size-xs);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-medium);
+}
+
+.schedule-tag.tag-past {
+  background-color: var(--neutral-200);
+  color: var(--neutral-600);
+}
+
+.schedule-tag.tag-current {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.schedule-tag.tag-immediate {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.schedule-tag.tag-today {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.schedule-tag.tag-tomorrow {
+  background-color: rgba(6, 182, 212, 0.1);
+  color: #06b6d4;
+}
+
+.schedule-tag.tag-future {
+  background-color: rgba(99, 102, 241, 0.1);
+  color: var(--primary-color);
+}
+
+.schedule-time {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  color: var(--neutral-800);
+}
+
+.schedule-interval {
+  font-size: var(--font-size-xs);
+  color: var(--neutral-600);
+  margin-bottom: var(--spacing-2);
+}
+
+.schedule-note {
+  font-size: var(--font-size-xs);
+  color: var(--neutral-700);
+  line-height: 1.5;
+}
+
+/* Science Cards */
+.science-container {
+  margin-bottom: var(--spacing-6);
+}
+
+.science-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-4);
+}
+
+.science-card {
+  background-color: white;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--neutral-200);
+}
+
+.science-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background-color: rgba(99, 102, 241, 0.1);
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-3);
+}
+
+.science-card h6 {
+  margin-bottom: var(--spacing-2);
+}
+
+.science-card p {
+  font-size: var(--font-size-sm);
+  color: var(--neutral-600);
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+
+/* Action Buttons */
 .actions-row {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--spacing-4);
   margin-top: var(--spacing-6);
+}
+
+.btn-icon {
+  margin-right: var(--spacing-2);
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
 }
 
 .loading-spinner {

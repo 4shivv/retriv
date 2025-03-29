@@ -206,6 +206,24 @@
         </div>
         
         <div class="form-group">
+          <label for="deadline" class="form-label">Learning Deadline <span class="optional-label">(optional)</span></label>
+          <div class="deadline-selection">
+            <div class="deadline-presets">
+              <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '1' }" @click="selectDeadline('1')">1 Day</button>
+              <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '3' }" @click="selectDeadline('3')">3 Days</button>
+              <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '7' }" @click="selectDeadline('7')">1 Week</button>
+              <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '14' }" @click="selectDeadline('14')">2 Weeks</button>
+              <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '30' }" @click="selectDeadline('30')">1 Month</button>
+              <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === 'custom' }" @click="selectDeadline('custom')">Custom</button>
+            </div>
+            <div v-if="deadline === 'custom'" class="custom-deadline-input">
+              <input type="date" v-model="customDeadlineDate" class="form-control" :min="minDate">
+            </div>
+          </div>
+          <p class="form-text deadline-helper">Setting a deadline will optimize your review schedule based on when you need to learn this material.</p>
+        </div>
+        
+        <div class="form-group">
           <label class="form-label">Or upload a file</label>
           <div class="file-upload-container">
             <input
@@ -266,6 +284,46 @@ export default {
     const categorySearchTerm = ref('');
     const categorySearchInput = ref(null);
     const customCategoryInput = ref(null);
+    
+    // Deadline related variables
+    const deadline = ref('');
+    const customDeadlineDate = ref('');
+    
+    // Compute minimum date for custom deadline (today)
+    const minDate = computed(() => {
+      const today = new Date();
+      return today.toISOString().split('T')[0];
+    });
+    
+    // Function to handle deadline selection
+    const selectDeadline = (value) => {
+      deadline.value = value;
+      if (value !== 'custom') {
+        customDeadlineDate.value = '';
+      } else {
+        // Set default custom date to 2 weeks from now if none selected yet
+        if (!customDeadlineDate.value) {
+          const defaultDate = new Date();
+          defaultDate.setDate(defaultDate.getDate() + 14);
+          customDeadlineDate.value = defaultDate.toISOString().split('T')[0];
+        }
+      }
+    };
+    
+    // Convert deadline selection to days for the API
+    const getDeadlineInDays = () => {
+      if (!deadline.value) return null;
+      
+      if (deadline.value === 'custom' && customDeadlineDate.value) {
+        const selectedDate = new Date(customDeadlineDate.value);
+        const today = new Date();
+        const diffTime = Math.abs(selectedDate - today);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+      }
+      
+      return deadline.value === 'custom' ? null : parseInt(deadline.value);
+    };
     
     // Predefined categories
     // Original system categories (used as reference for deletions)
@@ -625,7 +683,8 @@ export default {
           auth.currentUser.uid,
           title.value,
           content.value,
-          category.value // Add category parameter
+          category.value, // Add category parameter
+          getDeadlineInDays() // Add deadline parameter
         );
         
         console.log("Material saved with ID:", materialId);
@@ -639,7 +698,8 @@ export default {
             content: content.value,
             category: category.value, // Add category to the material object
             createdAt: new Date(),
-            userId: auth.currentUser.uid
+            userId: auth.currentUser.uid,
+            deadline: getDeadlineInDays()
           };
           
           console.log("Emitting material:", materialObj);
@@ -652,6 +712,8 @@ export default {
           customCategory.value = '';
           showCustomCategoryInput.value = false;
           fileName.value = '';
+          deadline.value = '';
+          customDeadlineDate.value = '';
         } else {
           error.value = 'Failed to save material. Please try again.';
         }
@@ -684,6 +746,12 @@ export default {
       filteredCustomCategories,
       filteredFrequentCategories,
       showCreateNewCategory,
+      // Deadline refs and methods
+      deadline,
+      customDeadlineDate,
+      minDate,
+      selectDeadline,
+      getDeadlineInDays,
       // Methods
       handleFileUpload,
       handleSubmit,
@@ -735,6 +803,59 @@ export default {
   display: flex;
   justify-content: flex-end;
   margin-top: var(--spacing-8);
+}
+
+/* Deadline Selection Styling */
+.optional-label {
+  font-size: var(--font-size-xs);
+  color: var(--neutral-500);
+  font-weight: normal;
+  margin-left: var(--spacing-1);
+}
+
+.deadline-selection {
+  margin-bottom: var(--spacing-2);
+}
+
+.deadline-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+}
+
+.deadline-preset-button {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--neutral-300);
+  background-color: var(--neutral-50);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  color: var(--neutral-700);
+}
+
+.deadline-preset-button:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(99, 102, 241, 0.05);
+}
+
+.deadline-preset-button.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.custom-deadline-input {
+  max-width: 300px;
+  margin-top: var(--spacing-2);
+  animation: fadeIn 0.3s;
+}
+
+.deadline-helper {
+  font-size: var(--font-size-xs);
+  color: var(--neutral-600);
+  margin-top: var(--spacing-2);
 }
 
 /* File Upload Styling */

@@ -26,60 +26,6 @@
       </div>
       
       <div v-else>
-        <!-- Add filter menu -->
-        <div class="filter-menu" v-if="showFilterMenu">
-          <div class="filter-option filter-section">
-            <h5 class="filter-section-title">View Options</h5>
-            <label class="filter-checkbox">
-              <input type="checkbox" v-model="filters.dueReview"> 
-              <span>Show Due Reviews Only</span>
-            </label>
-            <label class="filter-checkbox">
-              <input type="checkbox" v-model="filters.recentlyAdded"> 
-              <span>Recently Added</span>
-            </label>
-          </div>
-          
-          <div class="filter-option filter-section">
-            <h5 class="filter-section-title">Categories</h5>
-            <div class="category-filter-list">
-              <label v-for="category in availableCategories" :key="category" class="filter-checkbox">
-                <input 
-                  type="checkbox" 
-                  :value="category" 
-                  v-model="selectedCategoryFilters"
-                > 
-                <span class="category-name">{{ category }}</span>
-              </label>
-            </div>
-          </div>
-          
-          <div class="filter-actions">
-            <button class="btn btn-sm btn-outline" @click="applyFilters">Apply</button>
-            <button class="btn btn-sm btn-outline" @click="resetFilters">Reset</button>
-          </div>
-        </div>
-        
-        <!-- Category filter chips -->
-        <div class="category-filter">
-          <button 
-            class="category-chip" 
-            :class="{ active: activeCategory === '' }"
-            @click="filterByCategory('')"
-          >
-            All
-          </button>
-          <button 
-            v-for="category in availableCategories" 
-            :key="category"
-            class="category-chip" 
-            :class="{ active: activeCategory === category }"
-            @click="filterByCategory(category)"
-          >
-            {{ category }}
-          </button>
-        </div>
-        
         <div class="materials-grid">
           <div 
             v-for="material in filteredMaterials" 
@@ -329,7 +275,27 @@
       </div>
     </div>
     
-    <!-- Delete Confirmation Modal -->
+    <!-- Delete Category Confirmation Modal -->  
+    <div v-if="showCategoryDeleteModal" class="delete-modal-backdrop" @click="cancelCategoryDelete">
+      <div class="delete-modal" @click.stop>
+        <div class="delete-modal-header">
+          <h4>Delete Category</h4>
+        </div>
+        <div class="delete-modal-body">
+          <p>Are you sure you want to delete the category "{{ categoryToDelete }}"?</p>
+          <p class="text-warning">Materials in this category will be set to "Uncategorized".</p>
+        </div>
+        <div class="delete-modal-footer">
+          <button @click="cancelCategoryDelete" class="btn btn-outline">Cancel</button>
+          <button @click="deleteCategory" class="btn btn-danger" :disabled="categoryDeleteLoading">
+            <span v-if="categoryDeleteLoading" class="loading-spinner"></span>
+            <span v-else>Delete Category</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Delete Material Confirmation Modal -->
     <div v-if="showDeleteModal" class="delete-modal-backdrop" @click="cancelDelete">
       <div class="delete-modal" @click.stop>
         <div class="delete-modal-header">
@@ -352,7 +318,7 @@
 </template>
 
 <script>
-import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import StudyService from '@/services/study.service';
 
 export default {
@@ -365,9 +331,13 @@ export default {
     loading: {
       type: Boolean,
       default: false
+    },
+    filteredMaterials: {
+      type: Array,
+      default: () => []
     }
   },
-  emits: ['select-material', 'create-new', 'material-edited', 'material-deleted'],
+  emits: ['select-material', 'create-new', 'material-edited', 'material-deleted', 'category-deleted'],
   
   setup(props, { emit }) {
     const viewMode = ref(false);
@@ -377,26 +347,13 @@ export default {
     const isLoading = ref(false);
     const showDeleteModal = ref(false);
     const deleteLoading = ref(false);
+    const showCategoryDeleteModal = ref(false);
+    const categoryDeleteLoading = ref(false);
+    const categoryToDelete = ref('');
     const studyAttempts = ref([]);
     const nextReviewDate = ref(null);
     const activeActionMenu = ref(null);
-    const activeCategory = ref('');
-    const availableCategories = ref([]);
-    const selectedCategoryFilters = ref([]);
-    const showFilterMenu = ref(false);
-    const searchQuery = ref('');
-    const filters = ref({
-      dueReview: false,
-      recentlyAdded: false
-    });
-    
-    // Computed property for filtered materials by category
-    const filteredMaterials = computed(() => {
-      if (!activeCategory.value) {
-        return props.materials;
-      }
-      return props.materials.filter(m => m.category === activeCategory.value);
-    });
+    // These filter-related properties are now managed by the parent component
     
     // Form data for editing
     const editForm = ref({
@@ -405,25 +362,53 @@ export default {
       category: ''
     });
     
-    // Load available categories
-    const loadCategories = async () => {
-      try {
-        // Extract unique categories from materials
-        const uniqueCategories = new Set();
-        props.materials.forEach(material => {
-          if (material.category) {
-            uniqueCategories.add(material.category);
-          }
-        });
-        availableCategories.value = Array.from(uniqueCategories);
-      } catch (err) {
-        console.error("Error loading categories:", err);
-      }
+    // Category management for the list component
+    
+    // Handle category deletion
+    const confirmDeleteCategory = (category) => {
+      categoryToDelete.value = category;
+      showCategoryDeleteModal.value = true;
     };
     
-    // Filter materials by category
-    const filterByCategory = (category) => {
-      activeCategory.value = category;
+    const cancelCategoryDelete = () => {
+      showCategoryDeleteModal.value = false;
+      categoryToDelete.value = '';
+    };
+    
+    const deleteCategory = async () => {
+      if (!categoryToDelete.value) return;
+      
+      try {
+        categoryDeleteLoading.value = true;
+        
+        // Get all materials with this category
+        const materialsToUpdate = props.materials.filter(m => m.category === categoryToDelete.value);
+        
+        // Update all materials in this category to 'Uncategorized'
+        const updatePromises = materialsToUpdate.map(material => 
+          StudyService.updateStudyMaterial(
+            material.id, 
+            material.title, 
+            material.content, 
+            ''
+          )
+        );
+        
+        await Promise.all(updatePromises);
+        // Category deletion now handled by parent component
+        
+        // Emit an event to refresh the materials list
+        emit('category-deleted', categoryToDelete.value);
+        
+        // Close modal
+        showCategoryDeleteModal.value = false;
+        categoryToDelete.value = '';
+      } catch (err) {
+        console.error('Failed to delete category:', err);
+        error.value = err.message || 'Failed to delete category';
+      } finally {
+        categoryDeleteLoading.value = false;
+      }
     };
     
     const truncateText = (text, maxLength) => {
@@ -705,78 +690,13 @@ export default {
       }
     };
     
-    // Watch for changes in materials to update categories
-    watch(() => props.materials, () => {
-      loadCategories();
-    }, { immediate: true });
+    // Category loading is now handled by the parent component
     
-    // Update filterMaterials method
-    const filterMaterials = () => {
-      let filtered = [...props.materials];
-      
-      // Apply search filter
-      if (searchQuery.value) {
-        const query = searchQuery.value.toLowerCase();
-        filtered = filtered.filter(material => 
-          material.title.toLowerCase().includes(query) || 
-          material.content.toLowerCase().includes(query)
-        );
-      }
-      
-      // Apply due review filter
-      if (filters.value.dueReview) {
-        filtered = filtered.filter(material => material.hasReview);
-      }
-      
-      // Apply category filters from dropdown
-      if (selectedCategoryFilters.value.length > 0) {
-        filtered = filtered.filter(material => 
-          selectedCategoryFilters.value.includes(material.category)
-        );
-      } else if (activeCategory.value) {
-        // Apply selected category chip filter if no dropdown categories selected
-        filtered = filtered.filter(m => m.category === activeCategory.value);
-      }
-      
-      // Apply recently added filter
-      if (filters.value.recentlyAdded) {
-        // Sort by creation date (newest first)
-        filtered.sort((a, b) => {
-          const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
-          const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
-          return dateB - dateA;
-        });
-        
-        // Take only the 5 most recent
-        filtered = filtered.slice(0, 5);
-      }
-      
-      filteredMaterials.value = filtered;
-    };
-
-    // Add reset filters method
-    const resetFilters = () => {
-      filters.value.dueReview = false;
-      filters.value.recentlyAdded = false;
-      selectedCategoryFilters.value = [];
-      activeCategory.value = '';
-      searchQuery.value = '';
-      filterMaterials();
-      showFilterMenu.value = false;
-    };
-
-    // Add applyFilters method
-    const applyFilters = () => {
-      filterMaterials();
-      showFilterMenu.value = false;
-    };
+    // Filtering is now handled by the parent component
     
     onMounted(() => {
       // Add event listener to close action menus when clicking outside
       document.addEventListener('click', closeActionMenus);
-      
-      // Load categories
-      loadCategories();
     });
     
     onBeforeUnmount(() => {
@@ -793,12 +713,12 @@ export default {
       isLoading,
       showDeleteModal,
       deleteLoading,
+      showCategoryDeleteModal,
+      categoryDeleteLoading,
+      categoryToDelete,
       studyAttempts,
       nextReviewDate,
       activeActionMenu,
-      activeCategory,
-      availableCategories,
-      filteredMaterials,
       truncateText,
       formatDate,
       formatDateWithTime,
@@ -818,14 +738,9 @@ export default {
       deleteMaterial,
       cancelDelete,
       confirmDelete,
-      filterByCategory,
-      selectedCategoryFilters,
-      showFilterMenu,
-      searchQuery,
-      filters,
-      filterMaterials,
-      resetFilters,
-      applyFilters,
+      confirmDeleteCategory,
+      cancelCategoryDelete,
+      deleteCategory
     };
   }
 }
@@ -943,6 +858,47 @@ export default {
   margin-bottom: var(--spacing-6);
   color: var(--neutral-600);
   max-width: 400px;
+}
+
+/* List Controls */
+.list-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--spacing-4);
+  position: relative;
+}
+
+.filter-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: 0.5rem 1rem;
+  background-color: white;
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-md);
+  color: var(--neutral-700);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-toggle-btn:hover, .filter-toggle-btn.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.filter-toggle-btn.active svg {
+  animation: pulse-light 2s infinite;
+}
+
+@keyframes pulse-light {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
 }
 
 /* Materials Grid */
@@ -1450,6 +1406,11 @@ export default {
   font-weight: var(--font-weight-medium);
 }
 
+.text-warning {
+  color: #f59e0b;
+  font-weight: var(--font-weight-medium);
+}
+
 .delete-modal-footer {
   padding: var(--spacing-4) var(--spacing-6);
   border-top: 1px solid var(--neutral-200);
@@ -1561,16 +1522,60 @@ export default {
 
 /* Add filter menu styles */
 .filter-menu {
-  min-width: 220px;
-  max-width: 300px;
+  min-width: 250px;
+  max-width: 320px;
+  position: absolute;
+  top: 45px;
+  right: 0;
+  background-color: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  padding: var(--spacing-4);
+  border: 1px solid var(--neutral-200);
 }
 
-.filter-checkbox {
+.filter-checkbox-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-1) 0;
+  border-bottom: 1px solid var(--neutral-100);
+}
+
+.category-checkbox {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
-  margin-bottom: var(--spacing-2);
   cursor: pointer;
+}
+
+.delete-category-btn {
+  background: none;
+  border: none;
+  color: var(--neutral-500);
+  cursor: pointer;
+  padding: var(--spacing-2);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  margin-right: -8px;
+}
+
+.delete-category-btn:hover {
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+  transform: scale(1.1);
+}
+
+.category-help {
+  font-size: var(--font-size-xs);
+  font-weight: normal;
+  color: var(--neutral-500);
+  font-style: italic;
+  margin-left: var(--spacing-2);
 }
 
 .category-name {

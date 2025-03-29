@@ -98,14 +98,52 @@
       
       <form @submit.prevent="handleSubmitRecall" v-if="!submitted">
         <div class="form-group">
-          <textarea
-            v-model="recalledText"
-            class="form-control"
-            rows="12"
-            placeholder="Start typing what you remember..."
-            :disabled="loading"
-            autofocus
-          ></textarea>
+          <div class="textarea-container">
+            <textarea
+              v-model="recalledText"
+              class="form-control"
+              rows="12"
+              placeholder="Start typing what you remember..."
+              :disabled="loading || isRecording"
+              autofocus
+              ref="textareaRef"
+            ></textarea>
+            <div class="speech-controls">
+              <div class="speech-buttons-container">
+                <button 
+                  type="button" 
+                  @click="toggleSpeechRecognition" 
+                  class="btn btn-speech" 
+                  :class="{ 'recording': isRecording }"
+                  :disabled="loading"
+                  :title="isRecording ? 'Stop recording' : 'Start speech to text'"
+                >
+                  <svg v-if="!isRecording" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                  </svg>
+                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="6" y="4" width="4" height="16"></rect>
+                    <rect x="14" y="4" width="4" height="16"></rect>
+                  </svg>
+                </button>
+                <div v-if="isRecording" class="recording-indicator">
+                  <span class="recording-text">Recording...</span>
+                  <span class="recording-dot"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-if="browserSupportsSpeech === false" class="speech-warning">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span>Your browser doesn't support speech recognition. Please use Chrome or Edge browser for this feature.</span>
+          </div>
         </div>
         
         <div class="form-actions">
@@ -507,6 +545,10 @@ export default {
     const tooltipIndex = ref(null);
     const error = ref('');
     const nextReviewDate = ref(null);
+    const isRecording = ref(false);
+    const recognition = ref(null);
+    const browserSupportsSpeech = ref(null);
+    const textareaRef = ref(null);
     
     const router = useRouter();
     
@@ -1044,6 +1086,103 @@ export default {
       return '';
     });
     
+    // Initialize speech recognition
+    const initSpeechRecognition = () => {
+      // Check if the browser supports speech recognition
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      
+      if (!SpeechRecognition) {
+        console.log('Speech recognition not supported by your browser');
+        browserSupportsSpeech.value = false;
+        return;
+      }
+      
+      browserSupportsSpeech.value = true;
+      recognition.value = new SpeechRecognition();
+      
+      // Configure recognition
+      recognition.value.continuous = true;
+      recognition.value.interimResults = true;
+      recognition.value.lang = 'en-US'; // Default to English
+      
+      // Set up event handlers
+      recognition.value.onresult = (event) => {
+        // We're only using final results for now, not interim results
+        // let interimTranscript = '';
+        let finalTranscript = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          }
+          // We're not using interim results in this implementation
+          // else {
+          //   interimTranscript += event.results[i][0].transcript;
+          // }
+        }
+        
+        // Append final transcript to the textarea
+        if (finalTranscript) {
+          // Add a space if there's already text and it doesn't end with a space
+          const needsSpace = recalledText.value && !recalledText.value.endsWith(' ');
+          recalledText.value += (needsSpace ? ' ' : '') + finalTranscript;
+        }
+      };
+      
+      recognition.value.onerror = (event) => {
+        console.error('Speech recognition error', event.error);
+        isRecording.value = false;
+        
+        if (event.error === 'not-allowed') {
+          error.value = 'Microphone access denied. Please check your browser settings.';
+        }
+      };
+      
+      recognition.value.onend = () => {
+        // Only set isRecording to false if we didn't manually stop
+        // (This helps prevent the recognition from stopping unexpectedly)
+        if (isRecording.value) {
+          try {
+            recognition.value.start();
+          } catch (e) {
+            console.log('Recognition already started');
+            isRecording.value = false;
+          }
+        }
+      };
+    };
+    
+    // Toggle speech recognition on/off
+    const toggleSpeechRecognition = () => {
+      if (!browserSupportsSpeech.value) {
+        return;
+      }
+      
+      if (isRecording.value) {
+        // Stop recording
+        try {
+          recognition.value.stop();
+          isRecording.value = false;
+        } catch (e) {
+          console.error('Error stopping recognition', e);
+        }
+      } else {
+        // Start recording
+        try {
+          recognition.value.start();
+          isRecording.value = true;
+          
+          // Focus the textarea after starting recording
+          if (textareaRef.value) {
+            textareaRef.value.focus();
+          }
+        } catch (e) {
+          console.error('Error starting recognition', e);
+          error.value = 'Could not start speech recognition. Please try again.';
+        }
+      }
+    };
+
     onMounted(async () => {
       console.log("BlurtingForm mounted with materialId:", props.materialId);
       // Fetch past attempts for this material
@@ -1051,11 +1190,24 @@ export default {
       
       // Start the countdown
       startCountdown();
+      
+      // Initialize speech recognition
+      initSpeechRecognition();
     });
     
     onBeforeUnmount(() => {
       if (countdownTimer.value) {
         clearInterval(countdownTimer.value);
+      }
+      
+      // Stop speech recognition if it's running
+      if (recognition.value && isRecording.value) {
+        try {
+          recognition.value.stop();
+          isRecording.value = false;
+        } catch (e) {
+          console.error('Error stopping recognition on unmount', e);
+        }
       }
     });
     
@@ -1081,6 +1233,10 @@ export default {
       performanceTrendClass,
       performanceTrendText,
       performanceInsight,
+      isRecording,
+      browserSupportsSpeech,
+      textareaRef,
+      toggleSpeechRecognition,
       handleSubmitRecall,
       handleReset,
       handleStudyAgain,
@@ -1112,6 +1268,123 @@ export default {
 </script>
 
 <style scoped>
+/* Textarea with Speech Controls */
+.textarea-container {
+  position: relative;
+}
+
+.speech-controls {
+  position: absolute;
+  bottom: var(--spacing-3);
+  right: var(--spacing-3);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  z-index: 10;
+}
+
+.speech-buttons-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--neutral-200);
+}
+
+.btn-speech {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--neutral-100);
+  color: var(--neutral-600);
+  border: 1px solid var(--neutral-300);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.btn-speech:hover {
+  background-color: var(--neutral-200);
+  color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-speech.recording {
+  background-color: #ef4444;
+  color: white;
+  border-color: #ef4444;
+  animation: pulse-recording 2s infinite;
+}
+
+.btn-speech:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+}
+
+.btn-speech svg {
+  margin: 0;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+}
+
+@keyframes pulse-recording {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.recording-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: #ef4444;
+  white-space: nowrap;
+  margin-left: var(--spacing-2);
+}
+
+.recording-text {
+  white-space: nowrap;
+}
+
+.recording-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ef4444;
+  animation: blink 1s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes blink {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.speech-warning {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+  background-color: rgba(250, 204, 21, 0.1);
+  color: #b45309;
+  font-size: var(--font-size-xs);
+}
 .blurting-form {
   margin-bottom: var(--spacing-lg);
 }

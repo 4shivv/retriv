@@ -25,73 +25,38 @@
         </p>
         <div v-if="pastAttempts && pastAttempts.length > 0" class="past-attempts-summary">
           <h4>Your Past Performance</h4>
-          <div class="performance-chart-container">
-            <div class="chart-header">
-              <div class="chart-title">Recall Score History</div>
-              <div class="chart-legend">
-                <div class="legend-item">
-                  <span class="legend-color excellent"></span>
-                  <span>Excellent (90%+)</span>
-                </div>
-                <div class="legend-item">
-                  <span class="legend-color good"></span>
-                  <span>Good (80-89%)</span>
-                </div>
-                <div class="legend-item">
-                  <span class="legend-color fair"></span>
-                  <span>Fair (70-79%)</span>
-                </div>
-                <div class="legend-item">
-                  <span class="legend-color poor"></span>
-                  <span>Poor (&lt; 70%)</span>
-                </div>
-              </div>
+          <div class="past-attempts-stats">
+            <div class="stat-card attempts-card">
+              <div class="stat-value">{{ pastAttempts.length }}</div>
+              <div class="stat-label">Total Attempts</div>
             </div>
-            <div class="performance-trend-chart">
-              <div class="y-axis">
-                <div v-for="tick in 6" :key="'y-' + tick" class="axis-tick">
-                  {{ 100 - (tick - 1) * 20 }}%
-                </div>
-              </div>
-              <div class="chart-area">
-                <!-- Reference lines -->
-                <div class="reference-line" style="bottom: 90%;">Excellent (90%)</div>
-                <div class="reference-line" style="bottom: 70%;">Fair (70%)</div>
-                
-                <!-- Data points and connecting curve -->
-                <svg class="trend-curve" preserveAspectRatio="none" :viewBox="`0 0 ${pastAttempts.length - 1} 100`">
-                  <path :d="getChartPath()" fill="none" stroke="rgba(99, 102, 241, 0.7)" stroke-width="2"></path>
-                </svg>
-                
-                <div 
-                  v-for="(attempt, index) in pastAttempts" 
-                  :key="'point-' + index" 
-                  class="data-point" 
-                  :class="getScoreClass(attempt.matchPercentage)"
-                  :style="{
-                    left: `${(index / (pastAttempts.length - 1)) * 100}%`, 
-                    bottom: `${attempt.matchPercentage}%`
-                  }"
-                  @mouseenter="activatePoint(index)"
-                  @mouseleave="deactivatePoint()"
-                >
-                  <div v-if="activePoint === index" class="data-tooltip">
-                    <div class="tooltip-date">{{ formatDateWithTime(attempt.timestamp) }}</div>
-                    <div class="tooltip-score">{{ attempt.matchPercentage }}%</div>
-                  </div>
-                </div>
-              </div>
-              <div class="x-axis">
-                <div 
-                  v-for="(attempt, index) in pastAttempts" 
-                  :key="'x-' + index" 
-                  class="axis-label"
-                  :style="{ left: `${(index / (pastAttempts.length - 1)) * 100}%` }"
-                >
-                  {{ formatShortDate(attempt.timestamp) }}
-                </div>
-              </div>
+            <div class="stat-card score-card" v-if="pastAttempts.length > 0">
+              <div class="stat-value">{{ pastAttempts[0].matchPercentage }}%</div>
+              <div class="stat-label">Latest Score</div>
             </div>
+            <div class="stat-card streak-card" v-if="pastAttempts.length > 1">
+              <div class="stat-value">{{ isImproving ? '↑' : (isDecreasing ? '↓' : '→') }}</div>
+              <div class="stat-label">{{ performanceTrendText }}</div>
+            </div>
+          </div>
+          <div v-if="performanceInsight" class="performance-insight">
+            <div class="insight-icon" :class="getInsightIconClass">
+              <svg v-if="isImproving" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              <svg v-else-if="isDecreasing" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            </div>
+            <div class="insight-content">{{ performanceInsight }}</div>
           </div>
         </div>
       </div>
@@ -222,13 +187,6 @@
             >
               Split View
             </button>
-            <button 
-              @click="activeTab = 'history'" 
-              class="tab-button" 
-              :class="{ active: activeTab === 'history' }"
-            >
-              History
-            </button>
           </div>
           
           <div class="tab-content">
@@ -272,18 +230,6 @@
                   {{ recalledText }}
                 </div>
               </div>
-            </div>
-
-            <div v-else-if="activeTab === 'history'">
-              <ModernHistoryView 
-                :pastAttempts="pastAttempts" 
-                :reviewSchedule="reviewSchedule"
-                :isImproving="isImproving"
-                :isDecreasing="isDecreasing"
-                :performanceTrendText="performanceTrendText"
-                :performanceInsight="performanceInsight"
-                @add-to-calendar="addToCalendar"
-              />
             </div>
           </div>
         </div>
@@ -434,13 +380,9 @@ import { useRouter } from 'vue-router';
 import StudyService from '@/services/study.service';
 import ComparisonService from '@/services/comparison.service';
 import { auth } from '@/services/firebase';
-import ModernHistoryView from './ModernHistoryView.vue';
 
 export default {
   name: 'BlurtingForm',
-  components: {
-    ModernHistoryView
-  },
   props: {
     materialId: {
       type: String,
@@ -471,8 +413,6 @@ export default {
     const originalText = ref(props.content);
     const pastAttempts = ref([]);
     const attemptNumber = ref(1);
-    const activePoint = ref(null);
-    const tooltipIndex = ref(null);
     const error = ref('');
     const nextReviewDate = ref(null);
     const isRecording = ref(false);
@@ -511,6 +451,40 @@ export default {
       const currentScore = matchPercentage.value;
       
       return previousScore > currentScore + 5; // At least 5% decrease
+    });
+    
+    const getInsightIconClass = computed(() => {
+      if (isImproving.value) return 'insight-positive';
+      if (isDecreasing.value) return 'insight-negative';
+      return 'insight-neutral';
+    });
+    
+    const performanceTrendText = computed(() => {
+      if (isImproving.value) return 'Improving';
+      if (isDecreasing.value) return 'Decreasing';
+      return 'Stable';
+    });
+    
+    const performanceInsight = computed(() => {
+      if (!pastAttempts.value || pastAttempts.value.length < 2) return '';
+      
+      const latestScore = pastAttempts.value[0].matchPercentage;
+      
+      if (isImproving.value && latestScore > 80) {
+        return 'Great progress! Retention is excellent.';
+      } else if (isImproving.value) {
+        return 'Making good progress!';
+      } else if (isDecreasing.value && latestScore < 60) {
+        return 'Consider reviewing more frequently';
+      } else if (isDecreasing.value) {
+        return 'Retention declining slightly';
+      } else if (latestScore > 80) {
+        return 'Consistently strong performance';
+      } else if (latestScore < 50) {
+        return 'Material may need more focus';
+      }
+      
+      return '';
     });
     
     const startCountdown = () => {
@@ -634,15 +608,6 @@ export default {
       startCountdown();
     };
     
-    const formatDate = (dateString) => {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      }).format(date);
-    };
 
     const formatDateWithTime = (dateString) => {
       if (!dateString) return 'N/A';
@@ -759,14 +724,6 @@ export default {
       return difference > 0 ? `+${difference.toFixed(1)}%` : `${difference.toFixed(1)}%`;
     };
 
-    const activatePoint = (index) => {
-      activePoint.value = index;
-    };
-
-    const deactivatePoint = () => {
-      activePoint.value = null;
-    };
-
     const isPastDate = (timestamp) => {
       if (!timestamp) return false;
       
@@ -785,27 +742,6 @@ export default {
       
       // Check if the date is today
       return date.toDateString() === now.toDateString();
-    };
-    
-    const getChartPath = () => {
-      if (!pastAttempts.value || pastAttempts.value.length < 2) return '';
-      
-      // Create the SVG path data
-      let pathData = '';
-      
-      pastAttempts.value.forEach((attempt, index) => {
-        const x = index / (pastAttempts.value.length - 1) * (pastAttempts.value.length - 1);
-        const y = 100 - attempt.matchPercentage;
-        
-        if (index === 0) {
-          pathData = `M${x},${y}`;
-        } else {
-          // Use curve for smoother line
-          pathData += ` L${x},${y}`;
-        }
-      });
-      
-      return pathData;
     };
     
     // Generate a retention curve path based on Ebbinghaus forgetting curve principles
@@ -1063,184 +999,6 @@ export default {
       alert('Review sessions would be added to your calendar. This feature is coming soon!');
     };
     
-    // Calculate the position for the next review indicator on the timeline
-    const calculateNextReviewPosition = () => {
-      if (!nextReviewDate.value) return 50; // Default to middle if no date
-      
-      const now = new Date();
-      const nextReview = new Date(nextReviewDate.value);
-      const timeDiff = nextReview - now;
-      
-      // Convert to days
-      const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
-      
-      // Map days to position percentage (0 days = 0%, 90 days = 100%)
-      // Use logarithmic scale to better represent early reviews
-      if (daysDiff < 1) {
-        // Less than a day - position between 0-25%
-        return Math.max(5, (daysDiff * 25));
-      } else if (daysDiff < 7) {
-        // Less than a week - position between 25-50%
-        return 25 + ((daysDiff - 1) / 6 * 25);
-      } else if (daysDiff < 30) {
-        // Less than a month - position between 50-75%
-        return 50 + ((daysDiff - 7) / 23 * 25);
-      } else {
-        // More than a month - position between 75-95%
-        return Math.min(95, 75 + ((daysDiff - 30) / 60 * 20));
-      }
-    };
-    
-    // Calculate position for timeline points
-    const calculateTimelinePosition = (date, allDates) => {
-      if (!date || !allDates || allDates.length === 0) return 0;
-      
-      const now = new Date();
-      const reviewDate = new Date(date);
-      
-      // Find earliest and latest dates
-      let earliestDate = now;
-      let latestDate = now;
-      
-      if (allDates.length > 0) {
-        const dates = allDates.map(d => new Date(d));
-        latestDate = new Date(Math.max.apply(null, dates));
-        
-        // Add buffer to latest date (20% more than the actual span)
-        const timeSpan = latestDate - now;
-        latestDate = new Date(latestDate.getTime() + timeSpan * 0.2);
-      }
-      
-      // Calculate position as percentage of the timeline
-      const timelineSpan = latestDate - earliestDate;
-      const datePosition = reviewDate - earliestDate;
-      
-      return Math.min(100, Math.max(0, (datePosition / timelineSpan) * 100));
-    };
-    
-    // New methods for the enhanced chart
-    const showTooltip = (index) => {
-      tooltipIndex.value = index;
-    };
-
-    const hideTooltip = () => {
-      tooltipIndex.value = null;
-    };
-
-    const getAreaChartPath = () => {
-      if (!pastAttempts.value || pastAttempts.value.length < 2) return '';
-      
-      const width = pastAttempts.value.length - 1;
-      let path = 'M0 ' + (100 - pastAttempts.value[0].matchPercentage);
-      
-      // Add points for the top line
-      for (let i = 1; i < pastAttempts.value.length; i++) {
-        const x = i;
-        const y = 100 - pastAttempts.value[i].matchPercentage;
-        path += ` L${x} ${y}`;
-      }
-      
-      // Complete the path to create the area
-      path += ` L${width} 100 L0 100 Z`;
-      
-      return path;
-    };
-
-    const getChartLinePoints = () => {
-      if (!pastAttempts.value || pastAttempts.value.length < 2) return '';
-      
-      return pastAttempts.value.map((attempt, index) => 
-        `${index}, ${100 - attempt.matchPercentage}`
-      ).join(' ');
-    };
-    
-    // Format an interval (in days) to a human-readable string
-    const formatInterval = (interval) => {
-      if (!interval) return '';
-      
-      if (interval < 0.04) return 'Less than 1 hour';
-      if (interval < 1) {
-        const hours = Math.round(interval * 24);
-        return hours === 1 ? '1 hour' : `${hours} hours`;
-      }
-      if (interval < 7) {
-        const days = Math.round(interval * 10) / 10;
-        return days === 1 ? '1 day' : `${days} days`;
-      }
-      if (interval < 30) {
-        const weeks = Math.round(interval / 7 * 10) / 10;
-        return weeks === 1 ? '1 week' : `${weeks} weeks`;
-      }
-      const months = Math.round(interval / 30 * 10) / 10;
-      return months === 1 ? '1 month' : `${months} months`;
-    };
-    
-    // Get event label based on the date and index
-    const getEventLabel = (date) => {
-      if (isPastDate(date)) {
-        return 'Completed';
-      }
-      
-      if (isCurrentDate(date)) {
-        return 'Due today';
-      }
-      
-      // For future events, show the relative time
-      const now = new Date();
-      const reviewDate = new Date(date);
-      
-      const diffTime = Math.abs(reviewDate - now);
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      
-      if (diffDays === 0) {
-        const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
-        return `Due in ${diffHours} hour${diffHours !== 1 ? 's' : ''}`;
-      }
-      
-      if (diffDays === 1) return 'Due tomorrow';
-      if (diffDays < 7) return `Due in ${diffDays} days`;
-      if (diffDays < 14) return 'Due next week';
-      if (diffDays < 30) return `Due in ${Math.floor(diffDays / 7)} weeks`;
-      if (diffDays < 60) return 'Due next month';
-      
-      return `Due in ${Math.floor(diffDays / 30)} months`;
-    };
-
-    // Computed properties for enhanced chart
-    const performanceTrendClass = computed(() => {
-      if (isImproving.value) return 'improving';
-      if (isDecreasing.value) return 'decreasing';
-      return 'stable';
-    });
-    
-    const performanceTrendText = computed(() => {
-      if (isImproving.value) return 'Improving';
-      if (isDecreasing.value) return 'Decreasing';
-      return 'Stable';
-    });
-    
-    const performanceInsight = computed(() => {
-      if (!pastAttempts.value || pastAttempts.value.length < 2) return '';
-      
-      const latestScore = pastAttempts.value[0].matchPercentage;
-      
-      if (isImproving.value && latestScore > 80) {
-        return 'Great progress! Retention is excellent.';
-      } else if (isImproving.value) {
-        return 'Making good progress!';
-      } else if (isDecreasing.value && latestScore < 60) {
-        return 'Consider reviewing more frequently';
-      } else if (isDecreasing.value) {
-        return 'Retention declining slightly';
-      } else if (latestScore > 80) {
-        return 'Consistently strong performance';
-      } else if (latestScore < 50) {
-        return 'Material may need more focus';
-      }
-      
-      return '';
-    });
-    
     // Initialize speech recognition
     const initSpeechRecognition = () => {
       // Check if the browser supports speech recognition
@@ -1379,15 +1137,13 @@ export default {
       originalText,
       pastAttempts,
       attemptNumber,
-      activePoint,
-      tooltipIndex,
       isImproving,
       isDecreasing,
-      error,
-      nextReviewDate,
-      performanceTrendClass,
       performanceTrendText,
       performanceInsight,
+      getInsightIconClass,
+      error,
+      nextReviewDate,
       isRecording,
       browserSupportsSpeech,
       textareaRef,
@@ -1395,7 +1151,6 @@ export default {
       handleSubmitRecall,
       handleReset,
       handleStudyAgain,
-      formatDate,
       formatDateWithTime,
       formatShortDate,
       formatReviewDate,
@@ -1414,19 +1169,8 @@ export default {
       getScheduleNote,
       addToCalendar,
       activeReviewPoint,
-      activatePoint,
-      deactivatePoint,
-      showTooltip,
-      hideTooltip,
-      getAreaChartPath,
-      getChartLinePoints,
-      formatInterval,
-      getEventLabel,
       isPastDate,
-      isCurrentDate,
-      getChartPath,
-      calculateNextReviewPosition,
-      calculateTimelinePosition
+      isCurrentDate
     };
   }
 }
@@ -1610,7 +1354,7 @@ export default {
   border-radius: var(--radius-md);
 }
 
-/* Performance Chart in Instructions */
+/* Past Attempts Summary */
 .past-attempts-summary {
   margin-top: var(--spacing-4);
   padding-top: var(--spacing-4);
@@ -1624,202 +1368,93 @@ export default {
   color: var(--neutral-700);
 }
 
-.performance-chart-container {
-  margin-top: var(--spacing-3);
-  background-color: white;
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-4);
-  box-shadow: var(--shadow-sm);
-}
-
-.chart-header {
+.past-attempts-stats {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
+  gap: var(--spacing-4);
   margin-bottom: var(--spacing-3);
 }
 
-.chart-title {
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-md);
-  color: var(--neutral-800);
-}
-
-.chart-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-3);
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  font-size: var(--font-size-xs);
-  color: var(--neutral-600);
-}
-
-.legend-color {
-  width: 12px;
-  height: 12px;
-  border-radius: var(--radius-sm);
-}
-
-.legend-color.excellent {
-  background-color: rgba(16, 185, 129, 0.7);
-}
-
-.legend-color.good {
-  background-color: rgba(6, 182, 212, 0.7);
-}
-
-.legend-color.fair {
-  background-color: rgba(245, 158, 11, 0.7);
-}
-
-.legend-color.poor {
-  background-color: rgba(239, 68, 68, 0.7);
-}
-
-.legend-color.matched {
-  background-color: rgba(16, 185, 129, 0.15);
-  border-bottom: 2px solid #10b981;
-}
-
-.legend-color.unmatched {
-  background-color: rgba(239, 68, 68, 0.1);
-  border-bottom: 2px solid #ef4444;
-}
-
-.performance-trend-chart {
-  position: relative;
-  height: 200px;
-  margin-top: var(--spacing-4);
-}
-
-.y-axis {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 40px;
+.stat-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-3);
+  min-width: 100px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--neutral-200);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.axis-tick {
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-1);
+}
+
+.stat-label {
   font-size: var(--font-size-xs);
-  color: var(--neutral-500);
+  color: var(--neutral-600);
+  text-align: center;
 }
 
-.chart-area {
-  position: absolute;
-  top: 0;
-  left: 40px;
-  right: 0;
-  bottom: 25px;
-  border-bottom: 1px solid var(--neutral-300);
-  border-left: 1px solid var(--neutral-300);
+.attempts-card .stat-value {
+  color: var(--primary-color);
 }
 
-.reference-line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  border-top: 1px dashed var(--neutral-300);
-  font-size: var(--font-size-xs);
-  color: var(--neutral-500);
-  padding-left: var(--spacing-2);
+.score-card .stat-value {
+  color: #8b5cf6;
 }
 
-.reference-line.dashed {
-  border-top-style: dashed;
+.streak-card .stat-value {
+  font-size: 24px;
 }
 
-.data-point {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  transform: translate(-50%, 50%);
-  z-index: 2;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.data-point.excellent {
-  background-color: rgba(16, 185, 129, 0.7);
-}
-
-.data-point.good {
-  background-color: rgba(6, 182, 212, 0.7);
-}
-
-.data-point.fair {
-  background-color: rgba(245, 158, 11, 0.7);
-}
-
-.data-point.poor {
-  background-color: rgba(239, 68, 68, 0.7);
-}
-
-.data-point.very-poor {
-  background-color: rgba(239, 68, 68, 0.9);
-}
-
-.data-point:hover, .data-point:focus {
-  transform: translate(-50%, 50%) scale(1.5);
-}
-
-.data-tooltip {
-  position: absolute;
-  bottom: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: var(--neutral-800);
-  color: white;
-  padding: var(--spacing-2) var(--spacing-3);
+.performance-insight {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-3);
+  padding: var(--spacing-3);
+  background-color: var(--neutral-50);
   border-radius: var(--radius-md);
-  font-size: var(--font-size-xs);
-  white-space: nowrap;
-  z-index: 10;
-  box-shadow: var(--shadow-lg);
 }
 
-.tooltip-date {
-  font-weight: var(--font-weight-medium);
-  margin-bottom: 2px;
+.insight-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
 }
 
-.tooltip-score {
-  font-weight: var(--font-weight-semibold);
+.insight-icon.insight-positive {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
 }
 
-.trend-curve {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  z-index: 1;
+.insight-icon.insight-negative {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
 }
 
-.x-axis {
-  position: absolute;
-  left: 40px;
-  right: 0;
-  bottom: 0;
-  height: 25px;
+.insight-icon.insight-neutral {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
 }
 
-.axis-label {
-  position: absolute;
-  font-size: var(--font-size-xs);
-  color: var(--neutral-500);
-  transform: translateX(-50%);
+.insight-content {
+  font-size: var(--font-size-sm);
+  color: var(--neutral-700);
+  line-height: 1.5;
 }
 
 .form-actions {
@@ -2075,292 +1710,6 @@ export default {
   border-left: 3px solid var(--secondary-color);
 }
 
-/* History View */
-.history-view {
-  margin-bottom: var(--spacing-4);
-}
-
-/* Memory Curve Chart */
-.memory-curve-chart {
-  background-color: white;
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-4);
-  margin-bottom: var(--spacing-6);
-  box-shadow: var(--shadow-sm);
-}
-
-.chart-subtitle {
-  font-size: var(--font-size-xs);
-  color: var(--neutral-500);
-  margin-top: 2px;
-}
-
-.chart-view {
-  position: relative;
-  height: 180px;
-  margin-top: var(--spacing-4);
-}
-
-.forgetting-curve, .retention-curve {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-}
-
-.next-review-indicator {
-  position: absolute;
-  bottom: 0;
-  top: 0;
-  z-index: 2;
-}
-
-.indicator-line {
-  position: absolute;
-  width: 1px;
-  height: 100%;
-  background-color: var(--primary-color);
-  left: 0;
-}
-
-.indicator-label {
-  position: absolute;
-  bottom: -20px;
-  left: 0;
-  transform: translateX(-50%);
-  background-color: var(--primary-color);
-  color: white;
-  padding: 2px 6px;
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  white-space: nowrap;
-}
-
-/* History Table */
-.attempt-history-table {
-  background-color: white;
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-4);
-  box-shadow: var(--shadow-sm);
-}
-
-.attempt-history-table h6 {
-  font-weight: var(--font-weight-semibold);
-  margin-bottom: var(--spacing-3);
-  font-size: var(--font-size-md);
-}
-
-.history-table {
-  border: 1px solid var(--neutral-200);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-
-.history-table-header {
-  display: flex;
-  background-color: var(--neutral-100);
-  font-weight: var(--font-weight-semibold);
-  border-bottom: 1px solid var(--neutral-200);
-}
-
-.history-table-row {
-  display: flex;
-  border-bottom: 1px solid var(--neutral-200);
-}
-
-.history-table-row:last-child {
-  border-bottom: none;
-}
-
-.history-cell {
-  padding: var(--spacing-2) var(--spacing-3);
-}
-
-.date-cell {
-  flex: 2;
-}
-
-.score-cell {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.change-cell {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.score-pill {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: white;
-}
-
-.score-pill.excellent {
-  background-color: rgba(16, 185, 129, 0.9);
-}
-
-.score-pill.good {
-  background-color: rgba(6, 182, 212, 0.9);
-}
-
-.score-pill.fair {
-  background-color: rgba(245, 158, 11, 0.9);
-}
-
-.score-pill.poor {
-  background-color: rgba(249, 115, 22, 0.9);
-}
-
-.score-pill.very-poor {
-  background-color: rgba(239, 68, 68, 0.9);
-}
-
-.change-indicator {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-}
-
-.change-indicator.increase-large {
-  color: #10b981;
-}
-
-.change-indicator.increase-small {
-  color: #14b8a6;
-}
-
-.change-indicator.decrease-large {
-  color: #ef4444;
-}
-
-.change-indicator.decrease-small {
-  color: #f97316;
-}
-
-.change-indicator.no-change {
-  color: var(--neutral-500);
-}
-
-.no-history {
-  text-align: center;
-  padding: var(--spacing-6);
-  color: var(--neutral-600);
-}
-
-/* Schedule Timeline */
-.schedule-timeline {
-  position: relative;
-  height: 100px;
-  margin: var(--spacing-6) 0;
-}
-
-.timeline-track {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: var(--neutral-300);
-  transform: translateY(-50%);
-}
-
-.timeline-point {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.timeline-marker {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: var(--primary-color);
-  position: relative;
-  z-index: 1;
-  transform: translateX(-50%);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-}
-
-.timeline-point.current .timeline-marker {
-  background-color: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-}
-
-.timeline-point.past .timeline-marker {
-  background-color: var(--neutral-400);
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
-}
-
-.timeline-label {
-  position: absolute;
-  top: 15px;
-  left: 0;
-  transform: translateX(-50%);
-  text-align: center;
-  min-width: 100px;
-}
-
-.timeline-label.alt-position {
-  top: -45px;
-}
-
-.timeline-date {
-  font-weight: var(--font-weight-medium);
-  margin-bottom: var(--spacing-1);
-  color: var(--neutral-800);
-}
-
-.timeline-gap {
-  font-size: var(--font-size-xs);
-  color: var(--neutral-600);
-}
-
-/* Schedule Explanation */
-.schedule-explanation {
-  margin: var(--spacing-6) 0;
-}
-
-.explanation-card {
-  background-color: var(--neutral-50);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-4);
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-4);
-}
-
-.card-icon {
-  flex-shrink: 0;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--radius-md);
-  background-color: rgba(99, 102, 241, 0.1);
-  color: var(--primary-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.card-content h6 {
-  font-weight: var(--font-weight-semibold);
-  margin-bottom: var(--spacing-2);
-  font-size: var(--font-size-md);
-}
-
-.card-content p {
-  color: var(--neutral-700);
-  margin-bottom: 0;
-}
-
 /* Next Steps - Redesigned */
 .next-steps {
   background-color: var(--neutral-50);
@@ -2505,6 +1854,16 @@ export default {
   background-color: #6366f1;
 }
 
+.legend-color.matched {
+  background-color: rgba(16, 185, 129, 0.15);
+  border-bottom: 2px solid #10b981;
+}
+
+.legend-color.unmatched {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-bottom: 2px solid #ef4444;
+}
+
 /* Review Schedule Cards */
 .review-schedule-container {
   margin-bottom: var(--spacing-8);
@@ -2526,8 +1885,6 @@ export default {
   transition: all 0.3s ease;
   position: relative;
 }
-
-
 
 .schedule-card:hover {
   transform: translateY(-3px);
@@ -2629,49 +1986,6 @@ export default {
   line-height: 1.5;
 }
 
-/* Science Cards */
-.science-container {
-  margin-bottom: var(--spacing-6);
-}
-
-.science-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: var(--spacing-4);
-  margin-top: var(--spacing-4);
-}
-
-.science-card {
-  background-color: white;
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-4);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--neutral-200);
-}
-
-.science-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
-  background-color: rgba(99, 102, 241, 0.1);
-  color: var(--primary-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: var(--spacing-3);
-}
-
-.science-card h6 {
-  margin-bottom: var(--spacing-2);
-}
-
-.science-card p {
-  font-size: var(--font-size-sm);
-  color: var(--neutral-600);
-  line-height: 1.5;
-  margin-bottom: 0;
-}
-
 /* Action Buttons */
 .actions-row {
   display: flex;
@@ -2703,443 +2017,24 @@ export default {
   to { transform: rotate(360deg); }
 }
 
-/* Enhanced History View */
-.history-view {
-  margin-bottom: var(--spacing-4);
-}
-
-.history-view h5 {
-  margin-bottom: var(--spacing-4);
-  font-weight: var(--font-weight-semibold);
-}
-
-.performance-history {
-  background-color: white;
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-4);
-  box-shadow: var(--shadow-md);
-}
-
-/* Chart Header & Legend */
-.chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-4);
-  flex-wrap: wrap;
-  gap: var(--spacing-3);
-}
-
-.performance-trend {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-}
-
-.trend-indicator {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  box-shadow: var(--shadow-sm);
-}
-
-.trend-indicator.improving {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: #10b981;
-}
-
-.trend-indicator.decreasing {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-}
-
-.trend-indicator.stable {
-  background-color: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
-}
-
-.insight-badge {
-  padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-sm);
-  background-color: rgba(99, 102, 241, 0.1);
-  color: var(--primary-color);
-}
-
-.chart-legend {
-  display: flex;
-  gap: var(--spacing-3);
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  font-size: var(--font-size-xs);
-  color: var(--neutral-600);
-}
-
-.legend-color {
-  width: 16px;
-  height: 4px;
-  border-radius: 2px;
-}
-
-.legend-color.excellent {
-  background-color: #10b981;
-}
-
-.legend-color.good {
-  background-color: #06b6d4;
-}
-
-.legend-color.average {
-  background-color: #f59e0b;
-}
-
-.legend-color.poor {
-  background-color: #ef4444;
-}
-
-/* Enhanced Chart Container */
-.enhanced-chart-container {
-  margin-bottom: var(--spacing-6);
-}
-
-.enhanced-chart {
-  display: flex;
-  height: 280px;
-  position: relative;
-  margin-bottom: var(--spacing-4);
-}
-
-.chart-y-axis {
-  width: 40px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding-right: var(--spacing-2);
-  border-right: 1px dashed var(--neutral-300);
-}
-
-.y-axis-tick {
-  font-size: var(--font-size-xs);
-  color: var(--neutral-500);
-  transform: translateY(50%);
-  position: relative;
-}
-
-.y-axis-tick span {
-  position: absolute;
-  right: var(--spacing-2);
-  transform: translateY(-50%);
-}
-
-.chart-content-area {
-  flex: 1;
-  position: relative;
-  height: 100%;
-  overflow: hidden;
-}
-
-.threshold-line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background-color: var(--neutral-200);
-  z-index: 1;
-}
-
-.threshold-line.excellent-threshold {
-  background-color: rgba(16, 185, 129, 0.2);
-}
-
-.threshold-line.average-threshold {
-  background-color: rgba(245, 158, 11, 0.2);
-}
-
-.threshold-label {
-  position: absolute;
-  right: var(--spacing-2);
-  top: -10px;
-  font-size: var(--font-size-xs);
-  color: var(--neutral-500);
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 2px 4px;
-  border-radius: var(--radius-sm);
-}
-
-.data-visualization {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
-}
-
-.area-chart, .line-chart {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.data-point {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  margin-left: -6px;
-  margin-bottom: -6px;
-  z-index: 10;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.data-point:hover {
-  transform: scale(1.3);
-}
-
-.data-point.excellent {
-  background-color: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-}
-
-.data-point.good {
-  background-color: #06b6d4;
-  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
-}
-
-.data-point.fair {
-  background-color: #f59e0b;
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
-}
-
-.data-point.poor {
-  background-color: #ef4444;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
-}
-
-.pulse-ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 9;
-  pointer-events: none;
-}
-
-.enhanced-tooltip {
-  position: absolute;
-  bottom: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: white;
-  color: var(--neutral-700);
-  padding: var(--spacing-3) var(--spacing-4);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-xs);
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 20;
-  box-shadow: var(--shadow-lg);
-  min-width: 160px;
-  border: 1px solid var(--neutral-200);
-}
-
-.tooltip-date {
-  font-weight: var(--font-weight-medium);
-  margin-bottom: var(--spacing-1);
-  color: var(--neutral-800);
-}
-
-.tooltip-score {
-  margin-bottom: var(--spacing-1);
-  padding: 3px 6px;
-  border-radius: var(--radius-sm);
-  font-weight: var(--font-weight-medium);
-  display: inline-block;
-}
-
-.tooltip-score.excellent {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: #10b981;
-}
-
-.tooltip-score.good {
-  background-color: rgba(6, 182, 212, 0.1);
-  color: #06b6d4;
-}
-
-.tooltip-score.fair {
-  background-color: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
-}
-
-.tooltip-score.poor {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-}
-
-.tooltip-interval {
-  font-size: var(--font-size-xs);
-  color: var(--neutral-600);
-}
-
-.chart-x-axis {
-  height: 30px;
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  border-top: 1px dashed var(--neutral-300);
-  padding-left: 40px;
-}
-
-.x-axis-tick {
-  position: absolute;
-  transform: translateX(-50%);
-  font-size: var(--font-size-xs);
-  color: var(--neutral-500);
-  top: var(--spacing-2);
-  white-space: nowrap;
-}
-
-/* Enhanced Spaced Repetition Schedule */
-.enhanced-schedule-section {
-  margin-top: var(--spacing-6);
-  padding-top: var(--spacing-6);
-  border-top: 1px solid var(--neutral-200);
-}
-
-.timeline-container {
-  position: relative;
-  padding: var(--spacing-6) 0;
-  margin-left: 20px;
-}
-
-.timeline-line {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(to bottom, var(--primary-light), var(--primary-dark));
-}
-
-.timeline-event {
-  position: relative;
-  padding-left: 30px;
-  margin-bottom: var(--spacing-6);
-}
-
-.timeline-event:last-child {
-  margin-bottom: 0;
-}
-
-.event-dot {
-  position: absolute;
-  left: -5px;
-  top: 6px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  z-index: 2;
-}
-
-.past-event .event-dot {
-  background-color: var(--neutral-400);
-}
-
-.current-event .event-dot {
-  background-color: var(--primary-color);
-}
-
-.future-event .event-dot {
-  background-color: var(--primary-light);
-}
-
-.event-dot.pulse {
-  box-shadow: 0 0 0 rgba(99, 102, 241, 0.7);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
-  }
-}
-
-.event-content {
-  background-color: white;
-  border-radius: var(--radius-md);
-  padding: var(--spacing-3) var(--spacing-4);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--neutral-200);
-  transition: all 0.3s ease;
-}
-
-.past-event .event-content {
-  opacity: 0.7;
-}
-
-.current-event .event-content {
-  border-color: var(--primary-color);
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.2);
-}
-
-.timeline-event:hover .event-content {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
-}
-
-.event-time {
-  font-weight: var(--font-weight-medium);
-  margin-bottom: var(--spacing-1);
-  color: var(--neutral-800);
-}
-
-.event-label {
-  font-size: var(--font-size-sm);
-  color: var(--neutral-600);
-}
-
-.past-event .event-label {
-  text-decoration: line-through;
-  color: var(--neutral-500);
-}
-
-.current-event .event-label {
-  color: var(--primary-color);
-  font-weight: var(--font-weight-medium);
-}
-
+/* Responsive adjustments */
 @media (max-width: 768px) {
-  .chart-header {
-    flex-direction: column;
-    align-items: flex-start;
+  .split-view {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
   }
   
-  .chart-legend {
+  .schedule-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .past-attempts-stats {
     flex-wrap: wrap;
-    margin-top: var(--spacing-2);
   }
   
-  .enhanced-chart {
-    height: 240px;
+  .stat-card {
+    flex: 1;
+    min-width: 0;
   }
 }
 </style>

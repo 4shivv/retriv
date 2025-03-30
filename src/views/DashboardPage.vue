@@ -116,11 +116,17 @@
                 <div class="stat-content">
                   <div class="stat-value-container">
                     <h3 class="stat-value">{{ avgRetention }}%</h3>
-                    <div class="stat-change neutral">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <div class="stat-change" :class="retentionTrendClass">
+                      <svg v-if="retentionTrend === 'positive'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                      </svg>
+                      <svg v-else-if="retentionTrend === 'negative'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                      <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                       </svg>
-                      <span>Stable</span>
+                      <span>{{ retentionTrendText }}</span>
                     </div>
                   </div>
                   <div class="retention-chart">
@@ -409,6 +415,36 @@ export default {
     
     // State for category filtering
     const activeCategory = ref([]);
+    
+    // Computed properties for retention trend
+    const retentionTrend = computed(() => {
+      if (retentionHistory.value.length < 2) return 'neutral';
+      
+      // Compare the most recent retention value with the second most recent
+      const lastIndex = retentionHistory.value.length - 1;
+      const currentValue = retentionHistory.value[lastIndex];
+      const previousValue = retentionHistory.value[lastIndex - 1];
+      
+      if (currentValue > previousValue + 5) return 'positive'; // Significant improvement
+      if (previousValue > currentValue + 5) return 'negative'; // Significant decline
+      return 'neutral';
+    });
+    
+    const retentionTrendClass = computed(() => {
+      if (retentionTrend.value === 'positive') return 'positive';
+      if (retentionTrend.value === 'negative') return 'negative';
+      return 'neutral';
+    });
+    
+    const retentionTrendText = computed(() => {
+      if (retentionTrend.value === 'positive') return '+' + (retentionHistory.value.length > 1 ? 
+        Math.round(retentionHistory.value[retentionHistory.value.length - 1] - 
+        retentionHistory.value[retentionHistory.value.length - 2]) : 0) + '%';
+      if (retentionTrend.value === 'negative') return (retentionHistory.value.length > 1 ? 
+        Math.round(retentionHistory.value[retentionHistory.value.length - 1] - 
+        retentionHistory.value[retentionHistory.value.length - 2]) : 0) + '%';
+      return 'Stable';
+    });
     
     // State variables for dashboard stats - initially empty and populated from real data
     const studySessions = ref(0);
@@ -766,17 +802,43 @@ export default {
           return;
         }
         
-        // Calculate average retention from recent attempts
-        const sum = recentAttempts.reduce((acc, attempt) => 
+        // Get the latest attempt for each material to calculate accurate average
+        const materialAttempts = new Map();
+        
+        // Group attempts by materialId and keep only the latest one for each material
+        recentAttempts.forEach(attempt => {
+          if (!attempt.materialId) return;
+          
+          if (!materialAttempts.has(attempt.materialId) ||
+              (materialAttempts.get(attempt.materialId).timestamp < attempt.timestamp)) {
+            materialAttempts.set(attempt.materialId, attempt);
+          }
+        });
+        
+        // Calculate average from the latest attempt of each material
+        const latestAttempts = Array.from(materialAttempts.values());
+        
+        if (latestAttempts.length === 0) {
+          avgRetention.value = 0;
+          return;
+        }
+        
+        const sum = latestAttempts.reduce((acc, attempt) => 
           acc + attempt.matchPercentage, 0);
         
-        avgRetention.value = Math.round(sum / recentAttempts.length);
+        avgRetention.value = Math.round(sum / latestAttempts.length);
         
-        // Update retention history if we have enough data
+        // Update retention history with chronological data if we have enough attempts
         if (recentAttempts.length >= 7) {
-          retentionHistory.value = recentAttempts
-            .slice(0, 7)
-            .map(attempt => attempt.matchPercentage);
+          // Sort by timestamp (newest first) and take only the first 7
+          const sortedAttempts = [...recentAttempts].sort((a, b) => {
+            const dateA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+            const dateB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+            return dateB - dateA;
+          }).slice(0, 7);
+          
+          // Reverse the array to show progression from oldest to newest
+          retentionHistory.value = sortedAttempts.reverse().map(attempt => attempt.matchPercentage);
         }
       } catch (err) {
         console.error('Failed to calculate average retention:', err);
@@ -799,12 +861,11 @@ export default {
           const nextReview = await StudyService.getNextReviewDate(material.id);
           if (!nextReview) return null;
           
-          // Get the latest attempt for retention info
+          // Get the latest retention score directly instead of fetching all attempts
+          const retentionPercentage = await StudyService.getLatestRetentionScore(material.id);
+          
+          // Get the latest attempt for last reviewed info
           const attempts = await StudyService.getStudyAttempts(material.id);
-          let retentionPercentage = 0;
-          if (attempts && attempts.length > 0) {
-            retentionPercentage = attempts[0].matchPercentage;
-          }
           
           // Calculate if it's overdue or due today
           const now = new Date();
@@ -1121,6 +1182,10 @@ export default {
       generateDueReviews,
       extractRealCategories,
 
+      retentionTrend,
+      retentionTrendClass,
+      retentionTrendText,
+      
       getStreakStatus,
       getDayLabel,
       getRetentionClass,

@@ -438,19 +438,41 @@ export default {
     const isImproving = computed(() => {
       if (pastAttempts.value.length < 2) return false;
       
-      const previousScore = pastAttempts.value[0].matchPercentage;
-      const currentScore = matchPercentage.value;
-      
-      return currentScore > previousScore + 5; // At least 5% improvement
+      if (submitted.value) {
+        // When we've submitted a new attempt, compare with the previous best
+        const previousScore = pastAttempts.value[0].matchPercentage;
+        const currentScore = matchPercentage.value;
+        
+        return currentScore > previousScore + 5; // At least 5% improvement
+      } else {
+        // When viewing history, compare the last two attempts
+        if (pastAttempts.value.length < 2) return false;
+        
+        const latestScore = pastAttempts.value[0].matchPercentage;
+        const previousScore = pastAttempts.value[1].matchPercentage;
+        
+        return latestScore > previousScore + 5; // At least 5% improvement
+      }
     });
 
     const isDecreasing = computed(() => {
       if (pastAttempts.value.length < 2) return false;
       
-      const previousScore = pastAttempts.value[0].matchPercentage;
-      const currentScore = matchPercentage.value;
-      
-      return previousScore > currentScore + 5; // At least 5% decrease
+      if (submitted.value) {
+        // When we've submitted a new attempt, compare with the previous best
+        const previousScore = pastAttempts.value[0].matchPercentage;
+        const currentScore = matchPercentage.value;
+        
+        return previousScore > currentScore + 5; // At least 5% decrease
+      } else {
+        // When viewing history, compare the last two attempts
+        if (pastAttempts.value.length < 2) return false;
+        
+        const latestScore = pastAttempts.value[0].matchPercentage;
+        const previousScore = pastAttempts.value[1].matchPercentage;
+        
+        return previousScore > latestScore + 5; // At least 5% decrease
+      }
     });
     
     const getInsightIconClass = computed(() => {
@@ -466,25 +488,40 @@ export default {
     });
     
     const performanceInsight = computed(() => {
-      if (!pastAttempts.value || pastAttempts.value.length < 2) return '';
+      if (!pastAttempts.value || pastAttempts.value.length < 1) return '';
       
-      const latestScore = pastAttempts.value[0].matchPercentage;
+      // Get the latest score (either current attempt or most recent in history)
+      const latestScore = submitted.value ? matchPercentage.value : pastAttempts.value[0].matchPercentage;
       
-      if (isImproving.value && latestScore > 80) {
-        return 'Great progress! Retention is excellent.';
-      } else if (isImproving.value) {
-        return 'Making good progress!';
-      } else if (isDecreasing.value && latestScore < 60) {
-        return 'Consider reviewing more frequently';
-      } else if (isDecreasing.value) {
-        return 'Retention declining slightly';
-      } else if (latestScore > 80) {
-        return 'Consistently strong performance';
-      } else if (latestScore < 50) {
-        return 'Material may need more focus';
+      // For first attempts, provide feedback based solely on the score
+      if (pastAttempts.value.length < 2) {
+        if (latestScore >= 90) return 'Excellent first attempt! You have strong recall.';
+        if (latestScore >= 75) return 'Good first attempt. Keep practicing to improve retention.';
+        if (latestScore >= 60) return 'Decent start. More practice will help reinforce this material.';
+        if (latestScore >= 40) return 'Review this material again soon to strengthen your memory.';
+        return 'This material needs more attention. Try shorter study sessions more frequently.';
       }
       
-      return '';
+      // For subsequent attempts, consider trend and latest score
+      if (isImproving.value && latestScore > 85) {
+        return 'Outstanding improvement! Your retention is now excellent.';
+      } else if (isImproving.value && latestScore > 70) {
+        return 'Great progress! Your spaced repetition practice is working well.';
+      } else if (isImproving.value) {
+        return 'Making good progress! Keep up the consistent practice.';
+      } else if (isDecreasing.value && latestScore < 60) {
+        return 'Consider more frequent reviews to reinforce this material.';
+      } else if (isDecreasing.value) {
+        return 'Retention decreasing slightly. This is normal - just keep reviewing.';
+      } else if (latestScore > 85) {
+        return 'Consistently excellent performance. Material well-retained!';
+      } else if (latestScore > 75) {
+        return 'Stable good performance. Continue with your review schedule.';
+      } else if (latestScore < 50) {
+        return 'This material may need more focused attention and different study techniques.';
+      }
+      
+      return 'Continue with your scheduled reviews to maintain retention.';
     });
     
     const startCountdown = () => {
@@ -505,7 +542,15 @@ export default {
         console.log("Fetching past attempts for material:", props.materialId);
         const attempts = await StudyService.getStudyAttempts(props.materialId);
         console.log("Retrieved attempts:", attempts);
-        pastAttempts.value = attempts;
+        
+        // Make sure the attempts array is properly sorted by timestamp (newest first)
+        const sortedAttempts = [...attempts].sort((a, b) => {
+          const dateA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+          const dateB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+          return dateB - dateA;
+        });
+        
+        pastAttempts.value = sortedAttempts;
         
         // Set the attempt number based on past attempts
         attemptNumber.value = attempts.length + 1;
@@ -566,10 +611,11 @@ export default {
         console.log("Attempt saved with ID:", attemptId);
         
         console.log("Generating spaced repetition schedule...");
-        // Generate review schedule
+        // Generate review schedule with additional metadata for better tracking
         reviewSchedule.value = await StudyService.generateSpacedRepetitionSchedule(
           attemptId,
-          matchPercentage.value
+          matchPercentage.value,
+          pastAttempts.value.length // Pass the attempt count for better scheduling
         );
         
         console.log("Generated review schedule:", reviewSchedule.value);

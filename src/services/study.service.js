@@ -274,7 +274,7 @@ const StudyService = {
    * 4. Strategic review timing before predicted forgetting points
    * 5. Difficulty-based interval adjustments
    */
-  async generateSpacedRepetitionSchedule(attemptId, matchPercentage) {
+  async generateSpacedRepetitionSchedule(attemptId, matchPercentage, attemptCount = 0) {
     // First check if the user is authenticated
     if (!auth.currentUser) {
       throw new Error("You must be logged in to generate schedules");
@@ -340,7 +340,8 @@ const StudyService = {
       }
       
       // Determine the number of previous attempts (excluding the current one)
-      const previousAttemptCount = previousAttempts.length > 0 ? previousAttempts.length - 1 : 0;
+      // Use the provided attempt count if available, otherwise calculate from previous attempts
+      const previousAttemptCount = attemptCount > 0 ? attemptCount : (previousAttempts.length > 0 ? previousAttempts.length - 1 : 0);
       
       // Calculate stability metrics based on performance history
       let stabilityFactor = this._calculateStabilityFactor(previousAttempts, matchPercentage);
@@ -1233,6 +1234,33 @@ const StudyService = {
     } catch (error) {
       console.error("Error incrementing study sessions:", error);
       return null;
+    }
+  },
+  
+  async getLatestRetentionScore(materialId) {
+    if (!auth.currentUser) {
+      throw new Error("You must be logged in to view retention scores");
+    }
+    
+    try {
+      const attempts = await this.getStudyAttempts(materialId);
+      
+      if (!attempts || attempts.length === 0) {
+        return 0; // No attempts yet
+      }
+      
+      // Sort the attempts by timestamp (newest first)
+      const sortedAttempts = [...attempts].sort((a, b) => {
+        const dateA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+        const dateB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+        return dateB - dateA;
+      });
+      
+      // Return the most recent retention score
+      return sortedAttempts[0].matchPercentage || 0;
+    } catch (error) {
+      console.error("Error getting latest retention score:", error);
+      return 0;
     }
   }
 };

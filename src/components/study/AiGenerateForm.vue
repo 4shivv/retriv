@@ -1,11 +1,18 @@
 <template>
-  <div class="ai-generate-form">
-    <div class="form-header">
-      <h2 class="form-title">Generate Study Materials with AI</h2>
+  <div class="study-input-form card">
+    <div class="card-header">
+      <h3>Generate Study Materials with AI</h3>
       <p class="form-subtitle">Let AI create study cards from your source material or questions</p>
     </div>
-
-    <div class="source-type-selector">
+    
+    <div class="card-body">
+      <div v-if="error" class="alert alert-danger">
+        <div class="alert-content">
+          <div class="alert-text">{{ error }}</div>
+        </div>
+      </div>
+      
+      <div class="source-type-selector">
       <div class="source-option" 
            :class="{ active: sourceType === 'text' }"
            @click="sourceType = 'text'">
@@ -190,14 +197,11 @@
     </div>
 
     <div class="form-actions">
-      <button class="btn btn-cancel" @click="cancelGeneration">Cancel</button>
-      <button class="btn btn-generate" @click="generateMaterials" :disabled="isGenerating || !canGenerate">
-        <span v-if="isGenerating">
-          <div class="loading-spinner"></div>
-          Generating...
-        </span>
+      <button type="button" class="btn btn-outline btn-lg" @click="cancelGeneration">Cancel</button>
+      <button type="button" class="btn btn-primary btn-lg" @click="generateMaterials" :disabled="isGenerating || !canGenerate">
+        <span v-if="isGenerating" class="loading-spinner"></span>
         <span v-else>
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
             <path d="M18.5 22q-1.05 0-1.775-.725T16 19.5q0-1.05.725-1.775T18.5 17q1.05 0 1.775.725T21 19.5q0 1.05-.725 1.775T18.5 22ZM18.5 7q-1.05 0-1.775-.725T16 4.5q0-1.05.725-1.775T18.5 2q1.05 0 1.775.725T21 4.5q0 1.05-.725 1.775T18.5 7ZM5.5 14.5q-1.05 0-1.775-.725T3 12q0-1.05.725-1.775T5.5 9.5q1.05 0 1.775.725T8 12q0 1.05-.725 1.775T5.5 14.5ZM18.5 12l-13 0M18.5 4.5l-13 7.5M18.5 19.5l-13-7.5"></path>
           </svg>
           Generate Study Cards
@@ -233,39 +237,45 @@
         </div>
       </div>
       
-      <div class="save-actions">
-        <div class="selection-info">
-          {{ selectedCount }} of {{ generatedMaterials.length }} cards selected
-        </div>
-        <div class="selection-details" v-if="selectedCount > 0">
-          <div class="selection-detail-item">
-            <span class="detail-label">Category:</span>
-            <span class="detail-value">{{ selectedCategory }}</span>
+      <div class="preview-actions">
+        <div class="selection-summary">
+          <div class="selection-info">
+            {{ selectedCount }} of {{ generatedMaterials.length }} cards selected
           </div>
-          <div class="selection-detail-item" v-if="deadline">
-            <span class="detail-label">Learning Deadline:</span>
-            <span class="detail-value">
-              {{ deadline === 'custom' ? formatCustomDeadline(customDeadlineDate) : 
-                 deadline === '1' ? '1 Day' :
-                 deadline === '3' ? '3 Days' :
-                 deadline === '7' ? '1 Week' :
-                 deadline === '14' ? '2 Weeks' :
-                 deadline === '30' ? '1 Month' : '' }}
-            </span>
+          <div class="selection-details" v-if="selectedCount > 0">
+            <div class="selection-detail-item">
+              <span class="detail-label">Category:</span>
+              <span class="detail-value">{{ selectedCategory }}</span>
+            </div>
+            <div class="selection-detail-item" v-if="deadline">
+              <span class="detail-label">Learning Deadline:</span>
+              <span class="detail-value">
+                {{ deadline === 'custom' ? formatCustomDeadline(customDeadlineDate) : 
+                  deadline === '1' ? '1 Day' :
+                  deadline === '3' ? '3 Days' :
+                  deadline === '7' ? '1 Week' :
+                  deadline === '14' ? '2 Weeks' :
+                  deadline === '30' ? '1 Month' : '' }}
+              </span>
+            </div>
           </div>
         </div>
-        <button class="btn btn-select-all" @click="toggleSelectAll">
-          {{ allSelected ? 'Deselect All' : 'Select All' }}
-        </button>
-        <button class="btn btn-save" @click="saveMaterials" :disabled="selectedCount === 0 || !selectedCategory">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-            <polyline points="17 21 17 13 7 13 7 21"></polyline>
-            <polyline points="7 3 7 8 15 8"></polyline>
-          </svg>
-          Save Selected Cards
-        </button>
+        
+        <div class="button-group">
+          <button type="button" class="btn btn-outline btn-lg" @click="toggleSelectAll">
+            {{ allSelected ? 'Deselect All' : 'Select All' }}
+          </button>
+          <button type="button" class="btn btn-primary btn-lg" @click="saveMaterials" :disabled="selectedCount === 0 || !selectedCategory">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            Save Selected Cards
+          </button>
+        </div>
       </div>
+    </div>
     </div>
   </div>
 </template>
@@ -289,6 +299,7 @@ export default {
     const cardCount = ref(5);
     const isGenerating = ref(false);
     const generatedMaterials = ref([]);
+    const error = ref('');
     
     // Category and deadline state
     const selectedCategory = ref('');
@@ -440,8 +451,22 @@ export default {
       if (!canGenerate.value) return;
       
       isGenerating.value = true;
+      error.value = '';
       
       try {
+        // Check authentication
+        if (!auth.currentUser) {
+          error.value = "You must be logged in to generate materials with AI";
+          router.push('/login');
+          return;
+        }
+        
+        // Check if category is selected
+        if (!selectedCategory.value) {
+          error.value = 'Please select a category for your study materials';
+          return;
+        }
+        
         let content = sourceContent.value;
         
         // If file is uploaded, use fileContent
@@ -462,9 +487,9 @@ export default {
         if (generatedMaterials.value.length > cardCount.value) {
           generatedMaterials.value = generatedMaterials.value.slice(0, cardCount.value);
         }
-      } catch (error) {
-        console.error('Error generating materials:', error);
-        alert(`Error generating materials: ${error.message}`);
+      } catch (err) {
+        console.error('Error generating materials:', err);
+        error.value = err.message || 'Failed to generate study materials';
       } finally {
         isGenerating.value = false;
       }
@@ -492,7 +517,7 @@ export default {
       }
       
       if (!selectedCategory.value) {
-        alert('Please select a category for your study materials');
+        error.value = 'Please select a category for your study materials';
         return;
       }
       
@@ -500,7 +525,7 @@ export default {
         // Check if user is authenticated
         if (!auth.currentUser) {
           console.error("No authenticated user");
-          alert("You must be logged in to save materials");
+          error.value = "You must be logged in to save materials";
           router.push('/login');
           return;
         }
@@ -537,9 +562,9 @@ export default {
         } else {
           emit('materials-saved', savedMaterials);
         }
-      } catch (error) {
-        console.error('Error saving materials:', error);
-        alert(`Error saving materials: ${error.message}`);
+      } catch (err) {
+        console.error('Error saving materials:', err);
+        error.value = err.message || 'Failed to save study materials';
       }
     };
     
@@ -705,13 +730,8 @@ export default {
 </script>
 
 <style scoped>
-.ai-generate-form {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 1.5rem;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+.study-input-form {
+  margin-bottom: var(--spacing-8);
 }
 
 .option-group {
@@ -1097,30 +1117,37 @@ export default {
   overflow-y: auto;
 }
 
-.save-actions {
+.preview-actions {
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 1rem;
+  justify-content: space-between;
+  margin-top: var(--spacing-6);
   flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.selection-summary {
+  flex: 1;
+}
+
+.button-group {
+  display: flex;
+  gap: var(--spacing-2);
 }
 
 .selection-info {
   font-size: 0.9rem;
-  color: #6c757d;
-  margin-right: auto;
+  color: var(--neutral-600);
+  margin-bottom: var(--spacing-2);
 }
 
 .selection-details {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  margin-right: auto;
-  background-color: #f8f9fa;
+  background-color: var(--neutral-100);
   padding: 0.75rem;
-  border-radius: 6px;
-  border: 1px solid #e9ecef;
-  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--neutral-200);
   margin-bottom: 0.5rem;
 }
 
@@ -1132,82 +1159,63 @@ export default {
 }
 
 .detail-label {
-  font-weight: 500;
-  color: #6c757d;
+  font-weight: var(--font-weight-medium);
+  color: var(--neutral-600);
 }
 
 .detail-value {
-  color: #333;
-  font-weight: 600;
+  color: var(--neutral-800);
+  font-weight: var(--font-weight-semibold);
 }
 
-.btn-select-all {
-  background-color: #f8f9fa;
-  border: 1px solid #ced4da;
-  color: #495057;
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--spacing-8);
+  gap: var(--spacing-4);
 }
 
-.btn-select-all:hover {
-  background-color: #e9ecef;
-}
-
-.btn-save {
-  background-color: #6c5ce7;
-  border: none;
-  color: white;
-  font-weight: 600;
-}
-
-.btn-save:hover:not(:disabled) {
-  background-color: #5b4dc7;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(108, 92, 231, 0.2);
-}
-
-.btn-save:disabled {
-  background-color: #a29bfe;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+.mr-2 {
+  margin-right: 0.5rem;
 }
 
 /* Deadline Selection Styling */
 .deadline-selection {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-2);
 }
 
 .deadline-presets {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
 }
 
 .deadline-preset-button {
   padding: 0.5rem 0.75rem;
-  border: 1px solid #ced4da;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  font-size: 0.875rem;
+  border: 1px solid var(--neutral-300);
+  background-color: var(--neutral-50);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
-  color: #495057;
+  transition: all var(--transition-normal);
+  color: var(--neutral-700);
 }
 
 .deadline-preset-button:hover {
-  border-color: #6c5ce7;
-  background-color: rgba(108, 92, 231, 0.05);
+  border-color: var(--primary-color);
+  background-color: rgba(99, 102, 241, 0.05);
 }
 
 .deadline-preset-button.active {
-  background-color: #6c5ce7;
-  border-color: #6c5ce7;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
   color: white;
 }
 
 .custom-deadline-input {
   max-width: 300px;
-  margin-top: 0.5rem;
+  margin-top: var(--spacing-2);
   animation: fadeIn 0.3s;
 }
 

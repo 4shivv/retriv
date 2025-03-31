@@ -287,102 +287,102 @@
       
       <!-- AI-Assisted Material Creation Mode -->
       <div v-else-if="inputMode === 'ai'">
-        <div v-if="aiStep === 'input'">
-          <div class="form-group">
-            <label class="form-label">Create Study Materials with AI</label>
-            <p class="ai-description">Select your input type and provide content to generate study materials. The AI will analyze your content and create focused, concise material cards optimized for memorization.</p>
-            
-            <div class="ai-source-options">
-              <button 
-                type="button" 
-                @click="aiSourceType = 'text'" 
-                class="ai-source-btn" 
-                :class="{ active: aiSourceType === 'text' }"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="17" y1="10" x2="3" y2="10"></line>
-                  <line x1="21" y1="6" x2="3" y2="6"></line>
-                  <line x1="21" y1="14" x2="3" y2="14"></line>
-                  <line x1="17" y1="18" x2="3" y2="18"></line>
-                </svg>
-                <span>Paste Text</span>
-              </button>
-              
-              <button 
-                type="button" 
-                @click="aiSourceType = 'question'" 
-                class="ai-source-btn" 
-                :class="{ active: aiSourceType === 'question' }"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-                <span>Ask Question</span>
-              </button>
-              
-              <button 
-                type="button" 
-                @click="aiSourceType = 'file'" 
-                class="ai-source-btn" 
-                :class="{ active: aiSourceType === 'file' }"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-                <span>Upload File</span>
-              </button>
-            </div>
-          </div>
-          
-          <!-- Source Type Specific Form -->
-          <div class="form-group">
-            <!-- Text Input Source -->
-            <div v-if="aiSourceType === 'text'">
-              <label for="aiSourceText" class="form-label">Source Text</label>
-              <textarea
-                id="aiSourceText"
-                v-model="aiSourceText"
-                class="form-control"
-                rows="10"
-                placeholder="Paste or type your text content here. The AI will analyze this content and generate study materials."
-                required
-              ></textarea>
-            </div>
-            
-            <!-- Question Input Source -->
-            <div v-if="aiSourceType === 'question'">
-              <label for="aiSourceQuestion" class="form-label">Your Question</label>
-              <textarea
-                id="aiSourceQuestion"
-                v-model="aiSourceQuestion"
-                class="form-control"
-                rows="4"
-                placeholder="Enter your question here. The AI will generate comprehensive study materials that answer this question."
-                required
-              ></textarea>
-            </div>
-            
-            <!-- File Input Source -->
-            <div v-if="aiSourceType === 'file'">
-              <label class="form-label">Upload Source File</label>
-              <div class="file-upload-container">
-                <input
-                  type="file"
-                  id="ai-file-upload"
-                  @change="handleAiFileUpload"
-                  class="file-input"
-                  accept=".txt,.md,.doc,.docx"
-                  :disabled="loading"
-                />
-                <label for="ai-file-upload" class="file-upload-label">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+      <div v-if="aiStep === 'input'">
+        <div class="form-group">
+          <label class="form-label">Create Study Materials with AI</label>
+          <p class="ai-description">Select your input type and provide content to generate study materials. All generated cards will share the same category and learning deadline.</p>
+      
+      <div class="ai-source-options">
+      <button 
+        type="button" 
+        @click="aiSourceType = 'text'" 
+        class="ai-source-btn" 
+      :class="{ active: aiSourceType === 'text' }"
+      >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="17" y1="10" x2="3" y2="10"></line>
+          <line x1="21" y1="6" x2="3" y2="6"></line>
+        <line x1="21" y1="14" x2="3" y2="14"></line>
+      <line x1="17" y1="18" x2="3" y2="18"></line>
+      </svg>
+      <span>Paste Text</span>
+      </button>
+      
+      <button 
+        type="button" 
+        @click="aiSourceType = 'question'" 
+      class="ai-source-btn" 
+      :class="{ active: aiSourceType === 'question' }"
+      >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+      <span>Ask Question</span>
+      </button>
+      
+      <button 
+      type="button" 
+        @click="aiSourceType = 'file'" 
+          class="ai-source-btn" 
+            :class="{ active: aiSourceType === 'file' }"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+      </svg>
+      <span>Upload File</span>
+      </button>
+      </div>
+      </div>
+      
+      <!-- Source Type Specific Form -->
+      <div class="form-group">
+      <!-- Text Input Source -->
+      <div v-if="aiSourceType === 'text'">
+        <label for="aiSourceText" class="form-label">Content</label>
+      <textarea
+        id="aiSourceText"
+      v-model="aiSourceText"
+      class="form-control"
+      rows="10"
+      placeholder="Paste or type your text content here. The AI will analyze this content and generate study materials."
+      required
+      ></textarea>
+      </div>
+      
+      <!-- Question Input Source -->
+      <div v-if="aiSourceType === 'question'">
+        <label for="aiSourceQuestion" class="form-label">Your Question</label>
+      <textarea
+        id="aiSourceQuestion"
+      v-model="aiSourceQuestion"
+      class="form-control"
+      rows="6"
+      placeholder="Enter your question here. The AI will generate comprehensive study materials that answer this question."
+      required
+      ></textarea>
+      </div>
+      
+      <!-- File Input Source -->
+      <div v-if="aiSourceType === 'file'">
+      <label class="form-label">Upload Source File</label>
+      <div class="file-upload-container">
+      <input
+      type="file"
+      id="ai-file-upload"
+        @change="handleAiFileUpload"
+        class="file-input"
+          accept=".txt,.md,.doc,.docx"
+          :disabled="loading"
+      />
+        <label for="ai-file-upload" class="file-upload-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="17 8 12 3 7 8"></polyline>
                     <line x1="12" y1="3" x2="12" y2="15"></line>
                   </svg>
@@ -560,9 +560,17 @@
           </div>
           
           <div class="form-actions">
-            <button type="button" @click="generateWithAi" class="btn btn-primary btn-lg" :disabled="loading || !canGenerateWithAi">
-              <span v-if="loading" class="loading-spinner"></span>
-              <span v-else>Generate with AI</span>
+            <button type="button" @click="generateWithAi" class="btn btn-primary btn-lg" :disabled="loading || !canGenerateWithAi || !selectedCategoryOption">
+              <span v-if="loading">
+                <span class="loading-spinner"></span>
+                <span class="ml-2">Generating...</span>
+              </span>
+              <span v-else class="btn-content">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                  <path d="M18.5 22q-1.05 0-1.775-.725T16 19.5q0-1.05.725-1.775T18.5 17q1.05 0 1.775.725T21 19.5q0 1.05-.725 1.775T18.5 22ZM18.5 7q-1.05 0-1.775-.725T16 4.5q0-1.05.725-1.775T18.5 2q1.05 0 1.775.725T21 4.5q0 1.05-.725 1.775T18.5 7ZM5.5 14.5q-1.05 0-1.775-.725T3 12q0-1.05.725-1.775T5.5 9.5q1.05 0 1.775.725T8 12q0 1.05-.725 1.775T5.5 14.5ZM18.5 12l-13 0M18.5 4.5l-13 7.5M18.5 19.5l-13-7.5"></path>
+                </svg>
+                Generate with AI
+              </span>
             </button>
           </div>
         </div>
@@ -1073,8 +1081,39 @@ export default {
     // Generate materials with AI
     const generateWithAi = async () => {
       try {
-        loading.value = true;
+        // Reset any previous errors
         error.value = '';
+        
+        // Check for category selection
+        if (!selectedCategoryOption.value) {
+          error.value = 'Please select a category for your study materials';
+          return;
+        }
+        
+        // Check input content based on source type
+        let sourceContent = '';
+        if (aiSourceType.value === 'text') {
+          sourceContent = aiSourceText.value;
+          if (!sourceContent.trim()) {
+            error.value = 'Please enter some text content to generate materials';
+            return;
+          }
+        } else if (aiSourceType.value === 'question') {
+          sourceContent = aiSourceQuestion.value;
+          if (!sourceContent.trim()) {
+            error.value = 'Please enter a question to generate materials';
+            return;
+          }
+        } else if (aiSourceType.value === 'file') {
+          sourceContent = aiFileContent.value;
+          if (!sourceContent.trim()) {
+            error.value = 'The file appears to be empty. Please upload a file with content';
+            return;
+          }
+        }
+        
+        // Begin loading
+        loading.value = true;
         
         // Check authentication
         if (!auth.currentUser) {
@@ -1083,55 +1122,40 @@ export default {
           return;
         }
         
-        // Prepare source content based on type
-        let sourceContent = '';
-        if (aiSourceType.value === 'text') {
-          sourceContent = aiSourceText.value;
-        } else if (aiSourceType.value === 'question') {
-          sourceContent = aiSourceQuestion.value;
-        } else if (aiSourceType.value === 'file') {
-          sourceContent = aiFileContent.value;
-        }
-        
-        if (!sourceContent.trim()) {
-          error.value = 'Please provide content to generate materials';
-          return;
-        }
-        
-        // Check if category is selected
-        if (!selectedCategoryOption.value) {
-          error.value = 'Please select a category for your study materials';
-          return;
-        }
-        
         // Call the DeepseekService to generate materials
         // Import the DeepseekService
         import('@/services/deepseek.service').then(async (module) => {
           const DeepseekService = module.default;
-          // Call service to generate study materials
-          const generatedMaterials = await DeepseekService.generateStudyMaterials(
-            sourceContent,
-            aiSourceType.value
-          );
-          
-          if (!generatedMaterials || generatedMaterials.length === 0) {
-            error.value = 'No materials could be generated. Try providing different content.';
-            return;
+          try {
+            // Call service to generate study materials
+            const generatedMaterials = await DeepseekService.generateStudyMaterials(
+              sourceContent,
+              aiSourceType.value
+            );
+            
+            if (!generatedMaterials || generatedMaterials.length === 0) {
+              error.value = 'No materials could be generated. Try providing different content.';
+              return;
+            }
+            
+            // Store the generated materials
+            aiGeneratedMaterials.value = generatedMaterials;
+            
+            // Move to preview step
+            aiStep.value = 'preview';
+          } catch (innerErr) {
+            console.error('Error in AI generation:', innerErr);
+            error.value = innerErr.message || 'Failed to generate materials with AI';
           }
-          
-          // Store the generated materials
-          aiGeneratedMaterials.value = generatedMaterials;
-          
-          // Move to preview step
-          aiStep.value = 'preview';
-        }).catch(err => {
-          console.error('Error importing DeepseekService:', err);
+        }).catch(importErr => {
+          console.error('Error importing DeepseekService:', importErr);
           error.value = 'Failed to load AI service. Please try again later.';
+        }).finally(() => {
+          loading.value = false;
         });
       } catch (err) {
         console.error('Error generating materials with AI:', err);
         error.value = err.message || 'Failed to generate materials with AI';
-      } finally {
         loading.value = false;
       }
     };
@@ -1881,20 +1905,19 @@ export default {
 
 .ai-source-options {
   display: flex;
-  gap: var(--spacing-3);
-  margin-bottom: var(--spacing-4);
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+  margin-top: var(--spacing-2);
   flex-wrap: wrap;
 }
 
 .ai-source-btn {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: var(--spacing-2);
-  padding: var(--spacing-4);
+  padding: 0.75rem 1rem;
   border: 1px solid var(--neutral-300);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   background-color: white;
   cursor: pointer;
   transition: all var(--transition-normal);
@@ -1905,8 +1928,7 @@ export default {
 .ai-source-btn:hover {
   border-color: var(--primary-color);
   background-color: var(--neutral-50);
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .ai-source-btn.active {
@@ -1917,6 +1939,8 @@ export default {
 
 .ai-source-btn svg {
   color: var(--primary-color);
+  width: 16px;
+  height: 16px;
 }
 
 .ai-source-btn span {
@@ -2042,6 +2066,21 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-top: var(--spacing-6);
+}
+
+/* Utility Classes */
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Media Queries */

@@ -178,10 +178,12 @@ const StudyService = {
           return null; // No review scheduled
         }
         
-        // Find the first document that has a reviewSchedule
+        // Find the first document that has a reviewSchedule and is not deprecated
         for (const doc of querySnapshot.docs) {
           const attemptData = doc.data();
-          if (attemptData.reviewSchedule && attemptData.reviewSchedule.length > 0) {
+          if (attemptData.reviewSchedule && 
+              attemptData.reviewSchedule.length > 0 && 
+              !attemptData.isDeprecatedSchedule) {
             // Convert dates to Date objects
             const scheduleDates = attemptData.reviewSchedule.map(date => 
               typeof date === 'string' ? new Date(date) : date.toDate());
@@ -222,9 +224,11 @@ const StudyService = {
             return timeB - timeA;
           });
         
-        // Find the first document with a review schedule
+        // Find the first document with a review schedule that's not deprecated
         for (const attemptData of sortedDocs) {
-          if (attemptData.reviewSchedule && attemptData.reviewSchedule.length > 0) {
+          if (attemptData.reviewSchedule && 
+              attemptData.reviewSchedule.length > 0 &&
+              !attemptData.isDeprecatedSchedule) {
             // Convert dates to Date objects
             const scheduleDates = attemptData.reviewSchedule.map(date => 
               typeof date === 'string' ? new Date(date) : date.toDate());
@@ -291,6 +295,30 @@ const StudyService = {
       
       const attemptData = attemptDoc.data();
       const materialId = attemptData.materialId;
+      
+      // Check for existing attempts with review schedules for this material
+      let existingAttemptIdWithSchedule = null;
+      try {
+        const previousAttemptsQuery = query(
+          collection(db, 'attempts'),
+          where('materialId', '==', materialId),
+          where('userId', '==', auth.currentUser.uid),
+          orderBy('timestamp', 'desc')
+        );
+        
+        const previousAttemptsSnapshot = await getDocs(previousAttemptsQuery);
+        
+        // Find most recent attempt with a review schedule (excluding current attempt)
+        for (const doc of previousAttemptsSnapshot.docs) {
+          if (doc.id !== attemptId && doc.data().reviewSchedule && doc.data().reviewSchedule.length > 0) {
+            existingAttemptIdWithSchedule = doc.id;
+            console.log("Found existing review schedule in attempt:", existingAttemptIdWithSchedule);
+            break;
+          }
+        }
+      } catch (indexError) {
+        console.warn("Index error when checking for existing schedules, continuing with new schedule", indexError);
+      }
       
       // Get the material document to check if it has a deadline
       const materialRef = doc(db, 'materials', materialId);
@@ -590,6 +618,15 @@ const StudyService = {
                  "easeFactor:", easeFactor, 
                  "stabilityFactor:", stabilityFactor,
                  "baseInterval:", baseInterval);
+      
+      // If there's an existing schedule, delete it before adding the new one
+      if (existingAttemptIdWithSchedule) {
+        console.log("Removing existing review schedule from attempt:", existingAttemptIdWithSchedule);
+        await updateDoc(doc(db, 'attempts', existingAttemptIdWithSchedule), {
+          reviewSchedule: [],
+          isDeprecatedSchedule: true
+        });
+      }
       
       await updateDoc(doc(db, 'attempts', attemptId), {
         reviewSchedule: dedupedSchedule.map(date => date.toISOString()),

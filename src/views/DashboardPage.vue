@@ -178,16 +178,21 @@
             <div class="section-header">
               <h2 class="section-title">Due for Review</h2>
               <div class="reviews-header-meta">
-                <p class="section-subtitle">Review these materials to maintain your retention</p>
-                <div class="review-stats" v-if="reviewsDueToday > 0">
-                  <div class="review-stat-badge">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path>
-                    </svg>
-                    <span>{{ reviewsDueToday }} {{ reviewsDueToday === 1 ? 'review' : 'reviews' }} due today</span>
+              <p class="section-subtitle">Review these materials to maintain your retention</p>
+              <div class="review-stats-container">
+              <div class="review-stats" v-if="reviewsDueToday > 0">
+              <div class="review-stat-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path>
+                </svg>
+                  <span>{{ reviewsDueToday }} {{ reviewsDueToday === 1 ? 'review' : 'reviews' }} due today</span>
                   </div>
+                  </div>
+                <div class="calendar-button-container">
+                  <CalendarButton :dueReviews="dueReviews" />
                 </div>
               </div>
+            </div>
             </div>
 
             <div class="due-reviews">
@@ -388,6 +393,7 @@ import { useStore } from 'vuex';
 import MaterialList from '@/components/study/MaterialList.vue';
 import InputForm from '@/components/study/InputForm.vue';
 import BlurtingForm from '@/components/study/BlurtingForm.vue';
+import CalendarButton from '@/components/study/CalendarButton.vue';
 import StudyService from '@/services/study.service';
 
 export default {
@@ -395,7 +401,8 @@ export default {
   components: {
     MaterialList,
     InputForm,
-    BlurtingForm
+    BlurtingForm,
+    CalendarButton
   },
   
   setup() {
@@ -2092,9 +2099,20 @@ export default {
   width: 100%;
 }
 
+.review-stats-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+  align-items: center;
+}
+
 .review-stats {
   display: flex;
   gap: var(--spacing-3);
+}
+
+.calendar-button-container {
+  min-width: 250px;
 }
 
 .review-stat-badge {

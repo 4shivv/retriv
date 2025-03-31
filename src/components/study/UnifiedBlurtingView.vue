@@ -3,23 +3,6 @@
     <div class="view-header">
       <h5>{{ title }}</h5>
       <div class="view-stats" v-if="matchPercentage !== null">
-        <div class="match-percentage-display">
-          <svg viewBox="0 0 36 36" class="circular-chart">
-            <path class="circle-bg"
-              d="M18 2.0845
-                a 15.9155 15.9155 0 0 1 0 31.831
-                a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-            <path class="circle" :class="matchPercentageClass"
-              :stroke-dasharray="`${matchPercentage}, 100`"
-              d="M18 2.0845
-                a 15.9155 15.9155 0 0 1 0 31.831
-                a 15.9155 15.9155 0 0 1 0 -31.831"
-            />
-            <text x="18" y="20.35" class="percentage">{{ matchPercentage }}%</text>
-          </svg>
-          <span class="percentage-label">Recall Score</span>
-        </div>
         <div v-if="pastAttempts && pastAttempts.length > 0" class="trend-badge" :class="trendBadgeClass">
           <svg v-if="isImproving" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="18 15 12 9 6 15"></polyline>
@@ -133,14 +116,6 @@ export default {
   },
   
   setup(props) {
-    
-    const matchPercentageClass = computed(() => {
-      if (props.matchPercentage >= 80) return 'high';
-      if (props.matchPercentage >= 60) return 'medium';
-      if (props.matchPercentage >= 40) return 'low';
-      return 'very-low';
-    });
-    
     const trendBadgeClass = computed(() => {
       if (props.isImproving) return 'improving';
       if (props.isDecreasing) return 'decreasing';
@@ -162,7 +137,6 @@ export default {
 
     
     return {
-      matchPercentageClass,
       trendBadgeClass,
       getWordClass,
       getWordTooltip
@@ -201,63 +175,6 @@ export default {
   display: flex;
   align-items: center;
   gap: var(--spacing-4);
-}
-
-.match-percentage-display {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-right: var(--spacing-2);
-}
-
-.circular-chart {
-  width: 50px;
-  height: 50px;
-}
-
-.circle-bg {
-  fill: none;
-  stroke: var(--neutral-200);
-  stroke-width: 3;
-}
-
-.circle {
-  fill: none;
-  stroke-width: 3;
-  stroke-linecap: round;
-  transform: rotate(-90deg);
-  transform-origin: 50% 50%;
-  transition: stroke-dasharray 1s ease;
-}
-
-.circle.high {
-  stroke: #10b981;
-}
-
-.circle.medium {
-  stroke: #06b6d4;
-}
-
-.circle.low {
-  stroke: #f59e0b;
-}
-
-.circle.very-low {
-  stroke: #ef4444;
-}
-
-.percentage {
-  fill: var(--neutral-900);
-  font-size: 0.4em;
-  font-weight: var(--font-weight-bold);
-  text-anchor: middle;
-  font-family: var(--font-family-base);
-}
-
-.percentage-label {
-  font-size: var(--font-size-xs);
-  margin-top: var(--spacing-1);
-  color: var(--neutral-600);
 }
 
 .trend-badge {

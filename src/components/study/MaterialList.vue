@@ -318,7 +318,7 @@
 </template>
 
 <script>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import StudyService from '@/services/study.service';
 
 export default {
@@ -638,8 +638,8 @@ export default {
         editMode.value = false;
         viewMode.value = true;
         
-        // Reload categories
-        loadCategories();
+        // Emit event to reload categories
+        emit('reload-categories');
         
       } catch (err) {
         console.error('Failed to update material:', err);
@@ -679,8 +679,8 @@ export default {
         selectedMaterial.value = null;
         viewMode.value = false;
         
-        // Reload categories
-        loadCategories();
+        // Emit event to reload categories
+        emit('reload-categories');
         
       } catch (err) {
         console.error('Failed to delete material:', err);

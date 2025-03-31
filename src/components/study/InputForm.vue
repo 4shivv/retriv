@@ -340,112 +340,112 @@
       <div v-else-if="inputMode === 'ai'">
       <div v-if="aiStep === 'input'">
         <div class="form-group">
-          <label class="form-label">Create Study Materials with AI</label>
-          <p class="ai-description">Select your input type and provide content to generate study materials. All generated cards will share the same category and learning deadline.</p>
-      
-      <div class="ai-source-options">
-      <button 
-        type="button" 
-        @click="aiSourceType = 'text'" 
-        class="ai-source-btn" 
-      :class="{ active: aiSourceType === 'text' }"
-      >
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="17" y1="10" x2="3" y2="10"></line>
-          <line x1="21" y1="6" x2="3" y2="6"></line>
-        <line x1="21" y1="14" x2="3" y2="14"></line>
-      <line x1="17" y1="18" x2="3" y2="18"></line>
-      </svg>
-      <span>Paste Text</span>
-      </button>
-      
-      <button 
-        type="button" 
-        @click="aiSourceType = 'question'" 
-      class="ai-source-btn" 
-      :class="{ active: aiSourceType === 'question' }"
-      >
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-      <line x1="12" y1="17" x2="12.01" y2="17"></line>
-      </svg>
-      <span>Ask Question</span>
-      </button>
-      
-      <button 
-      type="button" 
-        @click="aiSourceType = 'file'" 
-          class="ai-source-btn" 
-            :class="{ active: aiSourceType === 'file' }"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-          <line x1="16" y1="17" x2="8" y2="17"></line>
-          <polyline points="10 9 9 9 8 9"></polyline>
-      </svg>
-      <span>Upload File</span>
-      </button>
-      </div>
-      </div>
-      
-      <!-- Source Type Specific Form -->
-      <div class="form-group">
-      <!-- Text Input Source -->
-      <div v-if="aiSourceType === 'text'">
-        <label for="aiSourceText" class="form-label">Content</label>
-      <textarea
-        id="aiSourceText"
-      v-model="aiSourceText"
-      class="form-control"
-      rows="10"
-      placeholder="Paste or type your text content here. The AI will analyze this content and generate study materials."
-      required
-      ></textarea>
-      </div>
-      
-      <!-- Question Input Source -->
-      <div v-if="aiSourceType === 'question'">
-        <label for="aiSourceQuestion" class="form-label">Your Question</label>
-      <textarea
-        id="aiSourceQuestion"
-      v-model="aiSourceQuestion"
-      class="form-control"
-      rows="6"
-      placeholder="Enter your question here. The AI will generate comprehensive study materials that answer this question."
-      required
-      ></textarea>
-      </div>
-      
-      <!-- File Input Source -->
-      <div v-if="aiSourceType === 'file'">
-      <label class="form-label">Upload Source File</label>
-      <div class="file-upload-container">
-      <input
-      type="file"
-      id="ai-file-upload"
-        @change="handleAiFileUpload"
-        class="file-input"
-          accept=".txt,.md,.doc,.docx"
-          :disabled="loading"
-      />
-        <label for="ai-file-upload" class="file-upload-label">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                  </svg>
-                  <span>Choose file</span>
-                </label>
-                <span v-if="aiFileName" class="file-name">{{ aiFileName }}</span>
-              </div>
-              <p class="form-text">
-                Supported file types: .txt, .md, .doc, .docx
-              </p>
-            </div>
+          <label class="form-label">Source Type</label>
+          <p class="form-text">Select how you want to create your study materials. All cards will share the same category and deadline.</p>
+          
+          <div class="ai-source-options">
+            <button 
+              type="button" 
+              @click="aiSourceType = 'text'" 
+              class="ai-source-btn" 
+              :class="{ active: aiSourceType === 'text' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="17" y1="10" x2="3" y2="10"></line>
+                <line x1="21" y1="6" x2="3" y2="6"></line>
+                <line x1="21" y1="14" x2="3" y2="14"></line>
+                <line x1="17" y1="18" x2="3" y2="18"></line>
+              </svg>
+              <span>Paste Text</span>
+            </button>
+            
+            <button 
+              type="button" 
+              @click="aiSourceType = 'question'" 
+              class="ai-source-btn" 
+              :class="{ active: aiSourceType === 'question' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <span>Ask Question</span>
+            </button>
+            
+            <button 
+              type="button" 
+              @click="aiSourceType = 'file'" 
+              class="ai-source-btn" 
+              :class="{ active: aiSourceType === 'file' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <span>Upload File</span>
+            </button>
           </div>
+        </div>
+      
+        <!-- Source Type Specific Form -->
+        <div class="form-group">
+          <!-- Text Input Source -->
+          <div v-if="aiSourceType === 'text'">
+            <label for="aiSourceText" class="form-label">Content</label>
+            <textarea
+              id="aiSourceText"
+              v-model="aiSourceText"
+              class="form-control"
+              rows="10"
+              placeholder="Paste or type your text content here. The AI will analyze this content and generate study materials."
+              required
+            ></textarea>
+          </div>
+          
+          <!-- Question Input Source -->
+          <div v-if="aiSourceType === 'question'">
+            <label for="aiSourceQuestion" class="form-label">Your Question</label>
+            <textarea
+              id="aiSourceQuestion"
+              v-model="aiSourceQuestion"
+              class="form-control"
+              rows="6"
+              placeholder="Enter your question here. The AI will generate comprehensive study materials that answer this question."
+              required
+            ></textarea>
+          </div>
+          
+          <!-- File Input Source -->
+          <div v-if="aiSourceType === 'file'">
+            <label class="form-label">Upload Source File</label>
+            <div class="file-upload-container">
+              <input
+                type="file"
+                id="ai-file-upload"
+                @change="handleAiFileUpload"
+                class="file-input"
+                accept=".txt,.md,.doc,.docx"
+                :disabled="loading"
+              />
+              <label for="ai-file-upload" class="file-upload-label">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>Choose file</span>
+              </label>
+              <span v-if="aiFileName" class="file-name">{{ aiFileName }}</span>
+            </div>
+            <p class="form-text">
+              Supported file types: .txt, .md, .doc, .docx
+            </p>
+          </div>
+        </div>
           
           <!-- Common Category Selection -->
           <div class="form-group">
@@ -687,21 +687,31 @@
             </div>
           </div>
           
-          <!-- Action buttons -->
-          <div class="preview-actions">
+        <div class="preview-actions">
+          <div class="action-group">
             <button type="button" @click="aiStep = 'input'" class="btn btn-outline btn-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
               </svg>
               <span>Back</span>
             </button>
-            
+          </div>
+          
+          <div class="action-group">
             <button type="button" @click="saveGeneratedMaterials" class="btn btn-primary btn-lg" :disabled="loading || aiGeneratedMaterials.length === 0">
               <span v-if="loading" class="loading-spinner"></span>
-              <span v-else>Save All Cards</span>
+              <span v-else class="btn-content">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                  <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                  <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                Save All Cards
+              </span>
             </button>
           </div>
+        </div>
         </div>
       </div>
     </div>
@@ -1977,32 +1987,27 @@ export default {
   background-color: white;
   cursor: pointer;
   transition: all var(--transition-normal);
-  min-width: 120px;
   flex: 1;
+  min-width: 120px;
 }
 
 .ai-source-btn:hover {
   border-color: var(--primary-color);
   background-color: var(--neutral-50);
-  box-shadow: var(--shadow-sm);
 }
 
 .ai-source-btn.active {
   border-color: var(--primary-color);
   background-color: rgba(99, 102, 241, 0.05);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .ai-source-btn svg {
   color: var(--primary-color);
-  width: 16px;
-  height: 16px;
 }
 
 .ai-source-btn span {
-  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--neutral-700);
 }
 
 /* AI Preview Styles */
@@ -2122,6 +2127,12 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-top: var(--spacing-6);
+  gap: var(--spacing-4);
+}
+
+.action-group {
+  display: flex;
+  gap: var(--spacing-2);
 }
 
 /* Source Type Selection */

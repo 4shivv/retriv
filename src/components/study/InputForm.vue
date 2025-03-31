@@ -2,6 +2,31 @@
   <div class="study-input-form card">
     <div class="card-header">
       <h3>Create Study Material</h3>
+      <div class="input-options">
+        <button
+          @click="switchMode('manual')"
+          class="input-option-btn"
+          :class="{ active: inputMode === 'manual' }"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+          <span>Manual Entry</span>
+        </button>
+        <button
+          @click="switchMode('ai')"
+          class="input-option-btn"
+          :class="{ active: inputMode === 'ai' }"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          <span>Create with AI</span>
+        </button>
+      </div>
     </div>
     
     <div class="card-body">
@@ -11,7 +36,9 @@
         </div>
       </div>
       
-      <form @submit.prevent="handleSubmit">
+      <!-- Manual Input Mode -->
+      <div v-if="inputMode === 'manual'">
+        <form @submit.prevent="handleSubmit">
         <div class="form-group">
           <label for="title" class="form-label">Title</label>
           <input
@@ -256,6 +283,349 @@
           </button>
         </div>
       </form>
+      </div>
+      
+      <!-- AI-Assisted Material Creation Mode -->
+      <div v-else-if="inputMode === 'ai'">
+        <div v-if="aiStep === 'input'">
+          <div class="form-group">
+            <label class="form-label">Create Study Materials with AI</label>
+            <p class="ai-description">Select your input type and provide content to generate study materials. The AI will analyze your content and create focused, concise material cards optimized for memorization.</p>
+            
+            <div class="ai-source-options">
+              <button 
+                type="button" 
+                @click="aiSourceType = 'text'" 
+                class="ai-source-btn" 
+                :class="{ active: aiSourceType === 'text' }"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="17" y1="10" x2="3" y2="10"></line>
+                  <line x1="21" y1="6" x2="3" y2="6"></line>
+                  <line x1="21" y1="14" x2="3" y2="14"></line>
+                  <line x1="17" y1="18" x2="3" y2="18"></line>
+                </svg>
+                <span>Paste Text</span>
+              </button>
+              
+              <button 
+                type="button" 
+                @click="aiSourceType = 'question'" 
+                class="ai-source-btn" 
+                :class="{ active: aiSourceType === 'question' }"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                <span>Ask Question</span>
+              </button>
+              
+              <button 
+                type="button" 
+                @click="aiSourceType = 'file'" 
+                class="ai-source-btn" 
+                :class="{ active: aiSourceType === 'file' }"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <span>Upload File</span>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Source Type Specific Form -->
+          <div class="form-group">
+            <!-- Text Input Source -->
+            <div v-if="aiSourceType === 'text'">
+              <label for="aiSourceText" class="form-label">Source Text</label>
+              <textarea
+                id="aiSourceText"
+                v-model="aiSourceText"
+                class="form-control"
+                rows="10"
+                placeholder="Paste or type your text content here. The AI will analyze this content and generate study materials."
+                required
+              ></textarea>
+            </div>
+            
+            <!-- Question Input Source -->
+            <div v-if="aiSourceType === 'question'">
+              <label for="aiSourceQuestion" class="form-label">Your Question</label>
+              <textarea
+                id="aiSourceQuestion"
+                v-model="aiSourceQuestion"
+                class="form-control"
+                rows="4"
+                placeholder="Enter your question here. The AI will generate comprehensive study materials that answer this question."
+                required
+              ></textarea>
+            </div>
+            
+            <!-- File Input Source -->
+            <div v-if="aiSourceType === 'file'">
+              <label class="form-label">Upload Source File</label>
+              <div class="file-upload-container">
+                <input
+                  type="file"
+                  id="ai-file-upload"
+                  @change="handleAiFileUpload"
+                  class="file-input"
+                  accept=".txt,.md,.doc,.docx"
+                  :disabled="loading"
+                />
+                <label for="ai-file-upload" class="file-upload-label">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <span>Choose file</span>
+                </label>
+                <span v-if="aiFileName" class="file-name">{{ aiFileName }}</span>
+              </div>
+              <p class="form-text">
+                Supported file types: .txt, .md, .doc, .docx
+              </p>
+            </div>
+          </div>
+          
+          <!-- Common Category Selection -->
+          <div class="form-group">
+            <label for="category" class="form-label">Category</label>
+            <div class="category-dropdown-container">
+              <!-- Using the same category dropdown as in manual mode -->
+              <div class="category-dropdown-trigger" @click="toggleCategoryDropdown" :class="{ 'active': showCategoryDropdown }">
+                <div class="selected-category">
+                  <div v-if="selectedCategoryOption" class="category-tag" :class="getCategoryColorClass(selectedCategoryOption)">
+                    <span>{{ selectedCategoryOption === 'custom' ? customCategory : selectedCategoryOption }}</span>
+                  </div>
+                  <span v-else class="placeholder-text">Select a category</span>
+                </div>
+                <div class="dropdown-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </div>
+              
+              <!-- Same dropdown content as in manual mode -->
+              <div v-if="showCategoryDropdown" class="category-dropdown-content">
+                <div class="category-search">
+                  <input 
+                    type="text" 
+                    v-model="categorySearchTerm" 
+                    class="form-control" 
+                    placeholder="Search or add new category"
+                    @input="handleCategorySearch"
+                    @keydown.enter="handleCategorySearchEnter"
+                    ref="categorySearchInput"
+                  />
+                </div>
+                
+                <div class="category-groups">
+                  <!-- Frequently Used Categories -->
+                  <div class="category-group" v-if="filteredFrequentCategories.length > 0">
+                    <div class="category-group-label">Frequently Used</div>
+                    <div class="category-options">
+                      <div 
+                        v-for="cat in filteredFrequentCategories" 
+                        :key="cat" 
+                        class="category-option" 
+                        @click="selectCategory(cat)"
+                        :class="[getCategoryColorClass(cat), { 'active': selectedCategoryOption === cat }]"
+                      >
+                        <span class="category-name">{{ cat }}</span>
+                        <span class="category-select-icon" v-if="selectedCategoryOption === cat">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Default Categories -->
+                  <div class="category-group" v-if="filteredDefaultCategories.length > 0">
+                    <div class="category-group-label">Default Categories</div>
+                    <div class="category-options">
+                      <div 
+                        v-for="cat in filteredDefaultCategories" 
+                        :key="cat" 
+                        class="category-option" 
+                        @click="selectCategory(cat)"
+                        :class="[getCategoryColorClass(cat), { 'active': selectedCategoryOption === cat }]"
+                      >
+                        <span class="category-name">{{ cat }}</span>
+                        <div class="category-option-actions">
+                          <span class="category-select-icon" v-if="selectedCategoryOption === cat">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                          </span>
+                          <button 
+                            class="category-delete-button" 
+                            @click.stop="deleteCategoryPrompt(cat)"
+                            title="Delete category"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <line x1="18" y1="6" x2="6" y2="18"></line>
+                              <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Custom Categories -->
+                  <div class="category-group" v-if="filteredCustomCategories.length > 0">
+                    <div class="category-group-label">Your Categories</div>
+                    <div class="category-options">
+                      <div 
+                        v-for="cat in filteredCustomCategories" 
+                        :key="cat" 
+                        class="category-option" 
+                        @click="selectCategory(cat)"
+                        :class="[getCategoryColorClass(cat), { 'active': selectedCategoryOption === cat }]"
+                      >
+                        <span class="category-name">{{ cat }}</span>
+                        <div class="category-option-actions">
+                          <span class="category-select-icon" v-if="selectedCategoryOption === cat">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                          </span>
+                          <button 
+                            class="category-delete-button" 
+                            @click.stop="deleteCategoryPrompt(cat)"
+                            title="Delete category"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <line x1="18" y1="6" x2="6" y2="18"></line>
+                              <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Create New Category Option -->
+                  <div class="category-group" v-if="showCreateNewCategory">
+                    <div class="category-group-label">Create New</div>
+                    <div class="category-options">
+                      <div 
+                        class="category-option category-option-new" 
+                        @click="createNewCategory"
+                      >
+                        <span class="category-name">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="category-new-icon">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                          </svg>
+                          Create "{{ categorySearchTerm }}"
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" @click="generateWithAi" class="btn btn-primary btn-lg" :disabled="loading || !canGenerateWithAi">
+              <span v-if="loading" class="loading-spinner"></span>
+              <span v-else>Generate with AI</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- AI Result Preview Step -->
+        <div v-if="aiStep === 'preview'" class="ai-preview-container">
+          <h4 class="preview-title">AI-Generated Study Materials</h4>
+          <p class="preview-description">Review the generated materials below. You can edit, remove, or save them as is.</p>
+          
+          <!-- Show error if generation failed -->
+          <div v-if="error" class="alert alert-danger">
+            <div class="alert-content">
+              <div class="alert-text">{{ error }}</div>
+            </div>
+          </div>
+          
+          <!-- Loading state while generating -->
+          <div v-if="loading" class="ai-loading-state">
+            <div class="ai-loading-spinner"></div>
+            <p>Generating your study materials...</p>
+            <p class="loading-description">The AI is analyzing your content and creating optimized study cards.</p>
+          </div>
+          
+          <!-- Result Cards -->
+          <div v-else class="ai-generated-cards">
+            <div v-for="(card, index) in aiGeneratedMaterials" :key="index" class="ai-material-card">
+              <div class="card-header-actions">
+                <span class="card-index">Card {{ index + 1 }}</span>
+                <button @click="removeGeneratedCard(index)" class="remove-card-btn" title="Remove card">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+              
+              <div class="card-content-editable">
+                <div class="form-group mb-2">
+                  <label class="form-label">Title</label>
+                  <input 
+                    type="text" 
+                    v-model="card.title" 
+                    class="form-control" 
+                    placeholder="Card title"
+                  />
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Content</label>
+                  <textarea 
+                    v-model="card.content" 
+                    class="form-control" 
+                    rows="6" 
+                    placeholder="Card content"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+            
+            <!-- No cards message -->
+            <div v-if="aiGeneratedMaterials.length === 0" class="no-cards-message">
+              <p>No cards were generated. Try providing different content or adjusting your input.</p>
+            </div>
+          </div>
+          
+          <!-- Action buttons -->
+          <div class="preview-actions">
+            <button type="button" @click="aiStep = 'input'" class="btn btn-outline btn-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span>Back</span>
+            </button>
+            
+            <button type="button" @click="saveGeneratedMaterials" class="btn btn-primary btn-lg" :disabled="loading || aiGeneratedMaterials.length === 0">
+              <span v-if="loading" class="loading-spinner"></span>
+              <span v-else>Save All Cards</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -271,6 +641,17 @@ export default {
   emits: ['material-saved'],
   
   setup(props, { emit }) {
+    // Input mode switcher (manual or AI)
+    const inputMode = ref('manual');
+    
+    // AI generation state
+    const aiStep = ref('input');
+    const aiSourceType = ref('text'); // 'text', 'question', or 'file'
+    const aiSourceText = ref('');
+    const aiSourceQuestion = ref('');
+    const aiFileName = ref('');
+    const aiFileContent = ref('');
+    const aiGeneratedMaterials = ref([]);
     const title = ref('');
     const content = ref('');
     const selectedCategoryOption = ref('');
@@ -631,6 +1012,199 @@ export default {
       document.removeEventListener('click', handleClickOutside);
     });
 
+    // Switch between manual and AI input modes
+    const switchMode = (mode) => {
+      inputMode.value = mode;
+      // Reset error when switching modes
+      error.value = '';
+    };
+    
+    // Handle AI file upload
+    const handleAiFileUpload = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      aiFileName.value = file.name;
+      
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        aiFileContent.value = e.target.result;
+      };
+      
+      reader.onerror = () => {
+        error.value = 'Failed to read the file. Please try again.';
+      };
+      
+      reader.readAsText(file);
+    };
+    
+    // Check if can generate with AI based on input
+    const canGenerateWithAi = computed(() => {
+      if (aiSourceType.value === 'text') {
+        return aiSourceText.value.trim().length > 0;
+      } else if (aiSourceType.value === 'question') {
+        return aiSourceQuestion.value.trim().length > 0;
+      } else if (aiSourceType.value === 'file') {
+        return aiFileContent.value.trim().length > 0;
+      }
+      return false;
+    });
+    
+    // Generate materials with AI
+    const generateWithAi = async () => {
+      try {
+        loading.value = true;
+        error.value = '';
+        
+        // Check authentication
+        if (!auth.currentUser) {
+          error.value = "You must be logged in to generate materials with AI";
+          router.push('/login');
+          return;
+        }
+        
+        // Prepare source content based on type
+        let sourceContent = '';
+        if (aiSourceType.value === 'text') {
+          sourceContent = aiSourceText.value;
+        } else if (aiSourceType.value === 'question') {
+          sourceContent = aiSourceQuestion.value;
+        } else if (aiSourceType.value === 'file') {
+          sourceContent = aiFileContent.value;
+        }
+        
+        if (!sourceContent.trim()) {
+          error.value = 'Please provide content to generate materials';
+          return;
+        }
+        
+        // Call the DeepseekService to generate materials
+        // Import the DeepseekService
+        import('@/services/deepseek.service').then(async (module) => {
+          const DeepseekService = module.default;
+          // Call service to generate study materials
+          const generatedMaterials = await DeepseekService.generateStudyMaterials(
+            sourceContent,
+            aiSourceType.value
+          );
+          
+          if (!generatedMaterials || generatedMaterials.length === 0) {
+            error.value = 'No materials could be generated. Try providing different content.';
+            return;
+          }
+          
+          // Store the generated materials
+          aiGeneratedMaterials.value = generatedMaterials;
+          
+          // Move to preview step
+          aiStep.value = 'preview';
+        }).catch(err => {
+          console.error('Error importing DeepseekService:', err);
+          error.value = 'Failed to load AI service. Please try again later.';
+        });
+      } catch (err) {
+        console.error('Error generating materials with AI:', err);
+        error.value = err.message || 'Failed to generate materials with AI';
+      } finally {
+        loading.value = false;
+      }
+    };
+    
+    // Remove a card from generated materials
+    const removeGeneratedCard = (index) => {
+      aiGeneratedMaterials.value.splice(index, 1);
+    };
+    
+    // Save all generated materials
+    const saveGeneratedMaterials = async () => {
+      try {
+        loading.value = true;
+        error.value = '';
+        
+        // Check if user is authenticated
+        if (!auth.currentUser) {
+          console.error("No authenticated user");
+          error.value = "You must be logged in to save materials";
+          router.push('/login');
+          return;
+        }
+        
+        // Check if we have materials to save
+        if (aiGeneratedMaterials.value.length === 0) {
+          error.value = 'No materials to save';
+          return;
+        }
+        
+        // Determine deadline in days if any was selected
+        const deadlineDays = getDeadlineInDays();
+        
+        // Save each material card
+        const savePromises = aiGeneratedMaterials.value.map(material => {
+          return StudyService.saveStudyMaterial(
+            auth.currentUser.uid,
+            material.title || 'Untitled Material',
+            material.content,
+            category.value,
+            deadlineDays
+          );
+        });
+        
+        // Wait for all saves to complete
+        const savedMaterialIds = await Promise.all(savePromises);
+        
+        // Emit the first saved material to trigger study view
+        if (savedMaterialIds.length > 0) {
+          // Create material object for the first saved item
+          const firstMaterial = {
+            id: savedMaterialIds[0],
+            title: aiGeneratedMaterials.value[0].title || 'Untitled Material',
+            content: aiGeneratedMaterials.value[0].content,
+            category: category.value,
+            createdAt: new Date(),
+            userId: auth.currentUser.uid,
+            deadline: deadlineDays
+          };
+          
+          emit('material-saved', firstMaterial);
+          
+          // Reset form
+          resetForm();
+        } else {
+          error.value = 'Failed to save materials. Please try again.';
+        }
+      } catch (err) {
+        console.error('Error saving generated materials:', err);
+        error.value = err.message || 'Failed to save study materials';
+      } finally {
+        loading.value = false;
+      }
+    };
+    
+    // Reset the form (both manual and AI)
+    const resetForm = () => {
+      // Reset manual form
+      title.value = '';
+      content.value = '';
+      selectedCategoryOption.value = '';
+      customCategory.value = '';
+      showCustomCategoryInput.value = false;
+      fileName.value = '';
+      deadline.value = '';
+      customDeadlineDate.value = '';
+      
+      // Reset AI form
+      aiStep.value = 'input';
+      aiSourceText.value = '';
+      aiSourceQuestion.value = '';
+      aiFileName.value = '';
+      aiFileContent.value = '';
+      aiGeneratedMaterials.value = [];
+      
+      // Reset to manual mode
+      inputMode.value = 'manual';
+    };
+    
     const handleFileUpload = (event) => {
       const file = event.target.files[0];
       if (!file) return;
@@ -657,6 +1231,7 @@ export default {
       reader.readAsText(file);
     };
     
+    // Original handleSubmit with minor modifications
     const handleSubmit = async () => {
       try {
         loading.value = true;
@@ -706,14 +1281,7 @@ export default {
           emit('material-saved', materialObj);
           
           // Clear form
-          title.value = '';
-          content.value = '';
-          selectedCategoryOption.value = '';
-          customCategory.value = '';
-          showCustomCategoryInput.value = false;
-          fileName.value = '';
-          deadline.value = '';
-          customDeadlineDate.value = '';
+          resetForm();
         } else {
           error.value = 'Failed to save material. Please try again.';
         }
@@ -766,7 +1334,23 @@ export default {
       cancelCustomCategory,
       handleCustomCategoryConfirm,
       deleteCategoryPrompt,
-      deleteCategory
+      deleteCategory,
+      // AI-related properties and methods
+      inputMode,
+      switchMode,
+      aiStep,
+      aiSourceType,
+      aiSourceText,
+      aiSourceQuestion,
+      aiFileName,
+      aiFileContent,
+      aiGeneratedMaterials,
+      handleAiFileUpload,
+      canGenerateWithAi,
+      generateWithAi,
+      removeGeneratedCard,
+      saveGeneratedMaterials,
+      resetForm
     };
   }
 }
@@ -1214,6 +1798,240 @@ export default {
   
   .category-dropdown-content {
     max-height: 280px;
+  }
+}
+
+/* Input Mode Tabs Styling */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.input-options {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.input-option-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: 0.5rem 1rem;
+  background-color: var(--neutral-100);
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  color: var(--neutral-700);
+}
+
+.input-option-btn:hover {
+  background-color: var(--neutral-200);
+  border-color: var(--primary-color);
+}
+
+.input-option-btn.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+/* AI Style Overrides */
+.ai-description {
+  font-size: var(--font-size-sm);
+  color: var(--neutral-600);
+  margin-bottom: var(--spacing-4);
+  line-height: 1.5;
+}
+
+.ai-source-options {
+  display: flex;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+  flex-wrap: wrap;
+}
+
+.ai-source-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-4);
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-lg);
+  background-color: white;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  min-width: 120px;
+  flex: 1;
+}
+
+.ai-source-btn:hover {
+  border-color: var(--primary-color);
+  background-color: var(--neutral-50);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.ai-source-btn.active {
+  border-color: var(--primary-color);
+  background-color: rgba(99, 102, 241, 0.05);
+  box-shadow: var(--shadow-md);
+}
+
+.ai-source-btn svg {
+  color: var(--primary-color);
+}
+
+.ai-source-btn span {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--neutral-700);
+}
+
+/* AI Preview Styles */
+.ai-preview-container {
+  animation: fadeIn 0.3s ease;
+}
+
+.preview-title {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-2);
+}
+
+.preview-description {
+  color: var(--neutral-600);
+  margin-bottom: var(--spacing-6);
+}
+
+.ai-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-12) 0;
+  text-align: center;
+}
+
+.ai-loading-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 3px solid rgba(99, 102, 241, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1.5s linear infinite;
+  margin-bottom: var(--spacing-4);
+}
+
+.loading-description {
+  color: var(--neutral-500);
+  font-size: var(--font-size-sm);
+  max-width: 400px;
+  margin-top: var(--spacing-2);
+}
+
+/* Generated Card Styles */
+.ai-generated-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-8);
+}
+
+.ai-material-card {
+  background-color: white;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--neutral-200);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+}
+
+.ai-material-card:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-3px);
+}
+
+.card-header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+}
+
+.card-index {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--primary-color);
+  background-color: rgba(99, 102, 241, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+}
+
+.remove-card-btn {
+  background: none;
+  border: none;
+  color: var(--neutral-500);
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.remove-card-btn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.card-content-editable {
+  animation: fadeIn 0.3s ease;
+}
+
+.mb-2 {
+  margin-bottom: var(--spacing-2);
+}
+
+.no-cards-message {
+  text-align: center;
+  padding: var(--spacing-8);
+  background-color: var(--neutral-100);
+  border-radius: var(--radius-lg);
+  color: var(--neutral-600);
+}
+
+.preview-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-6);
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .input-options {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: var(--spacing-2);
+  }
+  
+  .ai-source-options {
+    flex-direction: column;
+  }
+  
+  .preview-actions {
+    flex-direction: column;
+    gap: var(--spacing-3);
+  }
+  
+  .preview-actions .btn {
+    width: 100%;
   }
 }
 </style>

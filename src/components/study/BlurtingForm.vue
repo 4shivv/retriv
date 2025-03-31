@@ -171,68 +171,17 @@
           </div>
         </div>
         
-        <div class="comparison-container">
-          <div class="tabs">
-            <button 
-              @click="activeTab = 'heatmap'" 
-              class="tab-button" 
-              :class="{ active: activeTab === 'heatmap' }"
-            >
-              Heatmap View
-            </button>
-            <button 
-              @click="activeTab = 'split'" 
-              class="tab-button" 
-              :class="{ active: activeTab === 'split' }"
-            >
-              Split View
-            </button>
-          </div>
-          
-          <div class="tab-content">
-            <div v-if="activeTab === 'heatmap'" class="heatmap-section">
-              <h5>Comparison Heatmap</h5>
-              <div class="heatmap-container">
-                <p>
-                  <template v-for="(item, index) in heatmapData.original" :key="index">
-                    <span 
-                      class="heatmap-text" 
-                      :class="{ 'heatmap-matched': item.matched, 'heatmap-unmatched': !item.matched }"
-                    >
-                      {{ item.word }}
-                    </span>
-                  </template>
-                </p>
-              </div>
-              <div class="heatmap-legend">
-                <div class="legend-item">
-                  <span class="legend-color matched"></span>
-                  <span>Remembered</span>
-                </div>
-                <div class="legend-item">
-                  <span class="legend-color unmatched"></span>
-                  <span>Missed</span>
-                </div>
-              </div>
-            </div>
-            
-            <div v-else-if="activeTab === 'split'" class="split-view">
-              <div class="split-section">
-                <h5>Original Text</h5>
-                <div class="split-content original">
-                  {{ originalText }}
-                </div>
-              </div>
-              
-              <div class="split-section">
-                <h5>Your Recall</h5>
-                <div class="split-content recall">
-                  {{ recalledText }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <unified-blurting-view
+          :heatmap-data="heatmapData.original"
+          :recalled-text="recalledText"
+          :match-percentage="matchPercentage"
+          :past-attempts="pastAttempts"
+          :is-improving="isImproving"
+          :is-decreasing="isDecreasing"
+          :performance-trend-text="performanceTrendText"
+          :attempt-number="attemptNumber"
+          title="Your Blurting Results"
+        />
         
         <div class="next-steps">
           <h5>Your Personalized Learning Journey</h5>
@@ -246,26 +195,26 @@
             <div class="curve-visualization">
               <svg viewBox="0 0 500 200" class="curve-graph">
                 <!-- Axis -->
-                <line x1="50" y1="150" x2="450" y2="150" stroke="#e5e7eb" stroke-width="1"></line> <!-- X axis -->
-                <line x1="50" y1="30" x2="50" y2="150" stroke="#e5e7eb" stroke-width="1"></line> <!-- Y axis -->
+                <line x1="80" y1="150" x2="450" y2="150" stroke="#e5e7eb" stroke-width="1"></line> <!-- X axis -->
+                <line x1="80" y1="30" x2="80" y2="150" stroke="#e5e7eb" stroke-width="1"></line> <!-- Y axis -->
                 
                 <!-- Axis Labels -->
-                <text x="250" y="180" text-anchor="middle" class="axis-label">Time</text>
-                <text x="20" y="90" text-anchor="middle" class="axis-label" transform="rotate(-90, 20, 90)">Retention</text>
+                <text x="265" y="180" text-anchor="middle" class="axis-label">Time</text>
+                <text x="30" y="90" text-anchor="middle" class="axis-label" transform="rotate(-90, 30, 90)">Retention</text>
                 
                 <!-- Timepoint Markers -->
-                <line x1="50" y1="145" x2="50" y2="155" stroke="#9ca3af" stroke-width="1"></line>
-                <text x="50" y="170" text-anchor="middle" class="time-label">Now</text>
+                <line x1="80" y1="145" x2="80" y2="155" stroke="#9ca3af" stroke-width="1"></line>
+                <text x="80" y="170" text-anchor="middle" class="time-label">Now</text>
                 
                 <!-- Retention Markers -->
-                <line x1="45" y1="50" x2="55" y2="50" stroke="#9ca3af" stroke-width="1"></line>
-                <text x="35" y="55" text-anchor="end" class="retention-label">90%</text>
+                <line x1="70" y1="50" x2="90" y2="50" stroke="#9ca3af" stroke-width="1"></line>
+                <text x="60" y="55" text-anchor="end" class="retention-label">90%</text>
                 
-                <line x1="45" y1="100" x2="55" y2="100" stroke="#9ca3af" stroke-width="1"></line>
-                <text x="35" y="105" text-anchor="end" class="retention-label">50%</text>
+                <line x1="70" y1="100" x2="90" y2="100" stroke="#9ca3af" stroke-width="1"></line>
+                <text x="60" y="105" text-anchor="end" class="retention-label">50%</text>
                 
-                <line x1="45" y1="130" x2="55" y2="130" stroke="#9ca3af" stroke-width="1"></line>
-                <text x="35" y="135" text-anchor="end" class="retention-label">20%</text>
+                <line x1="70" y1="130" x2="90" y2="130" stroke="#9ca3af" stroke-width="1"></line>
+                <text x="60" y="135" text-anchor="end" class="retention-label">20%</text>
                 
                 <!-- Forgetting Curve without practice -->
                 <path :d="getRetentionCurvePath(false)" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,5"></path>
@@ -277,7 +226,7 @@
                 <g v-for="(date, index) in reviewSchedule" :key="'review-point-' + index">
                   <!-- Calculate x position based on days from now -->
                   <circle 
-                    :cx="50 + calculateGraphPosition(date)" 
+                    :cx="80 + calculateGraphPosition(date)" 
                     :cy="calculateRetentionPoint(date)" 
                     r="5" 
                     :class="getReviewPointClass(date)"
@@ -287,7 +236,7 @@
                   
                   <!-- Add pulsing effect to today's review point -->
                   <circle v-if="isCurrentDate(date)"
-                    :cx="50 + calculateGraphPosition(date)" 
+                    :cx="80 + calculateGraphPosition(date)" 
                     :cy="calculateRetentionPoint(date)" 
                     r="8"
                     class="review-point-pulse"
@@ -296,19 +245,19 @@
                   <!-- Review Point Tooltip -->
                   <g v-if="activeReviewPoint === index">
                     <rect 
-                      :x="45 + calculateGraphPosition(date) - 60" 
+                      :x="75 + calculateGraphPosition(date) - 60" 
                       :y="calculateRetentionPoint(date) - 55" 
                       width="120" 
                       height="45" 
                       rx="4" 
                       class="tooltip-bg"></rect>
                     <text 
-                      :x="45 + calculateGraphPosition(date)" 
+                      :x="75 + calculateGraphPosition(date)" 
                       :y="calculateRetentionPoint(date) - 35" 
                       text-anchor="middle" 
                       class="tooltip-text">{{ formatReviewDate(date) }}</text>
                     <text 
-                      :x="45 + calculateGraphPosition(date)" 
+                      :x="75 + calculateGraphPosition(date)" 
                       :y="calculateRetentionPoint(date) - 15" 
                       text-anchor="middle" 
                       class="tooltip-subtext">{{ getReviewTypeLabel(date) }}</text>
@@ -379,10 +328,14 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import StudyService from '@/services/study.service';
 import ComparisonService from '@/services/comparison.service';
+import UnifiedBlurtingView from './UnifiedBlurtingView.vue';
 import { auth } from '@/services/firebase';
 
 export default {
   name: 'BlurtingForm',
+  components: {
+    UnifiedBlurtingView
+  },
   props: {
     materialId: {
       type: String,
@@ -409,7 +362,7 @@ export default {
     const activeReviewPoint = ref(null);
     const countdownTimerValue = ref(300); // 5 minutes in seconds
     const countdownTimer = ref(null);
-    const activeTab = ref('heatmap');
+
     const originalText = ref(props.content);
     const pastAttempts = ref([]);
     const attemptNumber = ref(1);
@@ -794,14 +747,15 @@ export default {
     const getRetentionCurvePath = (withPractice = false) => {
       // Start from the current performance
       const startY = withPractice ? 50 : 50; // Start at the same point
+      const xAxisOffset = 80; // New x-axis starting point
       
       if (withPractice) {
         // Enhanced retention curve with spaced repetition
-        let pathData = `M50,${startY}`;
+        let pathData = `M${xAxisOffset},${startY}`;
         
         // Plot the curve with recovery at review points
         // This creates a sawtooth pattern that rises at each review
-        let xPos = 50;
+        let xPos = xAxisOffset;
         let yPos = startY;
         
         // Sort review schedule by time
@@ -809,7 +763,7 @@ export default {
         
         // Initial decline (first segment before any reviews)
         if (sortedSchedule.length > 0) {
-          const firstReviewX = 50 + calculateGraphPosition(sortedSchedule[0]);
+          const firstReviewX = xAxisOffset + calculateGraphPosition(sortedSchedule[0]);
           
           // Calculate natural memory decay to first review point
           const decayY = Math.min(140, startY + 30);
@@ -821,7 +775,7 @@ export default {
           
           // Add each review point with a boost in retention
           sortedSchedule.forEach((date, i) => {
-            const reviewX = 50 + calculateGraphPosition(date);
+            const reviewX = xAxisOffset + calculateGraphPosition(date);
             
             // Skip if this is the first point (already handled)
             if (i === 0) return;
@@ -841,17 +795,17 @@ export default {
           pathData += ` C${xPos + 20},${yPos + 5} ${400 - 20},${yPos + 10} ${400},${yPos + 15}`;
         } else {
           // If no review schedule, show a generic curve
-          pathData += ` C150,${startY + 20} 300,${startY + 40} 400,${startY + 60}`;
+          pathData += ` C${xAxisOffset + 70},${startY + 20} ${xAxisOffset + 220},${startY + 40} ${400},${startY + 60}`;
         }
         
         return pathData;
       } else {
         // Standard forgetting curve without practice (exponential decay)
-        let pathData = `M50,${startY}`;
+        let pathData = `M${xAxisOffset},${startY}`;
         
         // Create exponential forgetting curve based on Ebbinghaus
-        pathData += ` C100,${startY + 30} 150,${startY + 60} 200,${startY + 80}`;
-        pathData += ` C250,${startY + 90} 300,${startY + 95} 400,${startY + 100}`;
+        pathData += ` C${xAxisOffset + 50},${startY + 30} ${xAxisOffset + 100},${startY + 60} ${xAxisOffset + 150},${startY + 80}`;
+        pathData += ` C${xAxisOffset + 200},${startY + 90} ${xAxisOffset + 250},${startY + 95} ${400},${startY + 100}`;
         
         return pathData;
       }
@@ -1179,7 +1133,7 @@ export default {
       reviewSchedule,
       timeLeft,
       matchPercentageClass,
-      activeTab,
+
       originalText,
       pastAttempts,
       attemptNumber,
@@ -1632,129 +1586,7 @@ export default {
   border-radius: var(--radius-full);
 }
 
-/* Comparison Tabs */
-.comparison-container {
-  margin-top: var(--spacing-8);
-  margin-bottom: var(--spacing-8);
-  border: 1px solid var(--neutral-200);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
 
-.tabs {
-  display: flex;
-  background-color: var(--neutral-100);
-  border-bottom: 1px solid var(--neutral-200);
-}
-
-.tab-button {
-  flex: 1;
-  padding: var(--spacing-3) var(--spacing-4);
-  background-color: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  font-weight: var(--font-weight-medium);
-  transition: all var(--transition-normal);
-  color: var(--neutral-600);
-}
-
-.tab-button.active {
-  border-bottom-color: var(--primary-color);
-  color: var(--primary-color);
-}
-
-.tab-button:hover:not(.active) {
-  background-color: rgba(99, 102, 241, 0.05);
-  color: var(--neutral-900);
-}
-
-.tab-content {
-  padding: var(--spacing-6);
-}
-
-/* Heatmap */
-.heatmap-section h5,
-.split-section h5,
-.history-view h5 {
-  margin-bottom: var(--spacing-4);
-  font-weight: var(--font-weight-semibold);
-}
-
-.heatmap-container {
-  background-color: var(--neutral-50);
-  padding: var(--spacing-4);
-  border-radius: var(--radius-md);
-  margin-bottom: var(--spacing-4);
-  line-height: 1.8;
-}
-
-.heatmap-text {
-  position: relative;
-  margin-right: 3px;
-  padding: 2px 4px;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
-}
-
-.heatmap-matched {
-  background-color: rgba(16, 185, 129, 0.15);
-}
-
-.heatmap-matched::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: #10b981;
-}
-
-.heatmap-unmatched {
-  background-color: rgba(239, 68, 68, 0.1);
-}
-
-.heatmap-unmatched::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: #ef4444;
-}
-
-.heatmap-legend {
-  display: flex;
-  gap: var(--spacing-6);
-  justify-content: center;
-}
-
-/* Split View */
-.split-view {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-4);
-}
-
-.split-content {
-  background-color: var(--neutral-50);
-  padding: var(--spacing-4);
-  border-radius: var(--radius-md);
-  height: 250px;
-  overflow-y: auto;
-  font-size: var(--font-size-sm);
-  line-height: 1.6;
-}
-
-.split-content.original {
-  border-left: 3px solid var(--primary-color);
-}
-
-.split-content.recall {
-  border-left: 3px solid var(--secondary-color);
-}
 
 /* Next Steps - Redesigned */
 .next-steps {
@@ -2065,10 +1897,7 @@ export default {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .split-view {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-4);
-  }
+
   
   .schedule-grid {
     grid-template-columns: 1fr;

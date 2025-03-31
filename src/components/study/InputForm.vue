@@ -540,6 +540,25 @@
             </div>
           </div>
           
+          <!-- Learning Deadline Selection for AI-generated cards -->
+          <div class="form-group">
+            <label for="deadline" class="form-label">Learning Deadline <span class="optional-label">(optional)</span></label>
+            <div class="deadline-selection">
+              <div class="deadline-presets">
+                <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '1' }" @click="selectDeadline('1')">1 Day</button>
+                <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '3' }" @click="selectDeadline('3')">3 Days</button>
+                <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '7' }" @click="selectDeadline('7')">1 Week</button>
+                <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '14' }" @click="selectDeadline('14')">2 Weeks</button>
+                <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '30' }" @click="selectDeadline('30')">1 Month</button>
+                <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === 'custom' }" @click="selectDeadline('custom')">Custom</button>
+              </div>
+              <div v-if="deadline === 'custom'" class="custom-deadline-input">
+                <input type="date" v-model="customDeadlineDate" class="form-control" :min="minDate">
+              </div>
+            </div>
+            <p class="form-text deadline-helper">Setting a deadline will optimize your review schedule based on when you need to learn this material.</p>
+          </div>
+          
           <div class="form-actions">
             <button type="button" @click="generateWithAi" class="btn btn-primary btn-lg" :disabled="loading || !canGenerateWithAi">
               <span v-if="loading" class="loading-spinner"></span>
@@ -551,7 +570,7 @@
         <!-- AI Result Preview Step -->
         <div v-if="aiStep === 'preview'" class="ai-preview-container">
           <h4 class="preview-title">AI-Generated Study Materials</h4>
-          <p class="preview-description">Review the generated materials below. You can edit, remove, or save them as is.</p>
+          <p class="preview-description">Review the generated materials below. You can edit, remove, or save them as is. All cards will have the same category and learning deadline you selected.</p>
           
           <!-- Show error if generation failed -->
           <div v-if="error" class="alert alert-danger">
@@ -1079,6 +1098,12 @@ export default {
           return;
         }
         
+        // Check if category is selected
+        if (!selectedCategoryOption.value) {
+          error.value = 'Please select a category for your study materials';
+          return;
+        }
+        
         // Call the DeepseekService to generate materials
         // Import the DeepseekService
         import('@/services/deepseek.service').then(async (module) => {
@@ -1136,6 +1161,12 @@ export default {
           return;
         }
         
+        // Check if category is selected
+        if (!category.value) {
+          error.value = 'Please select a category for your study materials';
+          return;
+        }
+        
         // Determine deadline in days if any was selected
         const deadlineDays = getDeadlineInDays();
         
@@ -1145,8 +1176,8 @@ export default {
             auth.currentUser.uid,
             material.title || 'Untitled Material',
             material.content,
-            category.value,
-            deadlineDays
+            category.value, // All cards will have the same category
+            deadlineDays    // All cards will have the same learning deadline
           );
         });
         

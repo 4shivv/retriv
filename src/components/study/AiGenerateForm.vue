@@ -129,23 +129,64 @@
     </div>
 
     <div class="generate-options">
-      <label class="option-label">
-        Number of study cards to generate:
-        <div class="counter-input">
-          <button class="counter-btn" @click="decrementCardCount" :disabled="cardCount <= 1">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-          </button>
-          <input type="number" v-model.number="cardCount" min="1" max="20" class="counter-value" />
-          <button class="counter-btn" @click="incrementCardCount" :disabled="cardCount >= 20">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-          </button>
+      <!-- Card Count Option -->
+      <div class="option-group">
+        <label class="option-label">
+          Number of study cards to generate:
+          <div class="counter-input">
+            <button class="counter-btn" @click="decrementCardCount" :disabled="cardCount <= 1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+            <input type="number" v-model.number="cardCount" min="1" max="20" class="counter-value" />
+            <button class="counter-btn" @click="incrementCardCount" :disabled="cardCount >= 20">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+        </label>
+      </div>
+      
+      <!-- Category Selection -->
+      <div class="option-group">
+        <label class="option-label">Category:</label>
+        <select v-model="selectedCategory" class="form-control">
+          <option value="" disabled>Select a category</option>
+          <!-- System Categories -->
+          <optgroup label="Default Categories">
+            <option v-for="cat in systemCategories" :key="cat" :value="cat">{{ cat }}</option>
+          </optgroup>
+          <!-- Custom Categories -->
+          <optgroup label="Your Categories" v-if="userCustomCategories.length > 0">
+            <option v-for="cat in userCustomCategories" :key="cat" :value="cat">{{ cat }}</option>
+          </optgroup>
+          <!-- Frequent Categories -->
+          <optgroup label="Frequently Used" v-if="frequentCategories.length > 0">
+            <option v-for="cat in frequentCategories" :key="cat" :value="cat">{{ cat }}</option>
+          </optgroup>
+        </select>
+      </div>
+      
+      <!-- Learning Deadline -->
+      <div class="option-group">
+        <label class="option-label">Learning Deadline (optional):</label>
+        <div class="deadline-selection">
+          <div class="deadline-presets">
+            <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '1' }" @click="selectDeadline('1')">1 Day</button>
+            <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '3' }" @click="selectDeadline('3')">3 Days</button>
+            <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '7' }" @click="selectDeadline('7')">1 Week</button>
+            <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '14' }" @click="selectDeadline('14')">2 Weeks</button>
+            <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '30' }" @click="selectDeadline('30')">1 Month</button>
+            <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === 'custom' }" @click="selectDeadline('custom')">Custom</button>
+          </div>
+          <div v-if="deadline === 'custom'" class="custom-deadline-input">
+            <input type="date" v-model="customDeadlineDate" class="form-control" :min="minDate">
+          </div>
         </div>
-      </label>
+      </div>
     </div>
 
     <div class="form-actions">
@@ -196,10 +237,27 @@
         <div class="selection-info">
           {{ selectedCount }} of {{ generatedMaterials.length }} cards selected
         </div>
+        <div class="selection-details" v-if="selectedCount > 0">
+          <div class="selection-detail-item">
+            <span class="detail-label">Category:</span>
+            <span class="detail-value">{{ selectedCategory }}</span>
+          </div>
+          <div class="selection-detail-item" v-if="deadline">
+            <span class="detail-label">Learning Deadline:</span>
+            <span class="detail-value">
+              {{ deadline === 'custom' ? formatCustomDeadline(customDeadlineDate) : 
+                 deadline === '1' ? '1 Day' :
+                 deadline === '3' ? '3 Days' :
+                 deadline === '7' ? '1 Week' :
+                 deadline === '14' ? '2 Weeks' :
+                 deadline === '30' ? '1 Month' : '' }}
+            </span>
+          </div>
+        </div>
         <button class="btn btn-select-all" @click="toggleSelectAll">
           {{ allSelected ? 'Deselect All' : 'Select All' }}
         </button>
-        <button class="btn btn-save" @click="saveMaterials" :disabled="selectedCount === 0">
+        <button class="btn btn-save" @click="saveMaterials" :disabled="selectedCount === 0 || !selectedCategory">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
             <polyline points="17 21 17 13 7 13 7 21"></polyline>
@@ -216,18 +274,40 @@
 import { ref, computed, onMounted } from 'vue';
 import DeepseekService from '@/services/deepseek.service';
 import StudyService from '@/services/study.service';
+import { auth } from '@/services/firebase';
+import { useRouter } from 'vue-router';
 
 export default {
   name: 'AiGenerateForm',
   emits: ['cancel', 'material-saved', 'materials-saved'],
   
   setup(props, { emit }) {
+    const router = useRouter();
     // Form state
     const sourceType = ref('text');
     const sourceContent = ref('');
     const cardCount = ref(5);
     const isGenerating = ref(false);
     const generatedMaterials = ref([]);
+    
+    // Category and deadline state
+    const selectedCategory = ref('');
+    const deadline = ref('');
+    const customDeadlineDate = ref('');
+    
+    // Predefined categories
+    const systemCategories = [
+      'Programming',
+      'Languages',
+      'Science',
+      'Math',
+      'History',
+      'Art'
+    ];
+    
+    // Custom categories
+    const userCustomCategories = ref([]);
+    const frequentCategories = ref([]);
     
     // File upload state
     const fileInput = ref(null);
@@ -411,23 +491,43 @@ export default {
         return;
       }
       
+      if (!selectedCategory.value) {
+        alert('Please select a category for your study materials');
+        return;
+      }
+      
       try {
+        // Check if user is authenticated
+        if (!auth.currentUser) {
+          console.error("No authenticated user");
+          alert("You must be logged in to save materials");
+          router.push('/login');
+          return;
+        }
+        
+        // Determine deadline in days
+        const deadlineDays = getDeadlineInDays();
+        
         // Save each material to the database
         const savedMaterials = [];
         
         for (const material of selectedMaterials) {
           const materialId = await StudyService.saveStudyMaterial(
-            null, // userId (will use current user from auth)
+            auth.currentUser.uid,
             material.title,
             material.content,
-            'AI Generated'
+            selectedCategory.value, // Use the selected category
+            deadlineDays           // Use the deadline
           );
           
           savedMaterials.push({
             id: materialId,
             title: material.title,
             content: material.content,
-            category: 'AI Generated'
+            category: selectedCategory.value,
+            deadline: deadlineDays,
+            createdAt: new Date(),
+            userId: auth.currentUser.uid
           });
         }
         
@@ -481,6 +581,86 @@ export default {
       return content || '';
     };
     
+    // Deadline handling
+    const minDate = computed(() => {
+      const today = new Date();
+      return today.toISOString().split('T')[0];
+    });
+    
+    const selectDeadline = (value) => {
+      deadline.value = value;
+      if (value !== 'custom') {
+        customDeadlineDate.value = '';
+      } else {
+        // Set default custom date to 2 weeks from now if none selected yet
+        if (!customDeadlineDate.value) {
+          const defaultDate = new Date();
+          defaultDate.setDate(defaultDate.getDate() + 14);
+          customDeadlineDate.value = defaultDate.toISOString().split('T')[0];
+        }
+      }
+    };
+    
+    // Format custom deadline date for display
+    const formatCustomDeadline = (dateStr) => {
+      if (!dateStr) return '';
+      
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    };
+    
+    // Convert deadline selection to days for the API
+    const getDeadlineInDays = () => {
+      if (!deadline.value) return null;
+      
+      if (deadline.value === 'custom' && customDeadlineDate.value) {
+        const selectedDate = new Date(customDeadlineDate.value);
+        const today = new Date();
+        const diffTime = Math.abs(selectedDate - today);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+      }
+      
+      return deadline.value === 'custom' ? null : parseInt(deadline.value);
+    };
+    
+    // Load user's custom categories
+    const loadUserCustomCategories = async () => {
+      try {
+        const materials = await StudyService.getStudyMaterials();
+        const customCats = new Set();
+        
+        materials.forEach(material => {
+          if (material.category && !systemCategories.includes(material.category)) {
+            customCats.add(material.category);
+          }
+        });
+        
+        userCustomCategories.value = Array.from(customCats);
+      } catch (err) {
+        console.error('Failed to load custom categories:', err);
+      }
+    };
+    
+    // Load frequent categories from localStorage
+    const loadFrequentCategories = () => {
+      const saved = localStorage.getItem('frequentCategories');
+      if (saved) {
+        try {
+          frequentCategories.value = JSON.parse(saved);
+        } catch (e) {
+          console.error('Failed to parse frequent categories:', e);
+          frequentCategories.value = [];
+        }
+      }
+    };
+    
+    // Load categories on mount
+    onMounted(() => {
+      loadUserCustomCategories();
+      loadFrequentCategories();
+    });
+    
     return {
       sourceType,
       sourceContent,
@@ -496,6 +676,13 @@ export default {
       canGenerate,
       selectedCount,
       allSelected,
+      selectedCategory,
+      deadline,
+      customDeadlineDate,
+      systemCategories,
+      userCustomCategories,
+      frequentCategories,
+      minDate,
       incrementCardCount,
       decrementCardCount,
       triggerFileInput,
@@ -508,7 +695,10 @@ export default {
       toggleSelectAll,
       saveMaterials,
       cancelGeneration,
-      formatContentForDisplay
+      formatContentForDisplay,
+      selectDeadline,
+      formatCustomDeadline,
+      getDeadlineInDays
     };
   }
 };
@@ -522,6 +712,12 @@ export default {
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.option-group {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e9ecef;
 }
 
 .form-header {
@@ -906,12 +1102,43 @@ export default {
   align-items: center;
   gap: 1rem;
   margin-top: 1rem;
+  flex-wrap: wrap;
 }
 
 .selection-info {
   font-size: 0.9rem;
   color: #6c757d;
   margin-right: auto;
+}
+
+.selection-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-right: auto;
+  background-color: #f8f9fa;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.selection-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #6c757d;
+}
+
+.detail-value {
+  color: #333;
+  font-weight: 600;
 }
 
 .btn-select-all {
@@ -942,6 +1169,46 @@ export default {
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+/* Deadline Selection Styling */
+.deadline-selection {
+  margin-bottom: 0.5rem;
+}
+
+.deadline-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.deadline-preset-button {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ced4da;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #495057;
+}
+
+.deadline-preset-button:hover {
+  border-color: #6c5ce7;
+  background-color: rgba(108, 92, 231, 0.05);
+}
+
+.deadline-preset-button.active {
+  background-color: #6c5ce7;
+  border-color: #6c5ce7;
+  color: white;
+}
+
+.custom-deadline-input {
+  max-width: 300px;
+  margin-top: 0.5rem;
+  animation: fadeIn 0.3s;
 }
 
 @media (max-width: 768px) {

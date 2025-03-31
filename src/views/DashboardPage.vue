@@ -344,14 +344,41 @@
               </svg>
               <span>Back to Materials</span>
             </button>
+            
+            <!-- Study Method Switcher -->
+            <div class="study-method-selector">
+              <button 
+                class="method-button" 
+                :class="{ active: studyMethod === 'blurting' }" 
+                @click="studyMethod = 'blurting'">
+                Blurting
+              </button>
+              <button 
+                class="method-button" 
+                :class="{ active: studyMethod === 'feynman' }" 
+                @click="studyMethod = 'feynman'">
+                Feynman Technique
+              </button>
+            </div>
           </div>
 
           <BlurtingForm 
+            v-if="studyMethod === 'blurting'"
             :material-id="currentMaterial.id"
             :title="currentMaterial.title"
             :content="currentMaterial.content"
             @reset="currentMode = 'list'"
             @study-again="handleStudyAgain"
+          />
+          
+          <FeynmanTechnique 
+            v-else-if="studyMethod === 'feynman'"
+            :material-id="currentMaterial.id"
+            :title="currentMaterial.title"
+            :content="currentMaterial.content"
+            start-mode="form"
+            @reset="currentMode = 'list'"
+            @completed="handleFeynmanCompleted"
           />
         </div>
       </template>
@@ -394,6 +421,7 @@ import MaterialList from '@/components/study/MaterialList.vue';
 import InputForm from '@/components/study/InputForm.vue';
 import BlurtingForm from '@/components/study/BlurtingForm.vue';
 import CalendarButton from '@/components/study/CalendarButton.vue';
+import FeynmanTechnique from '@/components/study/feynman/FeynmanTechnique.vue';
 import StudyService from '@/services/study.service';
 
 export default {
@@ -402,11 +430,13 @@ export default {
     MaterialList,
     InputForm,
     BlurtingForm,
-    CalendarButton
+    CalendarButton,
+    FeynmanTechnique
   },
   
   setup() {
-    const currentMode = ref('list'); // 'list', 'create', 'study'
+    const currentMode = ref('list'); // 'list', 'create', 'study', 'feynman'
+    const studyMethod = ref('blurting'); // 'blurting' or 'feynman'
     const currentMaterial = ref(null);
     const loading = ref(true);
     const materials = ref([]);
@@ -1048,6 +1078,15 @@ export default {
       console.log("Study Again clicked for:", currentMaterial.value.title);
     };
     
+    const handleFeynmanCompleted = (result) => {
+      console.log("Feynman technique completed with results:", result);
+      // Optional: do something with the results, such as showing a notification
+      // or updating retention stats
+      
+      // Refresh materials to update any stats
+      fetchMaterials();
+    };
+    
     // Update material categories based on current materials
     const updateMaterialCategories = () => {
       // Reset counts
@@ -1156,6 +1195,7 @@ export default {
     return {
       currentMode,
       currentMaterial,
+      studyMethod,
       loading,
       materials,
       filteredMaterials,
@@ -1179,6 +1219,7 @@ export default {
       handleCategoryDeleted,
       handleCategoryDeleteClick,
       handleStudyAgain,
+      handleFeynmanCompleted,
       filterMaterials,
       applyFilters,
       resetFilters,
@@ -1278,7 +1319,42 @@ export default {
 
 /* Improved Back Button */
 .back-button-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: var(--spacing-8);
+}
+
+/* Study Method Selector */
+.study-method-selector {
+  display: flex;
+  gap: var(--spacing-2);
+  background-color: var(--neutral-100);
+  padding: 0.25rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.method-button {
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-md);
+  border: none;
+  background-color: transparent;
+  color: var(--neutral-600);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.method-button.active {
+  background-color: white;
+  color: var(--primary-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.method-button:hover:not(.active) {
+  background-color: var(--neutral-200);
+  color: var(--neutral-800);
 }
 
 .back-button {

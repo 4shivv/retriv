@@ -13,6 +13,123 @@ const API_KEY = process.env.VUE_APP_DEEPSEEK_API_KEY;
 
 const DeepseekService = {
   /**
+   * Evaluate a Feynman Technique explanation against the original source content
+   * @param {string} sourceContent - The original source content
+   * @param {string} explanation - The user's explanation
+   * @returns {Object} Evaluation results including feedback and score
+   */
+  async evaluateFeynmanExplanation(sourceContent, explanation) {
+    // First check if the user is authenticated
+    if (!auth.currentUser) {
+      throw new Error("You must be logged in to use Feynman technique features");
+    }
+    
+    try {
+      // Prepare the system prompt for Feynman technique evaluation
+      const systemPrompt = "You are an expert tutor and educational coach who specializes in the Feynman Technique, which involves explaining complex topics in simple terms to deepen understanding.";
+      
+      // Prepare the user prompt for the evaluation
+      const userPrompt = `I'm practicing the Feynman Technique. Below is the ORIGINAL CONTENT I'm learning, followed by MY EXPLANATION where I tried to explain it in my own simple words.
+
+ORIGINAL CONTENT:
+${sourceContent}
+
+MY EXPLANATION:
+${explanation}
+
+Please evaluate my explanation using the Feynman Technique principles. Provide constructive feedback on:
+
+1. Strengths of my explanation
+2. Gaps or misunderstandings in my explanation
+3. Suggestions for improvement
+
+Also, give me a numerical score (0-100) representing my understanding level based on my explanation.
+
+Format your response as a structured JSON with the following fields:
+- understandingScore: a number between 0-100
+- feedback: an object containing arrays for 'strengths', 'gaps', and 'suggestions'
+
+For example:
+{
+  "understandingScore": 75,
+  "feedback": {
+    "strengths": ["Clear explanation of X", "Good use of analogy for Y"],
+    "gaps": ["Misunderstood concept Z", "Missed important point A"],
+    "suggestions": ["Try using analogy B", "Focus more on concept C"]
+  }
+}`;
+      
+      // Call the Deepseek API
+      const response = await fetch(`${API_BASE_URL}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          stream: false
+        })
+      });
+      
+      // Parse response
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`API error: ${errorData.error?.message || 'Unknown error'}`);
+      }
+      
+      const responseData = await response.json();
+      const generatedContent = responseData.choices[0]?.message?.content;
+      
+      if (!generatedContent) {
+        throw new Error('No evaluation generated from AI');
+      }
+      
+      // Parse the JSON response
+      try {
+        // Extract JSON from response if wrapped in code blocks
+        let jsonContent = generatedContent;
+        const jsonMatch = generatedContent.match(/```(?:json)?\s*([\s\S]+?)\s*```/);
+        if (jsonMatch && jsonMatch[1]) {
+          jsonContent = jsonMatch[1];
+        }
+        
+        // Clean up any markdown code block markers
+        jsonContent = jsonContent.replace(/^```(?:json)?/m, '').replace(/```$/m, '').trim();
+        
+        // Parse the JSON
+        const evaluation = JSON.parse(jsonContent);
+        
+        // Ensure the structure is as expected
+        if (!evaluation.understandingScore || !evaluation.feedback) {
+          throw new Error('Evaluation structure is not as expected');
+        }
+        
+        return evaluation;
+      } catch (parseError) {
+        console.error('Error parsing AI evaluation:', parseError);
+        
+        // Fallback with default structure if JSON parsing fails
+        return {
+          understandingScore: 50,
+          feedback: {
+            strengths: ["You've made an attempt at explaining the concept"],
+            gaps: ["There might be some gaps in understanding the full concept"],
+            suggestions: ["Try breaking down the concept into simpler terms", "Use analogies to explain complex ideas"]
+          }
+        };
+      }
+    } catch (error) {
+      console.error('Error evaluating Feynman explanation:', error);
+      throw new Error(`Failed to evaluate explanation: ${error.message}`);
+    }
+  },
+
+  /**
    * Generate study materials from the provided content
    * @param {string} sourceContent - The source content provided by the user
    * @param {string} sourceType - Type of source: 'text', 'question', or 'file'

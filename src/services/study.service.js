@@ -1274,6 +1274,102 @@ const StudyService = {
     }
   },
   
+  async saveFeynmanSession(materialId, title, initialExplanation, refinedExplanation, feedback, initialScore, finalScore) {
+    // First check if the user is authenticated
+    if (!auth.currentUser) {
+      throw new Error("You must be logged in to save Feynman sessions");
+    }
+    
+    try {
+      console.log("Saving Feynman session for material:", materialId);
+      
+      // Create the feynman_sessions collection if it doesn't exist
+      // by first attempting to get a document from it
+      try {
+        const testQuery = query(
+          collection(db, 'feynman_sessions'),
+          limit(1)
+        );
+        await getDocs(testQuery);
+      } catch (err) {
+        console.log("First time accessing feynman_sessions collection");
+        // Collection will be created automatically when we add the document
+      }
+      
+      // Create a new Feynman session document
+      const docRef = await addDoc(collection(db, 'feynman_sessions'), {
+        materialId,
+        userId: auth.currentUser.uid,
+        title,
+        initialExplanation,
+        refinedExplanation,
+        feedback,
+        initialScore,
+        finalScore,
+        timestamp: serverTimestamp()
+      });
+      
+      console.log("Feynman session saved successfully with ID:", docRef.id);
+      return docRef.id;
+    } catch (error) {
+      console.error("Error saving Feynman session:", error);
+      throw new Error(`Failed to save Feynman session: ${error.message}`);
+    }
+  },
+  
+  async getFeynmanSessions(materialId) {
+    // First check if the user is authenticated
+    if (!auth.currentUser) {
+      throw new Error("You must be logged in to view Feynman sessions");
+    }
+    
+    try {
+      // Query sessions for this material ordered by timestamp (newest first)
+      try {
+        const q = query(
+          collection(db, 'feynman_sessions'),
+          where('materialId', '==', materialId),
+          where('userId', '==', auth.currentUser.uid),
+          orderBy('timestamp', 'desc')
+        );
+        
+        const querySnapshot = await getDocs(q);
+        
+        return querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+      } catch (indexError) {
+        // If index error occurs, use a simpler query and sort manually
+        console.warn("Index not found error in getFeynmanSessions, using fallback query:", indexError);
+        
+        const fallbackQuery = query(
+          collection(db, 'feynman_sessions'),
+          where('materialId', '==', materialId),
+          where('userId', '==', auth.currentUser.uid)
+        );
+        
+        const fallbackSnapshot = await getDocs(fallbackQuery);
+        
+        // Sort manually (newest first)
+        return fallbackSnapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }))
+          .sort((a, b) => {
+            if (!a.timestamp || !b.timestamp) return 0;
+            const timeA = a.timestamp.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+            const timeB = b.timestamp.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+            return timeB - timeA;
+          });
+      }
+    } catch (error) {
+      console.error("Error fetching Feynman sessions:", error);
+      throw new Error(`Failed to fetch Feynman sessions: ${error.message}`);
+    }
+  },
+  
   async getLatestRetentionScore(materialId) {
     if (!auth.currentUser) {
       throw new Error("You must be logged in to view retention scores");

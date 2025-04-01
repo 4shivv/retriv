@@ -34,13 +34,25 @@
         </div>
 
         <div class="footer-links">
-          <div class="footer-group">
+          <!-- Different footer links for logged-out users -->
+          <div class="footer-group" v-if="!isAuthenticated">
             <h3 class="footer-heading">Product</h3>
             <ul class="footer-list">
               <li><a href="#how-it-works">How It Works</a></li>
               <li><a href="#science">The Science</a></li>
+              <li><a href="#testimonials">Testimonials</a></li>
               <li><a href="#">Pricing</a></li>
               <li><a href="#">FAQs</a></li>
+            </ul>
+          </div>
+
+          <!-- Different footer links for logged-in users -->
+          <div class="footer-group" v-else>
+            <h3 class="footer-heading">App</h3>
+            <ul class="footer-list">
+              <li><router-link to="/dashboard">Dashboard</router-link></li>
+              <li><router-link to="/profile">Profile</router-link></li>
+              <li><a href="#">Help Center</a></li>
             </ul>
           </div>
 
@@ -101,16 +113,25 @@
 
 <script>
 import { computed } from 'vue';
+import { useStore } from 'vuex';
 
 export default {
   name: 'AppFooter',
   setup() {
+    const store = useStore();
+    
     const currentYear = computed(() => {
       return new Date().getFullYear();
     });
+    
+    // Check if user is authenticated
+    const isAuthenticated = computed(() => {
+      return store.getters['auth/isAuthenticated'];
+    });
 
     return {
-      currentYear
+      currentYear,
+      isAuthenticated
     };
   }
 }

@@ -11,7 +11,10 @@ const routes = [
     path: '/',
     name: 'Home',
     component: HomePage,
-    meta: { title: 'Retriv - Learn Faster, Remember Longer' }
+    meta: { 
+      title: 'Retriv - Learn Faster, Remember Longer',
+      redirectIfAuth: '/dashboard' // Redirect authenticated users to dashboard
+    }
   },
   {
     path: '/login',
@@ -100,6 +103,7 @@ router.beforeEach(async (to, from, next) => {
   const currentUser = auth.currentUser;
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const requiresGuest = to.matched.some(record => record.meta.requiresGuest);
+  const redirectIfAuth = to.matched.some(record => record.meta.redirectIfAuth);
   
   if (requiresAuth && !currentUser) {
     // If route requires auth and user is not logged in, redirect to login
@@ -110,6 +114,9 @@ router.beforeEach(async (to, from, next) => {
   } else if (requiresGuest && currentUser) {
     // If route requires guest (non-authenticated) and user is logged in, redirect to dashboard
     next('/dashboard');
+  } else if (redirectIfAuth && currentUser) {
+    // If route should redirect authenticated users and user is logged in, redirect to dashboard
+    next(to.meta.redirectIfAuth || '/dashboard');
   } else {
     // Proceed normally
     next();

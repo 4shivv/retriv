@@ -1,5 +1,10 @@
 <template>
   <div class="home-page">
+    <!-- Redirect Message (only shown briefly before router redirects) -->
+    <div v-if="isAuthenticated" class="redirect-message">
+      <div class="spinner"></div>
+      <p>Redirecting to your dashboard...</p>
+    </div>
     <!-- Hero Section -->
     <section class="hero">
       <div class="container">
@@ -249,7 +254,7 @@
     </section>
     
     <!-- Testimonials Section -->
-    <section class="section testimonials-section">
+    <section id="testimonials" class="section testimonials-section">
       <div class="container">
         <div class="section-header text-center">
           <h2 class="section-title">What Our Users Say</h2>
@@ -334,6 +339,35 @@
 </template>
 
 <style scoped>
+/* Redirect Message */
+.redirect-message {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(99, 102, 241, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--spacing-4);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* Hero Section */
 .hero {
   position: relative;
@@ -1147,11 +1181,18 @@
 </style>
 
 <script>
-// Add onMounted at import
-import { onMounted } from 'vue';
+// Add imports
+import { onMounted, computed } from 'vue';
+import { useStore } from 'vuex';
 
 export default {
   setup() {
+    const store = useStore();
+    
+    // Check if user is authenticated
+    const isAuthenticated = computed(() => {
+      return store.getters['auth/isAuthenticated'];
+    });
     // Handle smooth scrolling for anchor links within the home page
     const handleSmoothScroll = () => {
       // Get all anchor links that point to sections on this page
@@ -1188,7 +1229,9 @@ export default {
       handleSmoothScroll();
     });
     
-    return {};
+    return {
+      isAuthenticated
+    };
   }
 }
 </script>

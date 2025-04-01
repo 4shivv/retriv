@@ -13,15 +13,28 @@
         
         <div class="navbar-menu" :class="{ 'is-active': menuOpen }">
           <ul class="navbar-links">
-            <li class="nav-item">
-              <router-link to="/#how-it-works" class="nav-link" @click="closeMenu" :class="{ 'no-active': true }">How It Works</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link to="/#science" class="nav-link" @click="closeMenu" :class="{ 'no-active': true }">Science</router-link>
-            </li>
-            <li class="nav-item" v-if="isAuthenticated">
-              <router-link to="/dashboard" class="nav-link" @click="closeMenu">Dashboard</router-link>
-            </li>
+            <!-- Links for logged-out users -->
+            <template v-if="!isAuthenticated">
+              <li class="nav-item">
+                <router-link to="/#how-it-works" class="nav-link" @click="closeMenu" :class="{ 'no-active': true }">How It Works</router-link>
+              </li>
+              <li class="nav-item">
+                <router-link to="/#science" class="nav-link" @click="closeMenu" :class="{ 'no-active': true }">Science</router-link>
+              </li>
+              <li class="nav-item">
+                <router-link to="/#testimonials" class="nav-link" @click="closeMenu" :class="{ 'no-active': true }">Testimonials</router-link>
+              </li>
+            </template>
+            
+            <!-- Links for logged-in users -->
+            <template v-else>
+              <li class="nav-item">
+                <router-link to="/dashboard" class="nav-link" @click="closeMenu">Dashboard</router-link>
+              </li>
+              <li class="nav-item">
+                <router-link to="/profile" class="nav-link" @click="closeMenu">Profile</router-link>
+              </li>
+            </template>
           </ul>
           
           <div class="navbar-actions">
@@ -42,12 +55,35 @@
                   </div>
                   <div class="user-dropdown-body">
                     <router-link to="/dashboard" class="dropdown-item" @click="closeUserMenu">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="3" y1="9" x2="21" y2="9"></line>
+                        <line x1="9" y1="21" x2="9" y2="9"></line>
+                      </svg>
                       Dashboard
                     </router-link>
                     <router-link to="/profile" class="dropdown-item" @click="closeUserMenu">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
                       Profile
                     </router-link>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" @click="handleAddNew">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                      Add New Material
+                    </button>
+                    <div class="dropdown-divider"></div>
                     <button class="dropdown-item text-danger" @click="handleLogout">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                      </svg>
                       Sign Out
                     </button>
                   </div>
@@ -159,6 +195,11 @@ export default {
       closeMenu();
     };
     
+    const handleAddNew = () => {
+      closeUserMenu();
+      router.push('/dashboard?action=create');
+    };
+    
     const handleLogout = async () => {
       try {
         await AuthService.logout();
@@ -207,6 +248,7 @@ export default {
       toggleUserMenu,
       closeUserMenu,
       navigateToHomeWithHash,
+      handleAddNew,
       handleLogout
     };
   }
@@ -447,6 +489,18 @@ export default {
 .dropdown-item.text-danger:hover {
   background-color: rgba(239, 68, 68, 0.1);
   color: #dc2626;
+}
+
+.dropdown-divider {
+  height: 1px;
+  margin: 0.5rem 0;
+  background-color: var(--neutral-200);
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 /* Mobile Menu Toggle */

@@ -1178,6 +1178,12 @@ export default {
           calculateAvgRetention()
         ]);
         
+        // Check if there's a query parameter to create a new material
+        const route = router.currentRoute.value;
+        if (route.query.action === 'create') {
+          currentMode.value = 'create';
+        }
+        
         // Add event listener to close filter menu when clicking outside
         document.addEventListener('click', closeFilterMenu);
       } catch (err) {

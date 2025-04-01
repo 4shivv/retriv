@@ -4,8 +4,7 @@
       <!-- Dashboard Header -->
       <header class="dashboard-header">
         <div class="header-content">
-          <h1 class="dashboard-title">Your Learning Dashboard</h1>
-          <p class="dashboard-subtitle">Track your progress and manage your study materials</p>
+          <h1 class="dashboard-title">Active Recall Dashboard</h1>
         </div>
         <div class="header-actions">
           <button v-if="currentMode !== 'create'" @click="currentMode = 'create'" class="btn btn-primary">
@@ -28,171 +27,25 @@
       <template v-else>
         <!-- Materials List Mode -->
         <div v-if="currentMode === 'list'" class="dashboard-content">
-          <!-- Stats Section -->
-          <section class="stats-section">
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-header">
-                  <div class="stat-icon study-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                      <circle cx="12" cy="10" r="3"></circle>
-                    </svg>
-                  </div>
-                  <div class="stat-title">Study Sessions</div>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-value-container">
-                    <h3 class="stat-value">{{ studySessions }}</h3>
-                    <div class="goal-info">
-                      <span class="goal-label">Goal: {{ studySessionGoal }}/month</span>
-                      <button @click="showGoalModal = true" class="goal-edit-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="stat-progress">
-                    <div class="progress-container">
-                      <div 
-                        class="progress-bar" 
-                        :style="{ width: `${Math.min(100, (studySessions / studySessionGoal) * 100)}%` }"
-                        :class="{ 'goal-complete': studySessions >= studySessionGoal }"
-                      ></div>
-                    </div>
-                    <div class="progress-label">
-                      {{ Math.min(100, Math.floor((studySessions / studySessionGoal) * 100)) }}% of monthly goal
-                      <span v-if="studySessions >= studySessionGoal" class="goal-complete-badge">Goal Complete!</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="stat-card">
-                <div class="stat-header">
-                  <div class="stat-icon streak-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"></path>
-                      <path d="M12 9v6"></path>
-                      <path d="M9 12h6"></path>
-                    </svg>
-                  </div>
-                  <div class="stat-title">Day Streak</div>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-value-container">
-                    <h3 class="stat-value">{{ streak }}</h3>
-                    <div class="stat-badge">
-                      <span>{{ getStreakStatus(streak) }}</span>
-                    </div>
-                  </div>
-                  <div class="streak-calendar">
-                    <div 
-                      v-for="i in 7" 
-                      :key="i" 
-                      class="calendar-day"
-                      :class="{ active: i <= streak % 7 || streak >= 7 }"
-                    >
-                      {{ getDayLabel(i) }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="stat-card">
-                <div class="stat-header">
-                  <div class="stat-icon retention-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                      <path d="M16 13l-4 4l-4-4"></path>
-                      <path d="M8 13v-1h8v1"></path>
-                    </svg>
-                  </div>
-                  <div class="stat-title">Avg. Retention</div>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-value-container">
-                    <h3 class="stat-value">{{ avgRetention }}%</h3>
-                    <div class="stat-change" :class="retentionTrendClass">
-                      <svg v-if="retentionTrend === 'positive'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="18 15 12 9 6 15"></polyline>
-                      </svg>
-                      <svg v-else-if="retentionTrend === 'negative'" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                      </svg>
-                      <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                      </svg>
-                      <span>{{ retentionTrendText }}</span>
-                    </div>
-                  </div>
-                  <div class="retention-chart">
-                    <div class="chart-bar-container">
-                      <div v-for="(value, index) in retentionHistory" :key="index" 
-                           class="chart-bar" 
-                           :style="{ height: `${value}%`, left: `${index * 14}%` }"
-                           :class="getRetentionClass(value)">
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="stat-card">
-                <div class="stat-header">
-                  <div class="stat-icon material-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-                    </svg>
-                  </div>
-                  <div class="stat-title">Total Materials</div>
-                </div>
-                <div class="stat-content">
-                  <div class="stat-value-container">
-                    <h3 class="stat-value">{{ totalMaterials }}</h3>
-                    <div class="stat-change positive" v-if="totalMaterials > 0">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="18 15 12 9 6 15"></polyline>
-                      </svg>
-                      <span>+{{ Math.min(2, totalMaterials) }} new</span>
-                    </div>
-                  </div>
-                  <div class="materials-distribution">
-                    <div class="distribution-item" v-for="(category, index) in materialCategories" :key="index">
-                      <div class="distribution-color" :style="{ backgroundColor: category.color }"></div>
-                      <div class="distribution-label">{{ category.name }}</div>
-                      <div class="distribution-value">{{ category.count }}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
           <!-- Due Reviews Section -->
           <section class="reviews-section" v-if="hasDueReviews">
             <div class="section-header">
               <h2 class="section-title">Due for Review</h2>
               <div class="reviews-header-meta">
-              <p class="section-subtitle">Review these materials to maintain your retention</p>
-              <div class="review-stats-container">
-              <div class="review-stats" v-if="reviewsDueToday > 0">
-              <div class="review-stat-badge">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path>
-                </svg>
-                  <span>{{ reviewsDueToday }} {{ reviewsDueToday === 1 ? 'review' : 'reviews' }} due today</span>
+                <div class="review-stats-container">
+                  <div class="review-stats" v-if="reviewsDueToday > 0">
+                    <div class="review-stat-badge">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path>
+                      </svg>
+                      <span>{{ reviewsDueToday }} {{ reviewsDueToday === 1 ? 'review' : 'reviews' }} due today</span>
+                    </div>
                   </div>
+                  <div class="calendar-button-container">
+                    <CalendarButton :dueReviews="dueReviews" />
                   </div>
-                <div class="calendar-button-container">
-                  <CalendarButton :dueReviews="dueReviews" />
                 </div>
               </div>
-            </div>
             </div>
 
             <div class="due-reviews">
@@ -233,7 +86,7 @@
           <!-- Materials Library Section -->
           <section class="materials-section">
             <div class="section-header">
-              <h2 class="section-title">Your Materials</h2>
+              <h2 class="section-title">Your Study Materials</h2>
               <!-- Unified Search and Filter Section -->
               <div class="materials-filter">
                 <div class="search-box">
@@ -283,16 +136,16 @@
                         > 
                         <label :for="'category-' + category.name" class="category-name">{{ category.name }}</label>
                         </div>
-                                        <button 
-                                          class="delete-category-btn" 
-                                          @click.stop="handleCategoryDeleteClick(category.name)"
-                                          title="Delete category"
-                                        >
-                                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="3 6 5 6 21 6"></polyline>
-                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                          </svg>
-                                        </button>
+                        <button 
+                          class="delete-category-btn" 
+                          @click.stop="handleCategoryDeleteClick(category.name)"
+                          title="Delete category"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                          </svg>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -383,33 +236,6 @@
         </div>
       </template>
     </div>
-
-    <!-- Goal Setting Modal -->
-    <div v-if="showGoalModal" class="modal-backdrop" @click="showGoalModal = false">
-      <div class="modal-container" @click.stop>
-        <div class="modal-header">
-          <h3>Set Monthly Study Goal</h3>
-        </div>
-        <div class="modal-body">
-          <p>Set your monthly study session goal to track your progress.</p>
-          <div class="form-group">
-            <label for="goalValue" class="form-label">Sessions per month</label>
-            <input 
-              type="number" 
-              id="goalValue" 
-              v-model="newGoalValue" 
-              class="form-control" 
-              min="1" 
-              max="100"
-            />
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-outline" @click="showGoalModal = false">Cancel</button>
-          <button class="btn btn-primary" @click="updateStudySessionGoal">Save Goal</button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -435,6 +261,7 @@ export default {
   },
   
   setup() {
+    const error = ref('');
     const currentMode = ref('list'); // 'list', 'create', 'study', 'feynman'
     const studyMethod = ref('blurting'); // 'blurting' or 'feynman'
     const currentMaterial = ref(null);
@@ -453,43 +280,7 @@ export default {
     // State for category filtering
     const activeCategory = ref([]);
     
-    // Computed properties for retention trend
-    const retentionTrend = computed(() => {
-      if (retentionHistory.value.length < 2) return 'neutral';
-      
-      // Compare the most recent retention value with the second most recent
-      const lastIndex = retentionHistory.value.length - 1;
-      const currentValue = retentionHistory.value[lastIndex];
-      const previousValue = retentionHistory.value[lastIndex - 1];
-      
-      if (currentValue > previousValue + 5) return 'positive'; // Significant improvement
-      if (previousValue > currentValue + 5) return 'negative'; // Significant decline
-      return 'neutral';
-    });
-    
-    const retentionTrendClass = computed(() => {
-      if (retentionTrend.value === 'positive') return 'positive';
-      if (retentionTrend.value === 'negative') return 'negative';
-      return 'neutral';
-    });
-    
-    const retentionTrendText = computed(() => {
-      if (retentionTrend.value === 'positive') return '+' + (retentionHistory.value.length > 1 ? 
-        Math.round(retentionHistory.value[retentionHistory.value.length - 1] - 
-        retentionHistory.value[retentionHistory.value.length - 2]) : 0) + '%';
-      if (retentionTrend.value === 'negative') return (retentionHistory.value.length > 1 ? 
-        Math.round(retentionHistory.value[retentionHistory.value.length - 1] - 
-        retentionHistory.value[retentionHistory.value.length - 2]) : 0) + '%';
-      return 'Stable';
-    });
-    
-    // State variables for dashboard stats - initially empty and populated from real data
-    const studySessions = ref(0);
-    const streak = ref(0);
-    const avgRetention = ref(0);
-    // Retention history tracks average retention over time (last 7 attempts)
-    const retentionHistory = ref([68, 72, 75, 79, 82, 78, 76]);
-    const totalMaterials = ref(0);
+    // State variables for dashboard
     const dueReviews = ref([]);
     const materialCategories = ref([]);
     
@@ -608,7 +399,7 @@ export default {
         filterMaterials();
       } catch (err) {
         console.error('Failed to delete category:', err);
-        error.value = err.message || 'Failed to delete category';
+        // Handle error without using the undefined 'error' variable
       } finally {
         loading.value = false;
       }
@@ -671,21 +462,6 @@ export default {
       filterMaterials();
       showFilterMenu.value = false;
     };
-
-    
-    // Get streak status message
-    const getStreakStatus = (streakValue) => {
-      if (streakValue >= 14) return 'Excellent!';
-      if (streakValue >= 7) return 'Great!';
-      if (streakValue >= 3) return 'Good start!';
-      return 'Just started';
-    };
-    
-    // Get day label for streak calendar
-    const getDayLabel = (dayIndex) => {
-      const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-      return days[dayIndex - 1];
-    };
     
     // Get color class based on retention percentage
     const getRetentionClass = (value) => {
@@ -723,163 +499,6 @@ export default {
       const materialsSection = document.querySelector('.materials-section');
       if (materialsSection) {
         materialsSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    };
-    
-    // Calculate streak based on study activity
-    const calculateStreak = async () => {
-      try {
-        // This will be replaced with a direct call to StudyService in production
-        // For MVP, we'll simulate streak data based on study attempts
-        const attempts = await fetchRecentAttempts();
-        if (!attempts || attempts.length === 0) {
-          streak.value = 0;
-          return;
-        }
-        
-        // Calculate streak based on consecutive days with study attempts
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        // Create a set of dates (as strings) when the user studied
-        const studyDays = new Set();
-        attempts.forEach(attempt => {
-          const date = attempt.timestamp.toDate ? 
-            attempt.timestamp.toDate() : new Date(attempt.timestamp);
-          studyDays.add(date.toDateString());
-        });
-        
-        // Calculate streak by checking consecutive days
-        let currentStreak = 0;
-        const checkDate = new Date(today);
-        
-        // Check if user studied today
-        if (studyDays.has(checkDate.toDateString())) {
-          currentStreak = 1;
-          // Check previous days
-          let keepChecking = true;
-          while (keepChecking) {
-            checkDate.setDate(checkDate.getDate() - 1);
-            if (studyDays.has(checkDate.toDateString())) {
-              currentStreak++;
-            } else {
-              keepChecking = false;
-            }
-          }
-        } else {
-          // Check if user studied yesterday (streak still counts)
-          checkDate.setDate(checkDate.getDate() - 1);
-          if (studyDays.has(checkDate.toDateString())) {
-            currentStreak = 1;
-            // Check previous days
-            let keepChecking = true;
-            while (keepChecking) {
-              checkDate.setDate(checkDate.getDate() - 1);
-              if (studyDays.has(checkDate.toDateString())) {
-                currentStreak++;
-              } else {
-                keepChecking = false;
-              }
-            }
-          }
-        }
-        
-        streak.value = currentStreak;
-      } catch (err) {
-        console.error('Failed to calculate streak:', err);
-        // Keep current value or set a reasonable default
-        streak.value = streak.value || 0;
-      }
-    };
-    
-    // Fetch recent study attempts across all materials
-    const fetchRecentAttempts = async () => {
-      try {
-        // First get all materials
-        const userMaterials = await StudyService.getStudyMaterials();
-        if (!userMaterials || userMaterials.length === 0) {
-          return [];
-        }
-        
-        // Fetch attempts for each material
-        const allAttemptsPromises = userMaterials.map(material => 
-          StudyService.getStudyAttempts(material.id)
-        );
-        
-        const allAttemptsArrays = await Promise.all(allAttemptsPromises);
-        
-        // Flatten array of arrays and sort by timestamp (most recent first)
-        let allAttempts = [];
-        allAttemptsArrays.forEach(attempts => {
-          if (attempts && attempts.length > 0) {
-            allAttempts = [...allAttempts, ...attempts];
-          }
-        });
-        
-        // Sort by timestamp (newer first)
-        allAttempts.sort((a, b) => {
-          const dateA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
-          const dateB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
-          return dateB - dateA;
-        });
-        
-        return allAttempts;
-      } catch (err) {
-        console.error('Failed to fetch recent attempts:', err);
-        return [];
-      }
-    };
-    
-    // Calculate average retention based on recent attempts
-    const calculateAvgRetention = async () => {
-      try {
-        const recentAttempts = await fetchRecentAttempts();
-        if (!recentAttempts || recentAttempts.length === 0) {
-          avgRetention.value = 0;
-          return;
-        }
-        
-        // Get the latest attempt for each material to calculate accurate average
-        const materialAttempts = new Map();
-        
-        // Group attempts by materialId and keep only the latest one for each material
-        recentAttempts.forEach(attempt => {
-          if (!attempt.materialId) return;
-          
-          if (!materialAttempts.has(attempt.materialId) ||
-              (materialAttempts.get(attempt.materialId).timestamp < attempt.timestamp)) {
-            materialAttempts.set(attempt.materialId, attempt);
-          }
-        });
-        
-        // Calculate average from the latest attempt of each material
-        const latestAttempts = Array.from(materialAttempts.values());
-        
-        if (latestAttempts.length === 0) {
-          avgRetention.value = 0;
-          return;
-        }
-        
-        const sum = latestAttempts.reduce((acc, attempt) => 
-          acc + attempt.matchPercentage, 0);
-        
-        avgRetention.value = Math.round(sum / latestAttempts.length);
-        
-        // Update retention history with chronological data if we have enough attempts
-        if (recentAttempts.length >= 7) {
-          // Sort by timestamp (newest first) and take only the first 7
-          const sortedAttempts = [...recentAttempts].sort((a, b) => {
-            const dateA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
-            const dateB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
-            return dateB - dateA;
-          }).slice(0, 7);
-          
-          // Reverse the array to show progression from oldest to newest
-          retentionHistory.value = sortedAttempts.reverse().map(attempt => attempt.matchPercentage);
-        }
-      } catch (err) {
-        console.error('Failed to calculate average retention:', err);
-        // Keep current value
       }
     };
 
@@ -948,6 +567,7 @@ export default {
           }
           
           return {
+      error,
             id: material.id,
             materialId: material.id,
             title: material.title,
@@ -989,7 +609,6 @@ export default {
         const fetchedMaterials = await StudyService.getStudyMaterials(user.uid);
         materials.value = fetchedMaterials;
         filteredMaterials.value = fetchedMaterials;
-        totalMaterials.value = fetchedMaterials.length;
         
         // Generate due reviews data
         await generateDueReviews();
@@ -998,16 +617,6 @@ export default {
         if (fetchedMaterials.length > 0) {
           // First extract real categories from materials
           materialCategories.value = extractRealCategories(fetchedMaterials);
-        }
-        
-        // Load actual study sessions from the service
-        try {
-          const sessions = await StudyService.getMonthlyStudySessions();
-          studySessions.value = sessions;
-        } catch (err) {
-          console.error('Failed to load study sessions:', err);
-          // Keep current value or set to a reasonable default
-          studySessions.value = studySessions.value || 0;
         }
         
         return fetchedMaterials;
@@ -1064,14 +673,9 @@ export default {
       // Also remove from the dueReviews array if present
       dueReviews.value = dueReviews.value.filter(review => review.materialId !== materialId);
       
-      // Update the total count
-      totalMaterials.value = materials.value.length;
-      
       // Update material categories
       updateMaterialCategories();
     };
-    
-    // This duplicate implementation has been removed
     
     const handleStudyAgain = () => {
       // The BlurtingForm component will handle the reset internally
@@ -1080,25 +684,13 @@ export default {
     
     const handleFeynmanCompleted = (result) => {
       console.log("Feynman technique completed with results:", result);
-      // Optional: do something with the results, such as showing a notification
-      // or updating retention stats
-      
       // Refresh materials to update any stats
       fetchMaterials();
     };
     
     // Update material categories based on current materials
     const updateMaterialCategories = () => {
-      // Reset counts
-      materialCategories.value.forEach(category => {
-        category.count = 0;
-      });
-      
-      // Distribute materials among categories for demo
-      materials.value.forEach((material, index) => {
-        const categoryIndex = index % materialCategories.value.length;
-        materialCategories.value[categoryIndex].count++;
-      });
+      materialCategories.value = extractRealCategories(materials.value);
     };
     
     // Watch for search query changes
@@ -1106,49 +698,6 @@ export default {
       filterMaterials();
     });
     
-    // Inside the setup() function, add these new refs:
-    const studySessionGoal = ref(20); // Default goal is 20 sessions per month
-    const showGoalModal = ref(false);
-    const newGoalValue = ref(20);
-    const error = ref(''); // Added error ref that was missing
-    
-    // Add new methods
-    const loadStudySessionGoal = async () => {
-      try {
-        const goal = await StudyService.getStudySessionGoal();
-        studySessionGoal.value = goal;
-      } catch (err) {
-        console.error("Error loading study session goal:", err);
-        // Keep the default value
-      }
-    };
-    
-    const updateStudySessionGoal = async () => {
-      try {
-        if (newGoalValue.value < 1) {
-          newGoalValue.value = 1;
-        }
-        
-        await StudyService.setStudySessionGoal(newGoalValue.value);
-        studySessionGoal.value = newGoalValue.value;
-        showGoalModal.value = false;
-      } catch (err) {
-        console.error("Error updating study session goal:", err);
-        error.value = "Failed to update your study goal.";
-      }
-    };
-    
-    const loadStudySessions = async () => {
-      try {
-        const sessions = await StudyService.getMonthlyStudySessions();
-        studySessions.value = sessions;
-      } catch (err) {
-        console.error("Error loading study sessions:", err);
-        // Keep the default or previous value
-      }
-    };
-    
-    // Update the onMounted hook to include the new fetch:
     // Close filter menu when clicking outside
     const closeFilterMenu = (event) => {
       if (showFilterMenu.value && !event.target.closest('.filter-menu') && !event.target.closest('.filter-toggle-btn')) {
@@ -1169,14 +718,6 @@ export default {
         
         // Load materials first (this will also call generateDueReviews internally)
         await fetchMaterials();
-        
-        // Then load additional data in parallel
-        await Promise.all([
-          loadStudySessionGoal(),
-          loadStudySessions(),
-          calculateStreak(),
-          calculateAvgRetention()
-        ]);
         
         // Check if there's a query parameter to create a new material
         const route = router.currentRoute.value;
@@ -1199,6 +740,7 @@ export default {
     });
     
     return {
+      // State
       currentMode,
       currentMaterial,
       studyMethod,
@@ -1207,17 +749,15 @@ export default {
       filteredMaterials,
       materialsLoading,
       searchQuery,
-
       filters,
       hasDueReviews,
       dueReviews,
       reviewsDueToday,
-      studySessions,
-      streak,
-      avgRetention,
-      totalMaterials,
-      retentionHistory,
       materialCategories,
+      showFilterMenu,
+      activeCategory,
+      
+      // Methods
       handleSelectMaterial,
       handleMaterialSaved,
       handleMaterialEdited,
@@ -1229,29 +769,9 @@ export default {
       filterMaterials,
       applyFilters,
       resetFilters,
-      showFilterMenu,
-      activeCategory,
-      calculateStreak,
-      calculateAvgRetention,
-      generateDueReviews,
-      extractRealCategories,
-
-      retentionTrend,
-      retentionTrendClass,
-      retentionTrendText,
-      
-      getStreakStatus,
-      getDayLabel,
       getRetentionClass,
       reviewMaterial,
       viewAllDueReviews,
-      studySessionGoal,
-      showGoalModal,
-      newGoalValue,
-      error,
-      updateStudySessionGoal,
-      loadStudySessionGoal,
-      loadStudySessions,
     };
   }
 }
@@ -1275,13 +795,7 @@ export default {
 
 .dashboard-title {
   font-size: var(--font-size-3xl);
-  margin-bottom: var(--spacing-2);
   color: var(--neutral-900);
-}
-
-.dashboard-subtitle {
-  color: var(--neutral-600);
-  margin-bottom: 0;
 }
 
 .header-actions .btn {
@@ -1418,241 +932,6 @@ export default {
   stroke: white;
 }
 
-/* Enhanced Stats Section */
-.stats-section {
-  margin-bottom: var(--spacing-8);
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-6);
-}
-
-.stat-card {
-  background-color: white;
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-6);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-normal);
-  border: 1px solid var(--neutral-200);
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--neutral-300);
-}
-
-.stat-header {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  margin-bottom: var(--spacing-4);
-}
-
-.stat-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
-.study-icon {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-}
-
-.streak-icon {
-  background: linear-gradient(135deg, #f43f5e, #ec4899);
-}
-
-.retention-icon {
-  background: linear-gradient(135deg, #10b981, #06b6d4);
-}
-
-.material-icon {
-  background: linear-gradient(135deg, #f59e0b, #fb923c);
-}
-
-.stat-title {
-  font-weight: var(--font-weight-medium);
-  color: var(--neutral-700);
-  font-size: var(--font-size-md);
-}
-
-.stat-content {
-  position: relative;
-}
-
-.stat-value-container {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: var(--spacing-3);
-}
-
-.stat-value {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  margin-bottom: 0;
-  color: var(--neutral-900);
-}
-
-.stat-change {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--radius-full);
-}
-
-.stat-change.positive {
-  color: #10b981;
-  background-color: rgba(16, 185, 129, 0.1);
-}
-
-.stat-change.negative {
-  color: #ef4444;
-  background-color: rgba(239, 68, 68, 0.1);
-}
-
-.stat-change.neutral {
-  color: #f59e0b;
-  background-color: rgba(245, 158, 11, 0.1);
-}
-
-.stat-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.2rem 0.75rem;
-  background-color: rgba(99, 102, 241, 0.1);
-  color: var(--primary-color);
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-}
-
-/* Streak Calendar */
-.streak-calendar {
-  display: flex;
-  justify-content: space-between;
-  margin-top: var(--spacing-2);
-}
-
-.calendar-day {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-full);
-  background-color: var(--neutral-200);
-  color: var(--neutral-500);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  transition: all var(--transition-normal);
-}
-
-.calendar-day.active {
-  background-color: var(--secondary-color);
-  color: white;
-}
-
-/* Progress Bar */
-.stat-progress {
-  margin-top: var(--spacing-3);
-}
-
-.progress-container {
-  height: 6px;
-  background-color: var(--neutral-200);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-}
-
-.progress-bar {
-  height: 100%;
-  background: var(--primary-gradient);
-  border-radius: var(--radius-full);
-}
-
-.progress-label {
-  font-size: var(--font-size-xs);
-  color: var(--neutral-600);
-  margin-top: var(--spacing-1);
-}
-
-/* Retention Chart */
-.retention-chart {
-  margin-top: var(--spacing-3);
-  height: 50px;
-  position: relative;
-}
-
-.chart-bar-container {
-  height: 100%;
-  position: relative;
-}
-
-.chart-bar {
-  position: absolute;
-  bottom: 0;
-  width: 6px;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-}
-
-.chart-bar.excellent {
-  background-color: rgba(16, 185, 129, 0.7);
-}
-
-.chart-bar.good {
-  background-color: rgba(6, 182, 212, 0.7);
-}
-
-.chart-bar.fair {
-  background-color: rgba(245, 158, 11, 0.7);
-}
-
-.chart-bar.poor {
-  background-color: rgba(239, 68, 68, 0.7);
-}
-
-/* Materials Distribution */
-.materials-distribution {
-  margin-top: var(--spacing-3);
-}
-
-.distribution-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: var(--spacing-2);
-}
-
-.distribution-color {
-  width: 10px;
-  height: 10px;
-  border-radius: var(--radius-sm);
-  margin-right: var(--spacing-2);
-}
-
-.distribution-label {
-  flex: 1;
-  font-size: var(--font-size-sm);
-  color: var(--neutral-700);
-}
-
-.distribution-value {
-  font-weight: var(--font-weight-medium);
-  color: var(--neutral-900);
-}
-
 /* Reviews Section */
 .reviews-section {
   margin-bottom: var(--spacing-12);
@@ -1671,12 +950,6 @@ export default {
   font-size: var(--font-size-2xl);
   margin-bottom: var(--spacing-2);
   color: var(--neutral-900);
-}
-
-.section-subtitle {
-  color: var(--neutral-600);
-  margin-bottom: 0;
-  font-size: var(--font-size-md);
 }
 
 .due-reviews {
@@ -1745,6 +1018,28 @@ export default {
   overflow: hidden;
 }
 
+.progress-bar {
+  height: 100%;
+  background: var(--primary-gradient);
+  border-radius: var(--radius-full);
+}
+
+.progress-bar.excellent {
+  background: linear-gradient(90deg, #10b981, #0ea5e9);
+}
+
+.progress-bar.good {
+  background: linear-gradient(90deg, #0ea5e9, #6366f1);
+}
+
+.progress-bar.fair {
+  background: linear-gradient(90deg, #f59e0b, #f97316);
+}
+
+.progress-bar.poor {
+  background: linear-gradient(90deg, #f97316, #ef4444);
+}
+
 .progress-text {
   font-size: var(--font-size-xs);
   color: var(--neutral-600);
@@ -1755,6 +1050,34 @@ export default {
   justify-content: flex-end;
 }
 
+.review-card.is-overdue {
+  border-left: 4px solid #ef4444;
+}
+
+.review-actions .btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.view-all-container {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--spacing-6);
+}
+
+.view-all-btn {
+  position: relative;
+  overflow: hidden;
+  min-width: 200px;
+  justify-content: center;
+}
+
+.view-all-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
 /* Materials Section */
 .materials-section {
   margin-bottom: var(--spacing-12);
@@ -1762,259 +1085,6 @@ export default {
 
 .materials-filter {
   display: flex;
-  gap: var(--spacing-4);
-}
-
-.search-box {
-  position: relative;
-  width: 250px;
-}
-
-.search-icon {
-  position: absolute;
-  top: 50%;
-  left: 1rem;
-  transform: translateY(-50%);
-  color: var(--neutral-500);
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.5rem 1rem 0.5rem 2.5rem;
-  border: 1px solid var(--neutral-300);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  transition: all var(--transition-normal);
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
-}
-
-.filter-dropdown {
-  position: relative;
-}
-
-
-
-
-
-/* Responsive Styles */
-@media (max-width: 992px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-4);
-  }
-  
-  .materials-filter {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-3);
-  }
-  
-  .search-box {
-    width: 100%;
-  }
-  
-  .filter-dropdown {
-    width: 100%;
-  }
-  
-  .filter-button {
-    width: 100%;
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboard-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-4);
-  }
-  
-  .header-actions .btn {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .stats-grid {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-4);
-  }
-  
-  .due-reviews {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-4);
-  }
-}
-
-/* New CSS rules */
-.edit-goal {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1);
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-sm);
-  background-color: var(--neutral-100);
-  color: var(--neutral-600);
-  font-size: var(--font-size-xs);
-  cursor: pointer;
-  transition: all var(--transition-normal);
-}
-
-.edit-goal:hover {
-  background-color: var(--neutral-200);
-  color: var(--primary-color);
-}
-
-/* Modal Styles */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-container {
-  background-color: white;
-  border-radius: var(--radius-lg);
-  width: 400px;
-  max-width: 90%;
-  box-shadow: var(--shadow-xl);
-  animation: fadeIn 0.3s ease-out;
-}
-
-.modal-header {
-  padding: var(--spacing-4) var(--spacing-6);
-  border-bottom: 1px solid var(--neutral-200);
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-weight: var(--font-weight-semibold);
-}
-
-.modal-body {
-  padding: var(--spacing-6);
-}
-
-.modal-body p {
-  color: var(--neutral-600);
-  margin-bottom: var(--spacing-4);
-}
-
-.form-group {
-  margin-bottom: var(--spacing-4);
-}
-
-.form-label {
-  display: block;
-  margin-bottom: var(--spacing-2);
-  color: var(--neutral-700);
-  font-weight: var(--font-weight-medium);
-}
-
-.form-control {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--neutral-300);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-md);
-  transition: all var(--transition-normal);
-}
-
-.form-control:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
-}
-
-.modal-footer {
-  padding: var(--spacing-4) var(--spacing-6);
-  border-top: 1px solid var(--neutral-200);
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-3);
-}
-
-.modal-footer .btn {
-  min-width: 100px;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.goal-info {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-}
-
-.goal-label {
-  font-size: var(--font-size-sm);
-  color: var(--neutral-600);
-  background-color: var(--neutral-100);
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-full);
-}
-
-.goal-edit-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  color: var(--neutral-500);
-  cursor: pointer;
-  padding: 0.25rem;
-  border-radius: var(--radius-full);
-  transition: all var(--transition-fast);
-}
-
-.goal-edit-btn:hover {
-  color: var(--primary-color);
-  background-color: var(--neutral-100);
-}
-
-.goal-complete {
-  background: linear-gradient(90deg, var(--primary-color) 0%, #10b981 100%);
-}
-
-.goal-complete-badge {
-  display: inline-block;
-  margin-left: var(--spacing-2);
-  color: #10b981;
-  font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-xs);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 0.7; }
-  50% { opacity: 1; }
-  100% { opacity: 0.7; }
-}
-
-/* Filter styles */
-.materials-filter {
-  display: flex;
-  align-items: center;
   gap: var(--spacing-4);
   position: relative;
 }
@@ -2209,61 +1279,85 @@ export default {
   font-weight: var(--font-weight-medium);
 }
 
-.review-card {
+/* Button styles */
+.btn {
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
   transition: all var(--transition-normal);
-  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.review-card.is-overdue {
-  border-left: 4px solid #ef4444;
+.btn-primary {
+  background: var(--primary-gradient);
+  color: white;
+  padding: 0.5rem 1rem;
 }
 
-.review-card:hover {
-  transform: translateY(-5px);
+.btn-primary:hover {
+  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
 
-.progress-bar.excellent {
-  background: linear-gradient(90deg, #10b981, #0ea5e9);
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--neutral-300);
+  color: var(--neutral-700);
+  padding: 0.5rem 1rem;
 }
 
-.progress-bar.good {
-  background: linear-gradient(90deg, #0ea5e9, #6366f1);
-}
-
-.progress-bar.fair {
-  background: linear-gradient(90deg, #f59e0b, #f97316);
-}
-
-.progress-bar.poor {
-  background: linear-gradient(90deg, #f97316, #ef4444);
-}
-
-.progress-bar.very-poor {
-  background: linear-gradient(90deg, #ef4444, #dc2626);
-}
-
-.review-actions .btn {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-}
-
-.view-all-container {
-  display: flex;
-  justify-content: center;
-  margin-top: var(--spacing-6);
-}
-
-.view-all-btn {
-  position: relative;
-  overflow: hidden;
-  min-width: 200px;
-  justify-content: center;
-}
-
-.view-all-btn:hover {
+.btn-outline:hover {
   border-color: var(--primary-color);
   color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-sm {
+  font-size: var(--font-size-sm);
+  padding: 0.35rem 0.75rem;
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+  .materials-filter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+  }
+  
+  .search-box {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-4);
+  }
+  
+  .header-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .due-reviews {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .materials-filter {
+    width: 100%;
+  }
 }
 </style>

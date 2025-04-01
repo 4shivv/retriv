@@ -1,0 +1,1618 @@
+<template>
+  <div class="home-page">
+    <!-- Redirect Message (only shown briefly before router redirects) -->
+    <div v-if="isAuthenticated" class="redirect-message">
+      <div class="spinner"></div>
+      <p>Redirecting to your dashboard...</p>
+    </div>
+
+    <!-- Modern Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <div class="hero-text">
+            <div class="hero-badge">Powered by AI & Cognitive Science</div>
+            <h1 class="hero-title">
+              Supercharge Your Learning with
+              <span class="gradient-text">Active Recall</span>
+            </h1>
+            <p class="hero-description">
+              Retriv uses neuroscience-backed techniques and AI to help you learn faster and 
+              remember longer. Our platform optimizes your study sessions for maximum retention 
+              with personalized schedules and instant feedback.
+            </p>
+            <div class="hero-stats">
+              <div class="stat">
+                <div class="stat-value">3x</div>
+                <div class="stat-label">Faster Learning</div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">80%</div>
+                <div class="stat-label">Better Retention</div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">10k+</div>
+                <div class="stat-label">Active Users</div>
+              </div>
+            </div>
+            <div class="hero-actions">
+              <router-link to="/register" class="btn btn-primary btn-lg">Get Started Free</router-link>
+              <a href="#how-it-works" class="btn btn-secondary btn-lg">See How It Works</a>
+            </div>
+          </div>
+          <div class="hero-device">
+            <div class="device-wrapper">
+              <div class="device-mockup">
+                <div class="device-screen">
+                  <div class="app-interface">
+                    <div class="app-header">
+                      <div class="app-logo">R</div>
+                      <div class="app-title">Retriv</div>
+                    </div>
+                    <div class="app-content">
+                      <div class="app-section">
+                        <div class="app-section-label">Source Material</div>
+                        <div class="app-text-content">
+                          <div class="text-line w-100"></div>
+                          <div class="text-line w-90"></div>
+                          <div class="text-line w-95"></div>
+                          <div class="text-line w-85"></div>
+                        </div>
+                      </div>
+                      <div class="app-section">
+                        <div class="app-section-label">Your Recall</div>
+                        <div class="app-text-content">
+                          <div class="text-line w-100 match"></div>
+                          <div class="text-line w-90 match"></div>
+                          <div class="text-line w-85 partial"></div>
+                          <div class="text-line w-75 miss"></div>
+                        </div>
+                      </div>
+                      <div class="app-footer">
+                        <div class="app-score">
+                          <span class="score-label">Retention Score:</span>
+                          <span class="score-value">85%</span>
+                        </div>
+                        <div class="app-next-review">Review in 3 days</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="device-notch"></div>
+                <div class="device-reflection"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-bg">
+        <div class="hero-shape-1"></div>
+        <div class="hero-shape-2"></div>
+        <div class="hero-shape-3"></div>
+        <div class="hero-dots"></div>
+      </div>
+    </section>
+
+    <!-- Logos Section -->
+    <section class="trusted-by">
+      <div class="container">
+        <div class="trusted-by-header">
+          <div class="trusted-by-line"></div>
+          <p>Trusted by students and educators from</p>
+          <div class="trusted-by-line"></div>
+        </div>
+        <div class="logo-grid">
+          <div class="logo-item">Harvard University</div>
+          <div class="logo-item">Stanford Medicine</div>
+          <div class="logo-item">MIT</div>
+          <div class="logo-item">UC Berkeley</div>
+          <div class="logo-item">NYU</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Why Students Love Retriv</h2>
+          <p class="section-subtitle">Our powerful learning platform combines cognitive science with AI technology</p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <line x1="10" y1="9" x2="8" y2="9"></line>
+              </svg>
+            </div>
+            <h3 class="feature-title">Study Any Subject</h3>
+            <p class="feature-description">From medical school to language learning, our platform adapts to any subject matter. Just paste or upload your study material to get started.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.9 2.6A2 2 0 0 1 22 5.4"></path>
+                <path d="M2 12.5A2 2 0 0 1 5.4 10"></path>
+                <path d="M14 21.4A2 2 0 0 0 16 19"></path>
+                <path d="M19 16a7.5 7.5 0 1 0-15 1.1"></path>
+                <path d="m12 10-2 4h4l-2 4"></path>
+              </svg>
+            </div>
+            <h3 class="feature-title">Active Recall</h3>
+            <p class="feature-description">Our "blurting" technique forces your brain to actively retrieve information, strengthening neural pathways far more effectively than passive reading.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                <line x1="7" y1="2" x2="7" y2="22"></line>
+                <line x1="17" y1="2" x2="17" y2="22"></line>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <line x1="2" y1="7" x2="7" y2="7"></line>
+                <line x1="2" y1="17" x2="7" y2="17"></line>
+                <line x1="17" y1="17" x2="22" y2="17"></line>
+                <line x1="17" y1="7" x2="22" y2="7"></line>
+              </svg>
+            </div>
+            <h3 class="feature-title">Smart Scheduling</h3>
+            <p class="feature-description">Our AI-powered spaced repetition system optimizes your review schedule, ensuring you review material just before you would naturally forget it.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
+                <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+              </svg>
+            </div>
+            <h3 class="feature-title">Instant Feedback</h3>
+            <p class="feature-description">Our AI instantly compares your recall attempt with the original text, highlighting what you remembered correctly and what you missed.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">How Retriv Works</h2>
+          <p class="section-subtitle">Four simple steps to transform your learning experience</p>
+        </div>
+
+        <div class="steps">
+          <div class="step-card">
+            <h3 class="step-title">Input Your Material</h3>
+            <p class="step-description">Simply paste or upload the text you want to learn. Our platform works with any subject matter from medicine to languages.</p>
+          </div>
+
+          <div class="step-card">
+            <h3 class="step-title">Active Recall Training</h3>
+            <p class="step-description">Test your knowledge by recalling as much as you can without looking. This active process, known as "blurting," strengthens memory pathways.</p>
+          </div>
+
+          <div class="step-card">
+            <h3 class="step-title">AI-Powered Feedback</h3>
+            <p class="step-description">Our AI instantly analyzes your recall, highlighting what you remembered well and what needs more focus with a visual heatmap.</p>
+          </div>
+
+          <div class="step-card">
+            <h3 class="step-title">Personalized Review</h3>
+            <p class="step-description">Based on your performance, we create a personalized review schedule to ensure you review material at the optimal time for maximum retention.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Science Section -->
+    <section id="science" class="science">
+      <div class="container">
+        <div class="science-content">
+          <div class="science-text">
+            <h2 class="section-title">Backed by Cognitive Science</h2>
+            <p class="section-subtitle">Retriv is built on decades of research on how the brain learns and remembers information</p>
+
+            <div class="science-box">
+              <h3>Active Recall</h3>
+              <p>Actively retrieving information from memory strengthens neural connections far more effectively than passive re-reading or highlighting. Research shows this technique can improve retention by up to 200%.</p>
+            </div>
+
+            <div class="science-box">
+              <h3>Spaced Repetition</h3>
+              <p>Reviewing material at strategically spaced intervals dramatically improves long-term retention. Our algorithm determines the optimal schedule based on your performance data.</p>
+            </div>
+
+            <div class="research-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+              </svg>
+              Based on research from Harvard, Stanford, and other leading institutions
+            </div>
+          </div>
+
+          <div class="science-image">
+            <img src="/img/brain-visualization.png" alt="Neural connections visualization" class="brain-visual" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="testimonials">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">What Our Users Say</h2>
+          <p class="section-subtitle">Join thousands of students who have transformed their learning with Retriv</p>
+        </div>
+
+        <div class="testimonial-grid">
+          <div class="testimonial-card">
+            <div class="testimonial-content">
+              <p class="testimonial-text">
+                "Retriv helped me prepare for my medical board exams more efficiently than any other method I've tried. The spaced repetition reminders kept me on track, and I saw dramatic improvements in my retention."
+              </p>
+            </div>
+            <div class="testimonial-author">
+              <div class="author-avatar">MS</div>
+              <div class="author-info">
+                <p class="author-name">Maria S.</p>
+                <p class="author-title">Medical Student</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="testimonial-content">
+              <p class="testimonial-text">
+                "I use Retriv for language learning. The immediate feedback on what I can recall versus what I still need to practice has accelerated my vocabulary acquisition and grammar mastery."
+              </p>
+            </div>
+            <div class="testimonial-author">
+              <div class="author-avatar">DL</div>
+              <div class="author-info">
+                <p class="author-name">David L.</p>
+                <p class="author-title">Language Enthusiast</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="testimonial-content">
+              <p class="testimonial-text">
+                "As a teacher, I recommend Retriv to all my students. It's transformed their study habits and improved test scores across the board. The spaced repetition system is especially effective."
+              </p>
+            </div>
+            <div class="testimonial-author">
+              <div class="author-avatar">JK</div>
+              <div class="author-info">
+                <p class="author-name">Jennifer K.</p>
+                <p class="author-title">High School Teacher</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Simple, Transparent Pricing</h2>
+          <p class="section-subtitle">Start for free, upgrade when you're ready</p>
+        </div>
+
+        <div class="pricing-grid">
+          <div class="pricing-card free">
+            <div class="pricing-header">
+              <h3 class="pricing-title">Free</h3>
+              <div class="pricing-price">$0</div>
+              <p class="pricing-subtitle">Get started with basic features</p>
+            </div>
+            <ul class="pricing-features">
+              <li>Up to 5 study materials</li>
+              <li>Basic active recall testing</li>
+              <li>Simple spaced repetition</li>
+              <li>Web access only</li>
+            </ul>
+            <div class="pricing-action">
+              <router-link to="/register" class="btn btn-secondary">Sign Up Free</router-link>
+            </div>
+          </div>
+
+          <div class="pricing-card pro highlight">
+            <div class="popular-badge">Most Popular</div>
+            <div class="pricing-header">
+              <h3 class="pricing-title">Pro</h3>
+              <div class="pricing-price">$9.99<span class="pricing-period">/month</span></div>
+              <p class="pricing-subtitle">Everything you need to excel</p>
+            </div>
+            <ul class="pricing-features">
+              <li>Unlimited study materials</li>
+              <li>Advanced AI feedback</li>
+              <li>Optimized spaced repetition</li>
+              <li>Web & mobile access</li>
+              <li>Progress analytics</li>
+              <li>Priority support</li>
+            </ul>
+            <div class="pricing-action">
+              <router-link to="/register?plan=pro" class="btn btn-primary">Get Started</router-link>
+            </div>
+          </div>
+
+          <div class="pricing-card team">
+            <div class="pricing-header">
+              <h3 class="pricing-title">Team</h3>
+              <div class="pricing-price">$29.99<span class="pricing-period">/month</span></div>
+              <p class="pricing-subtitle">Perfect for study groups</p>
+            </div>
+            <ul class="pricing-features">
+              <li>Everything in Pro plan</li>
+              <li>Up to 5 team members</li>
+              <li>Shared study materials</li>
+              <li>Team analytics</li>
+              <li>Admin controls</li>
+              <li>Dedicated support</li>
+            </ul>
+            <div class="pricing-action">
+              <router-link to="/register?plan=team" class="btn btn-secondary">Contact Sales</router-link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="faq">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Frequently Asked Questions</h2>
+          <p class="section-subtitle">Everything you need to know about Retriv</p>
+        </div>
+
+        <div class="faq-grid">
+          <div class="faq-item">
+            <h3 class="faq-question">What types of content can I study with Retriv?</h3>
+            <p class="faq-answer">Retriv works with any text-based study material. Whether you're studying medicine, law, languages, history, or any other subject, our platform can help you learn and retain the information more effectively.</p>
+          </div>
+
+          <div class="faq-item">
+            <h3 class="faq-question">How does the "blurting" technique work?</h3>
+            <p class="faq-answer">Blurting involves trying to recall as much information as possible without looking at the original material. This active recall process strengthens neural connections in your brain, making the information easier to remember in the future.</p>
+          </div>
+
+          <div class="faq-item">
+            <h3 class="faq-question">Can I use Retriv on my mobile device?</h3>
+            <p class="faq-answer">Yes! Retriv is available on web, iOS, and Android platforms with our Pro and Team plans. Your progress syncs across all your devices, so you can study wherever and whenever it's convenient.</p>
+          </div>
+
+          <div class="faq-item">
+            <h3 class="faq-question">How does the spaced repetition system work?</h3>
+            <p class="faq-answer">Our AI-driven algorithm tracks your performance on each piece of material and schedules reviews at optimal intervals. As you demonstrate stronger recall of certain information, the system will increase the time between reviews, focusing your study time on the material you need to review most.</p>
+          </div>
+
+          <div class="faq-item">
+            <h3 class="faq-question">Can I cancel my subscription at any time?</h3>
+            <p class="faq-answer">Absolutely. There are no long-term contracts, and you can cancel your subscription at any time. Your data will remain accessible until the end of your billing period.</p>
+          </div>
+
+          <div class="faq-item">
+            <h3 class="faq-question">Is there a discount for students or educators?</h3>
+            <p class="faq-answer">Yes! We offer special pricing for students, educators, and educational institutions. Contact our sales team for more information about educational discounts.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+      <div class="container">
+        <div class="cta-content">
+          <h2>Ready to transform the way you learn?</h2>
+          <p>Join thousands of students who have improved their retention with Retriv's evidence-based learning system.</p>
+          <div class="cta-actions">
+            <router-link to="/register" class="btn btn-primary btn-lg">Start Free Trial</router-link>
+            <router-link to="/login" class="btn btn-secondary btn-lg">Sign In</router-link>
+          </div>
+        </div>
+      </div>
+      <div class="cta-shapes">
+        <div class="cta-shape-1"></div>
+        <div class="cta-shape-2"></div>
+      </div>
+    </section>
+  </div>
+</template>
+
+<script>
+import { onMounted, computed, ref } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+
+export default {
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+    
+    // Check if user is authenticated
+    const isAuthenticated = computed(() => {
+      return store.getters['auth/isAuthenticated'];
+    });
+    
+    // Active section for highlight in navigation
+    const activeSection = ref('hero');
+    
+    // FAQ accordion state
+    const expandedFaq = ref(null);
+    
+    const toggleFaq = (index) => {
+      if (expandedFaq.value === index) {
+        expandedFaq.value = null;
+      } else {
+        expandedFaq.value = index;
+      }
+    };
+    
+    // Handle smooth scrolling for anchor links
+    const handleSmoothScroll = () => {
+      // Get all anchor links that point to sections on this page
+      const anchorLinks = document.querySelectorAll('a[href^="#"]');
+      
+      anchorLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          
+          // Get the target element
+          const targetId = link.getAttribute('href');
+          const targetElement = document.querySelector(targetId);
+          
+          if (targetElement) {
+            // Get the navbar height for offset (approx 80px)
+            const navbarOffset = 80;
+            
+            // Calculate the element's position
+            const elementPosition = targetElement.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - navbarOffset;
+            
+            // Scroll to the element
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            });
+            
+            // Update active section
+            activeSection.value = targetId.substring(1);
+          }
+        });
+      });
+    };
+    
+    // Intersection Observer for detecting which section is in view
+    const setupSectionObserver = () => {
+      const sections = document.querySelectorAll('section[id]');
+      
+      const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            activeSection.value = entry.target.id;
+          }
+        });
+      }, {
+        rootMargin: '-100px 0px -100px 0px',
+        threshold: 0.2
+      });
+      
+      sections.forEach(section => {
+        sectionObserver.observe(section);
+      });
+    };
+    
+    // For device mockup animation
+    const setupDeviceAnimation = () => {
+      const deviceMockup = document.querySelector('.device-mockup');
+      if (!deviceMockup) return;
+      
+      // Subtle movement based on mouse position
+      document.addEventListener('mousemove', (e) => {
+        const xAxis = (window.innerWidth / 2 - e.pageX) / 50;
+        const yAxis = (window.innerHeight / 2 - e.pageY) / 50;
+        
+        // Apply rotation within limits
+        deviceMockup.style.transform = `perspective(1000px) rotateY(${-8 + xAxis}deg) rotateX(${5 + yAxis}deg)`;
+      });
+    };
+    
+    onMounted(() => {
+      // Set up smooth scrolling for anchor links
+      handleSmoothScroll();
+      
+      // Set up section observer for active navigation
+      setupSectionObserver();
+      
+      // Set up device animation
+      setupDeviceAnimation();
+    });
+    
+    return {
+      isAuthenticated,
+      activeSection,
+      expandedFaq,
+      toggleFaq
+    };
+  }
+}
+</script>
+
+<style scoped>
+/* Redirect Message */
+.redirect-message {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(99, 102, 241, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--spacing-4);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Modern Hero Section */
+.hero {
+  position: relative;
+  padding: 10rem 0 8rem;
+  overflow: hidden;
+  background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+}
+
+.hero-content {
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-text {
+  flex: 1;
+  max-width: 640px;
+}
+
+.hero-badge {
+  display: inline-block;
+  background: linear-gradient(to right, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.03em;
+}
+
+.gradient-text {
+  background: linear-gradient(to right, var(--primary-color), #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero-description {
+  font-size: 1.25rem;
+  color: var(--neutral-600);
+  margin-bottom: 2rem;
+  line-height: 1.7;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 3rem;
+  margin-bottom: 2rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--neutral-600);
+  margin-top: 0.5rem;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(to right, var(--primary-color), #8b5cf6);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 6px rgba(99, 102, 241, 0.25);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(99, 102, 241, 0.35);
+}
+
+.btn-secondary {
+  background-color: white;
+  color: var(--primary-color);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #f9fafb;
+}
+
+.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+}
+
+.hero-device {
+  flex: 1;
+  position: relative;
+  min-height: 400px;
+}
+
+.device-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+.device-mockup {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  transform: perspective(1000px) rotateY(-8deg) rotateX(5deg);
+  transform-style: preserve-3d;
+  transition: all 0.3s ease;
+}
+
+.device-mockup:hover {
+  transform: perspective(1000px) rotateY(-5deg) rotateX(3deg) translateY(-10px);
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.2);
+}
+
+.device-screen {
+  position: relative;
+  padding: 2rem 1.5rem 1.5rem;
+  background: #fafafa;
+  height: 480px;
+  overflow: hidden;
+}
+
+.device-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 25%;
+  height: 1.5rem;
+  background-color: white;
+  border-radius: 0 0 1rem 1rem;
+  z-index: 2;
+}
+
+.device-reflection {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.app-interface {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.app-logo {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(to right, var(--primary-color), #8b5cf6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  margin-right: 0.75rem;
+}
+
+.app-title {
+  font-weight: 600;
+  color: var(--neutral-900);
+}
+
+.app-content {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+}
+
+.app-section {
+  background: #f8fafc;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.app-section-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--neutral-700);
+  margin-bottom: 0.75rem;
+}
+
+.app-text-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.text-line {
+  height: 0.75rem;
+  border-radius: 0.25rem;
+  background-color: #e2e8f0;
+}
+
+.w-100 { width: 100%; }
+.w-95 { width: 95%; }
+.w-90 { width: 90%; }
+.w-85 { width: 85%; }
+.w-80 { width: 80%; }
+.w-75 { width: 75%; }
+
+.match { background-color: rgba(16, 185, 129, 0.6); }
+.partial { background-color: rgba(245, 158, 11, 0.6); }
+.miss { background-color: rgba(239, 68, 68, 0.6); }
+
+.app-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f1f5f9;
+  padding: 0.75rem 1rem;
+}
+
+.app-score {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.score-label {
+  font-size: 0.875rem;
+  color: var(--neutral-600);
+}
+
+.score-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.app-next-review {
+  font-size: 0.875rem;
+  padding: 0.25rem 0.75rem;
+  background: linear-gradient(to right, var(--primary-color), #8b5cf6);
+  color: white;
+  border-radius: 1rem;
+  font-weight: 500;
+}
+
+/* Hero Background */
+.hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.hero-shape-1,
+.hero-shape-2,
+.hero-shape-3 {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.2;
+}
+
+.hero-shape-1 {
+  top: -5%;
+  right: -10%;
+  width: 40%;
+  height: 50%;
+  background: rgba(99, 102, 241, 0.3);
+  animation: float 15s ease-in-out infinite alternate;
+}
+
+.hero-shape-2 {
+  bottom: -10%;
+  left: -5%;
+  width: 30%;
+  height: 40%;
+  background: rgba(168, 85, 247, 0.3);
+  animation: float 18s ease-in-out infinite alternate-reverse;
+}
+
+.hero-shape-3 {
+  top: 40%;
+  left: 20%;
+  width: 20%;
+  height: 20%;
+  background: rgba(236, 72, 153, 0.2);
+  animation: float 12s ease-in-out infinite alternate;
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(20px, 20px); }
+}
+
+.hero-dots {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(rgba(99, 102, 241, 0.1) 2px, transparent 2px);
+  background-size: 30px 30px;
+  opacity: 0.5;
+}
+
+/* Trusted By Section */
+.trusted-by {
+  padding: 3rem 0;
+  background-color: white;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.trusted-by-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.trusted-by-header p {
+  color: var(--neutral-500);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 1.5rem;
+  white-space: nowrap;
+}
+
+.trusted-by-line {
+  flex: 1;
+  height: 1px;
+  background-color: #e2e8f0;
+  max-width: 200px;
+}
+
+.logo-grid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3rem;
+}
+
+.logo-item {
+  color: var(--neutral-400);
+  font-weight: 600;
+  font-size: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.logo-item:hover {
+  color: var(--neutral-900);
+}
+
+/* Features Section */
+.features {
+  padding: 8rem 0;
+  background-color: white;
+}
+
+.section-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 5rem;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--neutral-900);
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.section-subtitle {
+  font-size: 1.25rem;
+  color: var(--neutral-600);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.feature-card {
+  background-color: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.feature-icon {
+  width: 3rem;
+  height: 3rem;
+  background: linear-gradient(to right, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  color: var(--primary-color);
+}
+
+.feature-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--neutral-900);
+  margin-bottom: 1rem;
+}
+
+.feature-description {
+  color: var(--neutral-600);
+  line-height: 1.6;
+}
+
+/* How It Works Section */
+.how-it-works {
+  padding: 8rem 0;
+  background-color: #f8fafc;
+  position: relative;
+  overflow: hidden;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  counter-reset: step;
+}
+
+.step-card {
+  background-color: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  position: relative;
+  counter-increment: step;
+  transition: all 0.3s ease;
+}
+
+.step-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.step-card::before {
+  content: counter(step);
+  position: absolute;
+  top: -1rem;
+  left: 1.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: linear-gradient(to right, var(--primary-color), #8b5cf6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.step-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--neutral-900);
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.step-description {
+  color: var(--neutral-600);
+  line-height: 1.6;
+}
+
+/* Science Section */
+.science {
+  padding: 8rem 0;
+  background: linear-gradient(to bottom right, #f8fafc, white);
+}
+
+.science-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4rem;
+  align-items: center;
+}
+
+.science-text {
+  flex: 1;
+  min-width: 300px;
+}
+
+.science-image {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  justify-content: center;
+}
+
+.brain-visual {
+  max-width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.science-box {
+  background-color: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid var(--primary-color);
+  transition: all 0.3s ease;
+}
+
+.science-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.science-box h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--neutral-900);
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.science-box p {
+  color: var(--neutral-600);
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+.research-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(to right, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 2rem;
+  margin-top: 2rem;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+/* Testimonials */
+.testimonials {
+  padding: 8rem 0;
+  background-color: white;
+}
+
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.testimonial-card {
+  background-color: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.testimonial-content {
+  position: relative;
+  padding-top: 1rem;
+  margin-bottom: 2rem;
+}
+
+.testimonial-content::before {
+  content: '"';
+  position: absolute;
+  top: -1.5rem;
+  left: -0.5rem;
+  font-size: 6rem;
+  font-family: Georgia, serif;
+  color: var(--primary-color);
+  opacity: 0.2;
+  line-height: 1;
+}
+
+.testimonial-text {
+  font-style: italic;
+  color: var(--neutral-700);
+  line-height: 1.6;
+}
+
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.author-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: linear-gradient(to right, var(--primary-color), #8b5cf6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.author-name {
+  font-weight: 700;
+  color: var(--neutral-900);
+  margin-bottom: 0.25rem;
+}
+
+.author-title {
+  font-size: 0.875rem;
+  color: var(--neutral-600);
+  margin: 0;
+}
+
+/* Pricing Section */
+.pricing {
+  padding: 8rem 0;
+  background-color: #f8fafc;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 4rem;
+}
+
+.pricing-card {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+  border: 1px solid #f1f5f9;
+}
+
+.pricing-card.highlight {
+  border-color: rgba(99, 102, 241, 0.3);
+  transform: translateY(-10px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.pricing-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.pricing-card.highlight:hover {
+  transform: translateY(-15px);
+}
+
+.popular-badge {
+  position: absolute;
+  top: 0;
+  right: 2rem;
+  background: linear-gradient(to right, var(--primary-color), #8b5cf6);
+  color: white;
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+.pricing-header {
+  padding: 2rem;
+  text-align: center;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.pricing-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--neutral-900);
+  margin-bottom: 0.5rem;
+}
+
+.pricing-price {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--neutral-900);
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.pricing-period {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--neutral-500);
+}
+
+.pricing-subtitle {
+  font-size: 0.875rem;
+  color: var(--neutral-600);
+  margin-bottom: 0;
+}
+
+.pricing-features {
+  padding: 2rem;
+  list-style: none;
+  margin: 0;
+}
+
+.pricing-features li {
+  position: relative;
+  padding-left: 1.75rem;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  color: var(--neutral-700);
+}
+
+.pricing-features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+.pricing-action {
+  padding: 0 2rem 2rem;
+  text-align: center;
+}
+
+/* FAQ Section */
+.faq {
+  padding: 8rem 0;
+  background-color: white;
+}
+
+.faq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-top: 4rem;
+}
+
+.faq-item {
+  background-color: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
+}
+
+.faq-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.faq-question {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--neutral-900);
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.faq-answer {
+  color: var(--neutral-600);
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+/* CTA Section */
+.cta {
+  padding: 5rem 0;
+  background: linear-gradient(to right, var(--primary-color), #8b5cf6);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-content {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.cta h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.cta p {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.cta-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.cta-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.cta-shape-1,
+.cta-shape-2 {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.cta-shape-1 {
+  width: 400px;
+  height: 400px;
+  top: -200px;
+  right: -100px;
+}
+
+.cta-shape-2 {
+  width: 300px;
+  height: 300px;
+  bottom: -150px;
+  left: -100px;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .hero-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .hero-text {
+    max-width: 100%;
+  }
+  
+  .hero-stats {
+    justify-content: center;
+  }
+  
+  .hero-actions {
+    justify-content: center;
+  }
+  
+  .science-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .science-image {
+    order: -1;
+    margin-bottom: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 8rem 0 6rem;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+  
+  .features,
+  .how-it-works,
+  .science,
+  .testimonials,
+  .pricing,
+  .faq {
+    padding: 5rem 0;
+  }
+  
+  .cta h2 {
+    font-size: 2rem;
+  }
+  
+  .trusted-by-header p {
+    font-size: 0.75rem;
+  }
+  
+  .logo-grid {
+    gap: 2rem;
+  }
+  
+  .logo-item {
+    font-size: 1rem;
+  }
+  
+  .device-mockup {
+    transform: none;
+  }
+  
+  .device-mockup:hover {
+    transform: translateY(-10px);
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-description {
+    font-size: 1rem;
+  }
+  
+  .hero-stats {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+  
+  .section-subtitle {
+    font-size: 1rem;
+  }
+  
+  .logo-grid {
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .cta-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+</style>

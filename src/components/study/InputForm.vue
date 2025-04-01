@@ -51,6 +51,59 @@
           />
         </div>
         
+        <!-- Text Input Source -->
+        <div v-if="manualSourceType === 'text'" class="form-group">
+          <label for="content" class="form-label">Content</label>
+          <textarea
+            id="content"
+            v-model="content"
+            class="form-control"
+            rows="10"
+            placeholder="Paste or type the content you want to study"
+            required
+          ></textarea>
+        </div>
+        
+        <!-- File Input Source -->
+        <div v-if="manualSourceType === 'file'" class="form-group">
+          <label class="form-label">Upload File</label>
+          <div class="file-upload-container">
+            <input
+              type="file"
+              id="file-upload"
+              @change="handleFileUpload"
+              class="file-input"
+              accept=".txt,.md,.doc,.docx"
+              :disabled="loading"
+            />
+            <label for="file-upload" class="file-upload-label">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span>Choose file</span>
+            </label>
+            <span v-if="fileName" class="file-name">{{ fileName }}</span>
+          </div>
+          <p class="form-text">
+            Supported file types: .txt, .md, .doc, .docx
+          </p>
+          <div v-if="content" class="file-preview">
+            <div class="file-preview-header">
+              <h4>File Content Preview</h4>
+              <button type="button" class="preview-edit-btn" @click="manualSourceType = 'text'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                <span>Edit content</span>
+              </button>
+            </div>
+            <div class="file-preview-content">{{ content.slice(0, 300) }}{{ content.length > 300 ? '...' : '' }}</div>
+          </div>
+        </div>
+        
         <div class="form-group">
           <label for="category" class="form-label">Category</label>
           <div class="category-dropdown-container">
@@ -69,14 +122,20 @@
               </div>
             </div>
 
-            <!-- Dropdown Content -->
+            <!-- Enhanced Dropdown Content -->
             <div v-if="showCategoryDropdown" class="category-dropdown-content">
               <div class="category-search">
+                <div class="search-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                </div>
                 <input 
                   type="text" 
                   v-model="categorySearchTerm" 
                   class="form-control" 
-                  placeholder="Search or add new category"
+                  placeholder="Search or create category"
                   @input="handleCategorySearch"
                   @keydown.enter="handleCategorySearchEnter"
                   ref="categorySearchInput"
@@ -84,27 +143,6 @@
               </div>
               
               <div class="category-groups">
-                <!-- Frequently Used Categories -->
-                <div class="category-group" v-if="filteredFrequentCategories.length > 0">
-                  <div class="category-group-label">Frequently Used</div>
-                  <div class="category-options">
-                    <div 
-                      v-for="cat in filteredFrequentCategories" 
-                      :key="cat" 
-                      class="category-option" 
-                      @click="selectCategory(cat)"
-                      :class="[getCategoryColorClass(cat), { 'active': selectedCategoryOption === cat }]"
-                    >
-                      <span class="category-name">{{ cat }}</span>
-                      <span class="category-select-icon" v-if="selectedCategoryOption === cat">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
                 <!-- Default Categories -->
                 <div class="category-group" v-if="filteredDefaultCategories.length > 0">
                   <div class="category-group-label">Default Categories</div>
@@ -221,7 +259,7 @@
         </div>
         
         <div class="form-group">
-          <label class="form-label">Content Source</label>
+          <label class="form-label">Source Type</label>
           <div class="source-options">
             <button 
               type="button" 
@@ -257,7 +295,7 @@
         </div>
         
         <div class="form-group">
-          <label for="deadline" class="form-label">Learning Deadline <span class="optional-label">(optional)</span></label>
+          <label for="deadline" class="form-label">Learning Deadline</label>
           <div class="deadline-selection">
             <div class="deadline-presets">
               <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '1' }" @click="selectDeadline('1')">1 Day</button>
@@ -271,60 +309,7 @@
               <input type="date" v-model="customDeadlineDate" class="form-control" :min="minDate">
             </div>
           </div>
-          <p class="form-text deadline-helper">Setting a deadline will optimize your review schedule based on when you need to learn this material.</p>
-        </div>
-        
-        <!-- Text Input Source -->
-        <div v-if="manualSourceType === 'text'" class="form-group">
-          <label for="content" class="form-label">Content</label>
-          <textarea
-            id="content"
-            v-model="content"
-            class="form-control"
-            rows="10"
-            placeholder="Paste or type the content you want to study"
-            required
-          ></textarea>
-        </div>
-        
-        <!-- File Input Source -->
-        <div v-if="manualSourceType === 'file'" class="form-group">
-          <label class="form-label">Upload File</label>
-          <div class="file-upload-container">
-            <input
-              type="file"
-              id="file-upload"
-              @change="handleFileUpload"
-              class="file-input"
-              accept=".txt,.md,.doc,.docx"
-              :disabled="loading"
-            />
-            <label for="file-upload" class="file-upload-label">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
-              <span>Choose file</span>
-            </label>
-            <span v-if="fileName" class="file-name">{{ fileName }}</span>
-          </div>
-          <p class="form-text">
-            Supported file types: .txt, .md, .doc, .docx
-          </p>
-          <div v-if="content" class="file-preview">
-            <div class="file-preview-header">
-              <h4>File Content Preview</h4>
-              <button type="button" class="preview-edit-btn" @click="manualSourceType = 'text'">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-                <span>Edit content</span>
-              </button>
-            </div>
-            <div class="file-preview-content">{{ content.slice(0, 300) }}{{ content.length > 300 ? '...' : '' }}</div>
-          </div>
+          <p class="form-text deadline-helper">Setting a deadline helps the app create an optimized review schedule for maximum retention by your target date.</p>
         </div>
         
         <div class="form-actions">
@@ -593,7 +578,7 @@
           
           <!-- Learning Deadline Selection for AI-generated cards -->
           <div class="form-group">
-            <label for="deadline" class="form-label">Learning Deadline <span class="optional-label">(optional)</span></label>
+            <label for="deadline" class="form-label">Learning Deadline</label>
             <div class="deadline-selection">
               <div class="deadline-presets">
                 <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '1' }" @click="selectDeadline('1')">1 Day</button>
@@ -607,7 +592,7 @@
                 <input type="date" v-model="customDeadlineDate" class="form-control" :min="minDate">
               </div>
             </div>
-            <p class="form-text deadline-helper">Setting a deadline will optimize your review schedule based on when you need to learn this material.</p>
+            <p class="form-text deadline-helper">Setting a deadline helps the app create an optimized review schedule for maximum retention by your target date.</p>
           </div>
           
           <div class="form-actions">
@@ -1255,6 +1240,12 @@ export default {
           return;
         }
         
+        // Ensure a learning deadline is set
+        if (!deadline.value) {
+          error.value = 'Please set a learning deadline to create your study plan';
+          return;
+        }
+        
         // Determine deadline in days if any was selected
         const deadlineDays = getDeadlineInDays();
         
@@ -1369,6 +1360,12 @@ export default {
         // Ensure we have content before saving
         if (!content.value.trim()) {
           error.value = 'Please enter or upload content to study';
+          return;
+        }
+        
+        // Ensure a learning deadline is set
+        if (!deadline.value) {
+          error.value = 'Please set a learning deadline to create your study plan';
           return;
         }
         
@@ -1624,7 +1621,7 @@ export default {
   to { transform: rotate(360deg); }
 }
 
-/* Modern Category Dropdown Styling */
+/* Enhanced Category Dropdown Styling */
 .category-dropdown-container {
   position: relative;
   width: 100%;
@@ -1641,26 +1638,33 @@ export default {
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
 }
 
 .category-dropdown-trigger:hover {
-  border-color: var(--neutral-400);
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .category-dropdown-trigger.active {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), var(--shadow-md);
 }
 
 .selected-category {
   display: flex;
   align-items: center;
+  gap: var(--spacing-2);
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
 .placeholder-text {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
   color: var(--neutral-500);
 }
 
@@ -1672,6 +1676,7 @@ export default {
 
 .category-dropdown-trigger.active .dropdown-icon {
   transform: rotate(180deg);
+  color: var(--primary-color);
 }
 
 /* Category Tag Styling */

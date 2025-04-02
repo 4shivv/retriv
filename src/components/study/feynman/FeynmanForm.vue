@@ -128,36 +128,36 @@
           </div>
           
           <div class="feedback-content">
-            <div class="feedback-section-heading">Strengths</div>
-            <ul class="feedback-list strengths-list">
-              <li v-for="(strength, index) in feedback.strengths" :key="`strength-${index}`">
+            <div class="feedback-section-heading">What You Understood</div>
+            <div class="feedback-text strengths-text">
+              <p v-for="(strength, index) in feedback.strengths" :key="`strength-${index}`">
                 {{ strength }}
-              </li>
-            </ul>
+              </p>
+            </div>
             
-            <div class="feedback-section-heading">Gaps in Understanding</div>
-            <ul class="feedback-list gaps-list">
-              <li v-for="(gap, index) in feedback.gaps" :key="`gap-${index}`">
+            <div class="feedback-section-heading">What You Failed to Explain</div>
+            <div class="feedback-text gaps-text">
+              <p v-for="(gap, index) in feedback.gaps" :key="`gap-${index}`">
                 {{ gap }}
-              </li>
-            </ul>
+              </p>
+            </div>
             
             <div class="feedback-section-heading">Suggestions for Improvement</div>
-            <ul class="feedback-list suggestions-list">
-              <li v-for="(suggestion, index) in feedback.suggestions" :key="`suggestion-${index}`">
+            <div class="feedback-text suggestions-text">
+              <p v-for="(suggestion, index) in feedback.suggestions" :key="`suggestion-${index}`">
                 {{ suggestion }}
-              </li>
-            </ul>
+              </p>
+            </div>
           </div>
-          
-          <div class="feedback-actions">
-            <button @click="currentStep = 2" class="btn btn-outline">
-              Revise My Explanation
-            </button>
-            <button @click="proceedToRefinement" class="btn btn-primary">
-              Proceed to Refinement
-            </button>
-          </div>
+        </div>
+        
+        <div class="step3-actions">
+          <button @click="currentStep = 2" class="btn btn-outline">
+            Revise My Explanation
+          </button>
+          <button @click="proceedToRefinement" class="btn btn-primary">
+            Proceed to Refinement
+          </button>
         </div>
       </div>
       
@@ -359,6 +359,19 @@ export default {
         
         // Move to the next step
         currentStep.value = 3;
+        
+        // Record this Feynman attempt in spaced repetition system
+        // This will help track when to review this material again
+        try {
+          await StudyService.saveStudyAttempt(
+            props.materialId, 
+            userExplanation.value, 
+            understandingScore.value
+          );
+        } catch (spacedRepErr) {
+          console.error('Error recording attempt for spaced repetition:', spacedRepErr);
+          // Don't show this error to the user, as the core functionality still worked
+        }
       } catch (err) {
         console.error('Error evaluating explanation:', err);
         error.value = err.message || 'Failed to evaluate your explanation';
@@ -406,6 +419,25 @@ export default {
           understandingScore.value,
           finalUnderstandingScore.value
         );
+        
+        // Record the final attempt to generate a spaced repetition schedule
+        // This will create review dates based on performance
+        try {
+          const attemptId = await StudyService.saveStudyAttempt(
+            props.materialId, 
+            refinedExplanation.value, 
+            finalUnderstandingScore.value
+          );
+          
+          // Generate a spaced repetition schedule based on performance
+          await StudyService.generateSpacedRepetitionSchedule(
+            attemptId,
+            finalUnderstandingScore.value
+          );
+        } catch (spacedRepErr) {
+          console.error('Error generating spaced repetition schedule:', spacedRepErr);
+          // Don't show this error to the user as the core functionality still worked
+        }
         
         // Move to completion step
         currentStep.value = 5;
@@ -857,11 +889,12 @@ export default {
 }
 
 .feedback-card {
-  padding: var(--spacing-5);
+  padding: var(--spacing-6);
   background-color: white;
   border: 1px solid var(--neutral-200);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--spacing-5);
 }
 
 .feedback-header {
@@ -891,7 +924,8 @@ export default {
 .understanding-meter {
   display: flex;
   align-items: center;
-  margin-bottom: var(--spacing-5);
+  margin-bottom: var(--spacing-6);
+  margin-top: var(--spacing-4);
   gap: var(--spacing-4);
 }
 
@@ -940,47 +974,71 @@ export default {
 
 .feedback-content {
   margin-bottom: var(--spacing-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
 }
 
 .feedback-section-heading {
   font-weight: var(--font-weight-semibold);
   color: var(--neutral-800);
-  margin-bottom: var(--spacing-2);
-  margin-top: var(--spacing-4);
+  margin-bottom: var(--spacing-3);
+  margin-top: var(--spacing-5);
+  font-size: 1.05rem;
 }
 
-.feedback-list {
+.feedback-text {
   margin: 0;
-  padding-left: var(--spacing-5);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-4);
+  box-shadow: var(--shadow-sm);
 }
 
-.feedback-list li {
-  margin-bottom: var(--spacing-2);
-  line-height: 1.5;
+.feedback-text p {
+  margin-bottom: var(--spacing-3);
+  line-height: 1.6;
+  word-wrap: break-word;
+  font-size: 1rem;
 }
 
-.strengths-list li {
+.feedback-text p:last-child {
+  margin-bottom: 0;
+}
+
+.strengths-text {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-left: 3px solid #10b981;
+}
+
+.strengths-text p {
   color: #10b981;
 }
 
-.strengths-list li::marker {
-  color: #10b981;
+.gaps-text {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-left: 3px solid #ef4444;
 }
 
-.gaps-list li {
+.gaps-text p {
   color: #ef4444;
 }
 
-.gaps-list li::marker {
-  color: #ef4444;
+.suggestions-text {
+  background-color: rgba(99, 102, 241, 0.1);
+  border-left: 3px solid var(--primary-color);
 }
 
-.suggestions-list li {
+.suggestions-text p {
   color: var(--neutral-700);
 }
 
-.suggestions-list li::marker {
-  color: var(--primary-color);
+.step3-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-6);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--neutral-200);
 }
 
 .feedback-actions {

@@ -100,30 +100,30 @@
               
               <div v-if="activeTab === 'feedback'" class="feedback-content">
                 <div class="feedback-section">
-                  <h5 class="feedback-heading">Strengths</h5>
-                  <ul class="feedback-list strengths-list">
-                    <li v-for="(strength, index) in session.feedback.strengths" :key="`strength-${index}`">
+                  <h5 class="feedback-heading">What You Understood</h5>
+                  <div class="feedback-text strengths-text">
+                    <p v-for="(strength, index) in session.feedback.strengths" :key="`strength-${index}`">
                       {{ strength }}
-                    </li>
-                  </ul>
+                    </p>
+                  </div>
                 </div>
                 
                 <div class="feedback-section">
-                  <h5 class="feedback-heading">Gaps in Understanding</h5>
-                  <ul class="feedback-list gaps-list">
-                    <li v-for="(gap, index) in session.feedback.gaps" :key="`gap-${index}`">
+                  <h5 class="feedback-heading">What You Failed to Explain</h5>
+                  <div class="feedback-text gaps-text">
+                    <p v-for="(gap, index) in session.feedback.gaps" :key="`gap-${index}`">
                       {{ gap }}
-                    </li>
-                  </ul>
+                    </p>
+                  </div>
                 </div>
                 
                 <div class="feedback-section">
                   <h5 class="feedback-heading">Suggestions for Improvement</h5>
-                  <ul class="feedback-list suggestions-list">
-                    <li v-for="(suggestion, index) in session.feedback.suggestions" :key="`suggestion-${index}`">
+                  <div class="feedback-text suggestions-text">
+                    <p v-for="(suggestion, index) in session.feedback.suggestions" :key="`suggestion-${index}`">
                       {{ suggestion }}
-                    </li>
-                  </ul>
+                    </p>
+                  </div>
                 </div>
               </div>
               
@@ -134,8 +134,12 @@
           </div>
           
           <div class="session-actions">
-            <button @click="$emit('start-feynman')" class="btn btn-outline">
-              Try Again
+            <button @click="$emit('start-feynman')" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                <path d="M20 11.08V8l-6-6H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h6"></path>
+                <path d="M14 3v5h5M18 21v-6M15 18h6"></path>
+              </svg>
+              Improve with Feynman Technique
             </button>
           </div>
         </div>
@@ -499,51 +503,65 @@ export default {
 .feedback-content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-4);
+  gap: var(--spacing-5);
+  margin-bottom: var(--spacing-4);
 }
 
 .feedback-section {
-  margin-bottom: var(--spacing-4);
+  margin-bottom: var(--spacing-5);
 }
 
 .feedback-heading {
   font-weight: var(--font-weight-semibold);
   color: var(--neutral-800);
-  margin-bottom: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+  font-size: 1.05rem;
 }
 
-.feedback-list {
+.feedback-text {
   margin: 0;
-  padding-left: var(--spacing-5);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-3);
+  box-shadow: var(--shadow-sm);
 }
 
-.feedback-list li {
-  margin-bottom: var(--spacing-2);
-  line-height: 1.5;
+.feedback-text p {
+  margin-bottom: var(--spacing-3);
+  line-height: 1.6;
+  word-wrap: break-word;
+  font-size: 1rem;
 }
 
-.strengths-list li {
+.feedback-text p:last-child {
+  margin-bottom: 0;
+}
+
+.strengths-text {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-left: 3px solid #10b981;
+}
+
+.strengths-text p {
   color: #10b981;
 }
 
-.strengths-list li::marker {
-  color: #10b981;
+.gaps-text {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-left: 3px solid #ef4444;
 }
 
-.gaps-list li {
+.gaps-text p {
   color: #ef4444;
 }
 
-.gaps-list li::marker {
-  color: #ef4444;
+.suggestions-text {
+  background-color: rgba(99, 102, 241, 0.1);
+  border-left: 3px solid var(--primary-color);
 }
 
-.suggestions-list li {
+.suggestions-text p {
   color: var(--neutral-700);
-}
-
-.suggestions-list li::marker {
-  color: var(--primary-color);
 }
 
 .session-actions {

@@ -26,17 +26,27 @@
         <ol class="feynman-steps">
           <li :class="{ 'active': currentStep === 1 }">Review the source material</li>
           <li :class="{ 'active': currentStep === 2 }">Explain it in your own simple words</li>
-          <li :class="{ 'active': currentStep === 3 }">Identify gaps and save your understanding</li>
+          <li :class="{ 'active': currentStep === 3 }">Analyze understanding and identify gaps</li>
         </ol>
       </div>
       
       <div class="original-content-section" v-if="currentStep === 1">
         <h4>Original Material</h4>
         <div class="original-content-container">
-          <div class="original-content">{{ content }}</div>
-          <button @click="proceedToExplanation" class="btn btn-primary">
-            I've reviewed the material
-          </button>
+          <div class="original-content">
+            {{ content }}
+          </div>
+          <div class="action-buttons">
+            <button @click="openAiChat" class="btn btn-outline ai-chat-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              Ask Study Assistant
+            </button>
+            <button @click="proceedToExplanation" class="btn btn-primary">
+              I've reviewed the material
+            </button>
+          </div>
         </div>
       </div>
       
@@ -235,7 +245,7 @@ export default {
       required: true
     }
   },
-  emits: ['reset', 'completed'],
+  emits: ['reset', 'completed', 'open-chat'],
   
   setup(props, { emit }) {
     const router = useRouter();
@@ -482,6 +492,21 @@ export default {
       emit('reset');
     };
     
+    const openAiChat = () => {
+      // Emit an event to open the AI chat modal
+      emit('open-chat', {
+        materialId: props.materialId,
+        content: props.content,
+        title: props.title,
+        // Include feedback and explanation only if available
+        feedback: feedback.value,
+        explanation: userExplanation.value,
+        understandingScore: understandingScore.value || 0,
+        // Add context about which step the user is in
+        step: currentStep.value
+      });
+    };
+    
     // Initialize speech recognition on component mount
     onMounted(() => {
       // Initialize speech recognition
@@ -514,6 +539,7 @@ export default {
       evaluateExplanation,
       completeFeynman,
       handleReset,
+      openAiChat,
       isRecording,
       browserSupportsSpeech,
       textareaRef,
@@ -631,6 +657,12 @@ export default {
   max-height: 300px;
   overflow-y: auto;
   line-height: 1.6;
+}
+
+.action-buttons {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: flex-end;
 }
 
 /* Explanation section */
@@ -1249,5 +1281,20 @@ export default {
   font-size: var(--font-size-sm);
   color: var(--neutral-600);
   margin-top: var(--spacing-1);
+}
+
+/* AI Chat button styling */
+.ai-chat-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: 0.6rem 1rem;
+  background-color: rgba(99, 102, 241, 0.05);
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+.ai-chat-btn:hover {
+  background-color: rgba(99, 102, 241, 0.1);
 }
 </style>

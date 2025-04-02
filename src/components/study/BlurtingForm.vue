@@ -35,12 +35,23 @@
         </div>
         
         <div class="form-actions">
-          <button 
-            @click="startBlurting" 
-            class="btn btn-primary" 
-          >
-            <span>Start Recalling</span>
-          </button>
+          <div class="action-buttons-container">
+            <button 
+              @click="openAiChat" 
+              class="btn btn-outline ai-chat-btn"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              Ask Study Assistant
+            </button>
+            <button 
+              @click="startBlurting" 
+              class="btn btn-primary" 
+            >
+              <span>Start Recalling</span>
+            </button>
+          </div>
         </div>
       </div>
       
@@ -274,7 +285,7 @@ export default {
       required: true
     }
   },
-  emits: ['reset', 'study-again'],
+  emits: ['reset', 'study-again', 'open-chat'],
   
   setup(props, { emit }) {
     const recalledText = ref('');
@@ -537,6 +548,17 @@ export default {
       
       // Notify parent component
       emit('study-again');
+    };
+    
+    const openAiChat = () => {
+      // Emit an event to open the AI chat modal
+      emit('open-chat', {
+        materialId: props.materialId,
+        content: props.content,
+        title: props.title,
+        // Add context about which step the user is in
+        phase: currentPhase.value
+      });
     };
     
 
@@ -1066,6 +1088,7 @@ export default {
       matchPercentageClass,
       currentPhase,
       startBlurting,
+      openAiChat,
 
       originalText,
       pastAttempts,
@@ -1852,6 +1875,32 @@ export default {
 }
 
 .btn-icon {
+  margin-right: var(--spacing-2);
+}
+
+.action-buttons-container {
+  display: flex;
+  gap: var(--spacing-3);
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.ai-chat-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: 0.6rem 1rem;
+  background-color: rgba(99, 102, 241, 0.05);
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+.ai-chat-btn:hover {
+  background-color: rgba(99, 102, 241, 0.1);
+}
+
+.mr-2 {
   margin-right: var(--spacing-2);
 }
 

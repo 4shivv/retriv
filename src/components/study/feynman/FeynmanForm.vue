@@ -151,12 +151,8 @@
         </div>
         
         <div class="step3-actions">
-          <button @click="currentStep = 2" class="btn btn-outline" :disabled="loading">
+          <button @click="currentStep = 2" class="btn btn-primary">
             Revise My Explanation
-          </button>
-          <button @click="completeFeynman" class="btn btn-primary" :disabled="loading">
-            <span v-if="loading" class="loading-spinner"></span>
-            <span v-else>Complete & Save</span>
           </button>
         </div>
       </div>
@@ -679,6 +675,12 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-top: var(--spacing-4);
+  align-items: center;
+}
+
+.action-buttons {
+  display: flex;
+  gap: var(--spacing-3);
 }
 
 .btn {

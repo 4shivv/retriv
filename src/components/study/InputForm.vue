@@ -51,6 +51,42 @@
           />
         </div>
         
+        <div class="form-group">
+          <label class="form-label">Source Type</label>
+          <div class="source-options">
+            <button 
+              type="button" 
+              @click="manualSourceType = 'text'" 
+              class="source-btn" 
+              :class="{ active: manualSourceType === 'text' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="17" y1="10" x2="3" y2="10"></line>
+                <line x1="21" y1="6" x2="3" y2="6"></line>
+                <line x1="21" y1="14" x2="3" y2="14"></line>
+                <line x1="17" y1="18" x2="3" y2="18"></line>
+              </svg>
+              <span>Paste Text</span>
+            </button>
+            
+            <button 
+              type="button" 
+              @click="manualSourceType = 'file'" 
+              class="source-btn" 
+              :class="{ active: manualSourceType === 'file' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <span>Upload File</span>
+            </button>
+          </div>
+        </div>
+        
         <!-- Text Input Source -->
         <div v-if="manualSourceType === 'text'" class="form-group">
           <label for="content" class="form-label">Content</label>
@@ -255,42 +291,6 @@
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Source Type</label>
-          <div class="source-options">
-            <button 
-              type="button" 
-              @click="manualSourceType = 'text'" 
-              class="source-btn" 
-              :class="{ active: manualSourceType === 'text' }"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="17" y1="10" x2="3" y2="10"></line>
-                <line x1="21" y1="6" x2="3" y2="6"></line>
-                <line x1="21" y1="14" x2="3" y2="14"></line>
-                <line x1="17" y1="18" x2="3" y2="18"></line>
-              </svg>
-              <span>Paste Text</span>
-            </button>
-            
-            <button 
-              type="button" 
-              @click="manualSourceType = 'file'" 
-              class="source-btn" 
-              :class="{ active: manualSourceType === 'file' }"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
-              <span>Upload File</span>
-            </button>
           </div>
         </div>
         
@@ -1728,7 +1728,7 @@ export default {
   z-index: var(--z-dropdown);
   border: 1px solid var(--neutral-200);
   max-height: 350px;
-  overflow-y: auto;
+  overflow-y: scroll !important;
   animation: dropdownFadeIn 0.2s ease-out;
 }
 
@@ -1746,26 +1746,42 @@ export default {
   z-index: 1;
 }
 
+/* Add padding at the bottom to ensure all options are visible when scrolling */
+.category-groups::after {
+  content: '';
+  display: block;
+  height: 12px;
+}
+
 .category-groups {
   padding: var(--spacing-2);
+  padding-right: 10px; /* Extra space for scrollbar */
 }
 
 .category-group {
-  margin-bottom: var(--spacing-3);
+  margin-bottom: var(--spacing-5);
+  padding-bottom: var(--spacing-3);
+  border-bottom: 1px solid var(--neutral-200);
 }
 
 .category-group:last-child {
   margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .category-group-label {
   padding: 0 var(--spacing-3);
-  margin-bottom: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  color: var(--neutral-500);
+  color: var(--neutral-600);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  background-color: var(--neutral-50);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+  display: inline-block;
 }
 
 .category-options {
@@ -1778,20 +1794,29 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-2) var(--spacing-3);
+  padding: 12px var(--spacing-3);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-fast);
   color: var(--neutral-800);
+  margin-bottom: 4px;
+  min-height: 44px;
+  border: 1px solid transparent;
 }
 
 .category-option:hover {
   background-color: var(--neutral-100);
+  border-color: var(--neutral-300);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .category-option.active {
   background-color: var(--primary-color);
   color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  font-weight: var(--font-weight-medium);
 }
 
 /* Make category color classes more subtle when not active */
@@ -1923,7 +1948,8 @@ export default {
   }
   
   .category-dropdown-content {
-    max-height: 280px;
+    max-height: 250px;
+    overflow-y: scroll !important;
   }
 }
 
@@ -1945,25 +1971,30 @@ export default {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.25rem;
   background-color: var(--neutral-100);
   border: 1px solid var(--neutral-300);
   border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: all var(--transition-normal);
   color: var(--neutral-700);
+  box-shadow: var(--shadow-sm);
 }
 
 .input-option-btn:hover {
   background-color: var(--neutral-200);
   border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .input-option-btn.active {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
   color: white;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
 }
 
 /* AI Style Overrides */

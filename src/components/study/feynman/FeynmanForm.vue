@@ -26,8 +26,7 @@
         <ol class="feynman-steps">
           <li :class="{ 'active': currentStep === 1 }">Review the source material</li>
           <li :class="{ 'active': currentStep === 2 }">Explain it in your own simple words</li>
-          <li :class="{ 'active': currentStep === 3 }">Identify gaps in your explanation</li>
-          <li :class="{ 'active': currentStep === 4 }">Review, simplify, and use analogies</li>
+          <li :class="{ 'active': currentStep === 3 }">Identify gaps and save your understanding</li>
         </ol>
       </div>
       
@@ -152,72 +151,24 @@
         </div>
         
         <div class="step3-actions">
-          <button @click="currentStep = 2" class="btn btn-outline">
+          <button @click="currentStep = 2" class="btn btn-outline" :disabled="loading">
             Revise My Explanation
           </button>
-          <button @click="proceedToRefinement" class="btn btn-primary">
-            Proceed to Refinement
+          <button @click="completeFeynman" class="btn btn-primary" :disabled="loading">
+            <span v-if="loading" class="loading-spinner"></span>
+            <span v-else>Complete & Save</span>
           </button>
         </div>
       </div>
       
-      <div class="refinement-section" v-if="currentStep === 4">
-        <h4>Refine Your Understanding</h4>
-        <p class="refinement-guidance">
-          Based on the feedback, improve your explanation by filling gaps and simplifying concepts. Try using analogies or examples to make it even clearer.
-        </p>
-        <div class="refinement-form">
-          <div class="textarea-container">
-            <textarea 
-              v-model="refinedExplanation" 
-              class="form-control"
-              rows="8"
-              placeholder="Refine your explanation based on the feedback..."
-              :disabled="refiningLoading || isRefiningRecording"
-              autofocus
-              ref="refinementTextareaRef"
-            ></textarea>
-            <div class="speech-controls">
-              <div class="speech-buttons-container">
-                <button 
-                  type="button" 
-                  @click="toggleRefinementSpeechRecognition" 
-                  class="btn btn-speech" 
-                  :class="{ 'recording': isRefiningRecording }"
-                  :disabled="refiningLoading"
-                  :title="isRefiningRecording ? 'Stop recording' : 'Start speech to text'"
-                >
-                  <svg v-if="!isRefiningRecording" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                    <line x1="12" y1="19" x2="12" y2="23"></line>
-                    <line x1="8" y1="23" x2="16" y2="23"></line>
-                  </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="6" y="4" width="4" height="16"></rect>
-                    <rect x="14" y="4" width="4" height="16"></rect>
-                  </svg>
-                </button>
-                <div v-if="isRefiningRecording" class="recording-indicator">
-                  <span class="recording-text">Recording...</span>
-                  <span class="recording-dot"></span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="form-actions">
-            <button @click="currentStep = 3" class="btn btn-outline" :disabled="refiningLoading">
-              Back to Feedback
-            </button>
-            <button @click="saveExplanation" class="btn btn-primary" :disabled="!canSave || refiningLoading">
-              <span v-if="refiningLoading" class="loading-spinner"></span>
-              <span v-else>Save & Complete</span>
-            </button>
+      <div class="completion-section" v-if="currentStep === 4">
+        <div v-if="error" class="alert alert-danger mb-4">
+          <div class="alert-content">
+            <div class="alert-text">{{ error }}</div>
+            <div class="alert-subtext">Your explanation was saved, but there was an issue with the spaced repetition schedule.</div>
           </div>
         </div>
-      </div>
-      
-      <div class="completion-section" v-if="currentStep === 5">
+
         <div class="completion-card">
           <div class="completion-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -226,23 +177,31 @@
             </svg>
           </div>
           <h4>Feynman Technique Completed!</h4>
-          <p>You've successfully completed the Feynman Technique. Your understanding of this material has improved significantly.</p>
+          <p>You've successfully completed the Feynman Technique. Your understanding has been recorded.</p>
           
           <div class="progress-summary">
             <div class="progress-item">
-              <div class="progress-label">Initial Understanding</div>
+              <div class="progress-label">Your Understanding</div>
               <div class="progress-bar-container">
                 <div class="progress-bar-fill" :style="{ width: `${understandingScore}%` }" :class="understandingClass"></div>
               </div>
               <div class="progress-value">{{ understandingScore }}%</div>
             </div>
-            
-            <div class="progress-item">
-              <div class="progress-label">Final Understanding</div>
-              <div class="progress-bar-container">
-                <div class="progress-bar-fill" :style="{ width: `${finalUnderstandingScore}%` }" :class="finalUnderstandingClass"></div>
-              </div>
-              <div class="progress-value">{{ finalUnderstandingScore }}%</div>
+          </div>
+
+          <div class="spaced-repetition-info">
+            <div class="info-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </div>
+            <div class="info-text">
+              <h5>Spaced Repetition Schedule Created</h5>
+              <p>To maximize retention, we've created a personalized review schedule based on your performance.</p>
+              <p>You'll see your next review date on the material page.</p>
             </div>
           </div>
           
@@ -288,43 +247,26 @@ export default {
     // Form state
     const currentStep = ref(1);
     const userExplanation = ref('');
-    const refinedExplanation = ref('');
     const loading = ref(false);
-    const refiningLoading = ref(false);
     const error = ref('');
     const isRecording = ref(false);
-    const isRefiningRecording = ref(false);
     const recognition = ref(null);
-    const refinementRecognition = ref(null);
     const browserSupportsSpeech = ref(null);
     const textareaRef = ref(null);
-    const refinementTextareaRef = ref(null);
     
     // Feedback state
     const feedback = ref(null);
     const understandingScore = ref(0);
-    const finalUnderstandingScore = ref(0);
     
     // Computed properties
     const canProceed = computed(() => {
       return userExplanation.value.trim().length > 50;
     });
     
-    const canSave = computed(() => {
-      return refinedExplanation.value.trim().length > 50;
-    });
-    
     const understandingClass = computed(() => {
       if (understandingScore.value >= 80) return 'excellent';
       if (understandingScore.value >= 60) return 'good';
       if (understandingScore.value >= 40) return 'fair';
-      return 'needs-work';
-    });
-    
-    const finalUnderstandingClass = computed(() => {
-      if (finalUnderstandingScore.value >= 80) return 'excellent';
-      if (finalUnderstandingScore.value >= 60) return 'good';
-      if (finalUnderstandingScore.value >= 40) return 'fair';
       return 'needs-work';
     });
     
@@ -380,16 +322,8 @@ export default {
       }
     };
     
-    const proceedToRefinement = () => {
-      // Pre-populate with the original explanation
-      refinedExplanation.value = userExplanation.value;
-      currentStep.value = 4;
-    };
-    
-    const saveExplanation = async () => {
-      if (!canSave.value) return;
-      
-      refiningLoading.value = true;
+    const completeFeynman = async () => {
+      loading.value = true;
       error.value = '';
       
       try {
@@ -399,61 +333,62 @@ export default {
           router.push('/login');
           return;
         }
-        
-        // Call DeepSeek API to get the final evaluation
-        const finalEvaluation = await DeepseekService.evaluateFeynmanExplanation(
-          props.content,
-          refinedExplanation.value
-        );
-        
-        // Update the final understanding score
-        finalUnderstandingScore.value = finalEvaluation.understandingScore || understandingScore.value + 10;
-        
-        // Save the feynman technique session
-        await StudyService.saveFeynmanSession(
-          props.materialId,
-          props.title,
-          userExplanation.value,
-          refinedExplanation.value,
-          feedback.value,
-          understandingScore.value,
-          finalUnderstandingScore.value
-        );
-        
-        // Record the final attempt to generate a spaced repetition schedule
-        // This will create review dates based on performance
+
+        // Save the Feynman technique session with the current explanation
         try {
-          const attemptId = await StudyService.saveStudyAttempt(
-            props.materialId, 
-            refinedExplanation.value, 
-            finalUnderstandingScore.value
+          await StudyService.saveFeynmanSession(
+            props.materialId,
+            props.title,
+            userExplanation.value,
+            userExplanation.value, // Use the same explanation for both initial and refined
+            feedback.value,
+            understandingScore.value,
+            understandingScore.value // Initial and final score are the same (no refinement)
           );
           
-          // Generate a spaced repetition schedule based on performance
-          await StudyService.generateSpacedRepetitionSchedule(
-            attemptId,
-            finalUnderstandingScore.value
-          );
-        } catch (spacedRepErr) {
-          console.error('Error generating spaced repetition schedule:', spacedRepErr);
-          // Don't show this error to the user as the core functionality still worked
+          // Record the attempt to generate a spaced repetition schedule
+          try {
+            const attemptId = await StudyService.saveStudyAttempt(
+              props.materialId, 
+              userExplanation.value, 
+              understandingScore.value
+            );
+            
+            // Generate a spaced repetition schedule based on performance
+            await StudyService.generateSpacedRepetitionSchedule(
+              attemptId,
+              understandingScore.value
+            );
+          } catch (spacedRepErr) {
+            console.error('Error generating spaced repetition schedule:', spacedRepErr);
+            // Don't show this error to the user as the core functionality still worked
+          }
+          
+          // Move to completion step
+          currentStep.value = 4;
+          
+          // Emit completed event
+          emit('completed', {
+            initialScore: understandingScore.value,
+            finalScore: understandingScore.value
+          });
+        } catch (saveErr) {
+          console.error('Error saving Feynman session:', saveErr);
+          if (saveErr.message && saveErr.message.includes('permission')) {
+            error.value = "Authentication error. Please refresh the page and try again.";
+          } else {
+            error.value = saveErr.message || 'Failed to save your explanation';
+          }
         }
-        
-        // Move to completion step
-        currentStep.value = 5;
-        
-        // Emit completed event
-        emit('completed', {
-          initialScore: understandingScore.value,
-          finalScore: finalUnderstandingScore.value
-        });
       } catch (err) {
-        console.error('Error saving explanation:', err);
-        error.value = err.message || 'Failed to save your explanation';
+        console.error('Error completing Feynman technique:', err);
+        error.value = err.message || 'Failed to complete the Feynman technique';
       } finally {
-        refiningLoading.value = false;
+        loading.value = false;
       }
     };
+    
+
     
     // Initialize speech recognition
     const initSpeechRecognition = () => {
@@ -513,51 +448,6 @@ export default {
           }
         }
       };
-      
-      // Initialize refinement speech recognition
-      refinementRecognition.value = new SpeechRecognition();
-      refinementRecognition.value.continuous = true;
-      refinementRecognition.value.interimResults = true;
-      refinementRecognition.value.lang = 'en-US'; // Default to English
-      
-      // Set up event handlers for refinement
-      refinementRecognition.value.onresult = (event) => {
-        let finalTranscript = '';
-        
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript;
-          }
-        }
-        
-        // Append final transcript to the refinement textarea
-        if (finalTranscript) {
-          // Add a space if there's already text and it doesn't end with a space
-          const needsSpace = refinedExplanation.value && !refinedExplanation.value.endsWith(' ');
-          refinedExplanation.value += (needsSpace ? ' ' : '') + finalTranscript;
-        }
-      };
-      
-      refinementRecognition.value.onerror = (event) => {
-        console.error('Refinement speech recognition error', event.error);
-        isRefiningRecording.value = false;
-        
-        if (event.error === 'not-allowed') {
-          error.value = 'Microphone access denied. Please check your browser settings.';
-        }
-      };
-      
-      refinementRecognition.value.onend = () => {
-        // Only set isRefiningRecording to false if we didn't manually stop
-        if (isRefiningRecording.value) {
-          try {
-            refinementRecognition.value.start();
-          } catch (e) {
-            console.log('Refinement recognition already started');
-            isRefiningRecording.value = false;
-          }
-        }
-      };
     };
     
     // Toggle speech recognition on/off
@@ -590,36 +480,7 @@ export default {
         }
       }
     };
-    
-    const toggleRefinementSpeechRecognition = () => {
-      if (!browserSupportsSpeech.value) {
-        return;
-      }
-      
-      if (isRefiningRecording.value) {
-        // Stop recording
-        try {
-          refinementRecognition.value.stop();
-          isRefiningRecording.value = false;
-        } catch (e) {
-          console.error('Error stopping refinement recognition', e);
-        }
-      } else {
-        // Start recording
-        try {
-          refinementRecognition.value.start();
-          isRefiningRecording.value = true;
-          
-          // Focus the textarea after starting recording
-          if (refinementTextareaRef.value) {
-            refinementTextareaRef.value.focus();
-          }
-        } catch (e) {
-          console.error('Error starting refinement recognition', e);
-          error.value = 'Could not start speech recognition. Please try again.';
-        }
-      }
-    };
+
     
     const handleReset = () => {
       emit('reset');
@@ -642,44 +503,25 @@ export default {
           console.error('Error stopping recognition on unmount', e);
         }
       }
-      
-      // Stop refinement speech recognition if it's running
-      if (refinementRecognition.value && isRefiningRecording.value) {
-        try {
-          refinementRecognition.value.stop();
-          isRefiningRecording.value = false;
-        } catch (e) {
-          console.error('Error stopping refinement recognition on unmount', e);
-        }
-      }
     });
     
     return {
       currentStep,
       userExplanation,
-      refinedExplanation,
       loading,
-      refiningLoading,
       error,
       feedback,
       understandingScore,
-      finalUnderstandingScore,
       canProceed,
-      canSave,
       understandingClass,
-      finalUnderstandingClass,
       proceedToExplanation,
       evaluateExplanation,
-      proceedToRefinement,
-      saveExplanation,
+      completeFeynman,
       handleReset,
       isRecording,
-      isRefiningRecording,
       browserSupportsSpeech,
       textareaRef,
-      refinementTextareaRef,
-      toggleSpeechRecognition,
-      toggleRefinementSpeechRecognition
+      toggleSpeechRecognition
     };
   }
 };
@@ -1304,6 +1146,39 @@ export default {
   margin-bottom: var(--spacing-4);
 }
 
+/* Refinement notice styling */
+.refinement-notice {
+  margin: var(--spacing-4) 0;
+  padding: var(--spacing-4);
+  background-color: rgba(99, 102, 241, 0.05);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--primary-color);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+}
+
+.notice-icon {
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.notice-text p {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-2);
+  color: var(--neutral-800);
+}
+
+.notice-text ul {
+  margin: 0;
+  padding-left: var(--spacing-5);
+}
+
+.notice-text li {
+  margin-bottom: var(--spacing-1);
+  color: var(--neutral-700);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .feynman-steps {
@@ -1332,5 +1207,45 @@ export default {
   .meter-value, .progress-value {
     text-align: left;
   }
+}
+
+/* Spaced repetition info styling */
+.spaced-repetition-info {
+  margin-top: var(--spacing-6);
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-4);
+  background-color: rgba(99, 102, 241, 0.05);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  text-align: left;
+}
+
+.info-icon {
+  color: var(--primary-color);
+  flex-shrink: 0;
+}
+
+.info-text h5 {
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-2);
+  color: var(--primary-color);
+}
+
+.info-text p {
+  margin-bottom: var(--spacing-2);
+  color: var(--neutral-700);
+  line-height: 1.5;
+}
+
+.info-text p:last-child {
+  margin-bottom: 0;
+}
+
+.alert-subtext {
+  font-size: var(--font-size-sm);
+  color: var(--neutral-600);
+  margin-top: var(--spacing-1);
 }
 </style>

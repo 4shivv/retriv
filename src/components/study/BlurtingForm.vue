@@ -2,7 +2,7 @@
   <div class="blurting-form card">
     <div class="card-header">
       <h3>{{ title }}</h3>
-      <div class="timer-badge" :class="timeLeft.includes('0:') ? 'urgent' : ''">
+      <div v-if="currentPhase === 'blurting'" class="timer-badge" :class="timeLeft.includes('0:') ? 'urgent' : ''">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
           <polyline points="12 6 12 12 16 14"></polyline>
@@ -19,110 +19,139 @@
         </div>
       </div>
       
-      <div v-if="!submitted" class="instructions">
-        <p>
-          Now, try to recall the content you just studied. Type as much as you can remember without looking at the original material. This "blurting" technique helps strengthen your memory.
-        </p>
-        <div v-if="pastAttempts && pastAttempts.length > 0" class="past-attempts-summary">
-          <h4>Your Past Performance</h4>
-          <div class="past-attempts-stats">
-            <div class="stat-card attempts-card">
-              <div class="stat-value">{{ pastAttempts.length }}</div>
-              <div class="stat-label">Total Attempts</div>
-            </div>
-            <div class="stat-card score-card" v-if="pastAttempts.length > 0">
-              <div class="stat-value">{{ pastAttempts[0].matchPercentage }}%</div>
-              <div class="stat-label">Latest Score</div>
-            </div>
-            <div class="stat-card streak-card" v-if="pastAttempts.length > 1">
-              <div class="stat-value">{{ isImproving ? '↑' : (isDecreasing ? '↓' : '→') }}</div>
-              <div class="stat-label">{{ performanceTrendText }}</div>
-            </div>
-          </div>
-          <div v-if="performanceInsight" class="performance-insight">
-            <div class="insight-icon" :class="getInsightIconClass">
-              <svg v-if="isImproving" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-              </svg>
-              <svg v-else-if="isDecreasing" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-              </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-              </svg>
-            </div>
-            <div class="insight-content">{{ performanceInsight }}</div>
-          </div>
+      <!-- Review Phase -->
+      <div v-if="!submitted && currentPhase === 'review'" class="review-phase">
+        <div class="instructions">
+          <p>
+            Take time to review the material below. When you're ready, click the button to move to the recall phase where you'll write down what you remember without looking back at this content.
+          </p>
         </div>
-      </div>
-      
-      <form @submit.prevent="handleSubmitRecall" v-if="!submitted">
-        <div class="form-group">
-          <div class="textarea-container">
-            <textarea
-              v-model="recalledText"
-              class="form-control"
-              rows="12"
-              placeholder="Start typing what you remember..."
-              :disabled="loading || isRecording"
-              autofocus
-              ref="textareaRef"
-            ></textarea>
-            <div class="speech-controls">
-              <div class="speech-buttons-container">
-                <button 
-                  type="button" 
-                  @click="toggleSpeechRecognition" 
-                  class="btn btn-speech" 
-                  :class="{ 'recording': isRecording }"
-                  :disabled="loading"
-                  :title="isRecording ? 'Stop recording' : 'Start speech to text'"
-                >
-                  <svg v-if="!isRecording" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                    <line x1="12" y1="19" x2="12" y2="23"></line>
-                    <line x1="8" y1="23" x2="16" y2="23"></line>
-                  </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="6" y="4" width="4" height="16"></rect>
-                    <rect x="14" y="4" width="4" height="16"></rect>
-                  </svg>
-                </button>
-                <div v-if="isRecording" class="recording-indicator">
-                  <span class="recording-text">Recording...</span>
-                  <span class="recording-dot"></span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div v-if="browserSupportsSpeech === false" class="speech-warning">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <span>Your browser doesn't support speech recognition. Please use Chrome or Edge browser for this feature.</span>
+        
+        <div class="source-material">
+          <h4>Source Material</h4>
+          <div class="source-content">
+            {{ content }}
           </div>
         </div>
         
         <div class="form-actions">
           <button 
-            type="submit" 
+            @click="startBlurting" 
             class="btn btn-primary" 
-            :disabled="loading"
           >
-            <span v-if="loading" class="loading-spinner"></span>
-            <span v-else>Submit Recall</span>
+            <span>Start Recalling</span>
           </button>
         </div>
-      </form>
+      </div>
       
+      <!-- Blurting Phase -->
+      <div v-if="!submitted && currentPhase === 'blurting'" class="blurting-phase">
+        <div class="instructions">
+          <p>
+            Now, try to recall the content you just studied. Type as much as you can remember without looking at the original material. This "blurting" technique helps strengthen your memory.
+          </p>
+          <div v-if="pastAttempts && pastAttempts.length > 0" class="past-attempts-summary">
+            <h4>Your Past Performance</h4>
+            <div class="past-attempts-stats">
+              <div class="stat-card attempts-card">
+                <div class="stat-value">{{ pastAttempts.length }}</div>
+                <div class="stat-label">Total Attempts</div>
+              </div>
+              <div class="stat-card score-card" v-if="pastAttempts.length > 0">
+                <div class="stat-value">{{ pastAttempts[0].matchPercentage }}%</div>
+                <div class="stat-label">Latest Score</div>
+              </div>
+              <div class="stat-card streak-card" v-if="pastAttempts.length > 1">
+                <div class="stat-value">{{ isImproving ? '↑' : (isDecreasing ? '↓' : '→') }}</div>
+                <div class="stat-label">{{ performanceTrendText }}</div>
+              </div>
+            </div>
+            <div v-if="performanceInsight" class="performance-insight">
+              <div class="insight-icon" :class="getInsightIconClass">
+                <svg v-if="isImproving" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <svg v-else-if="isDecreasing" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+              </div>
+              <div class="insight-content">{{ performanceInsight }}</div>
+            </div>
+          </div>
+        </div>
+        
+        <form @submit.prevent="handleSubmitRecall">
+          <div class="form-group">
+            <div class="textarea-container">
+              <textarea
+                v-model="recalledText"
+                class="form-control"
+                rows="12"
+                placeholder="Start typing what you remember..."
+                :disabled="loading || isRecording"
+                autofocus
+                ref="textareaRef"
+              ></textarea>
+              <div class="speech-controls">
+                <div class="speech-buttons-container">
+                  <button 
+                    type="button" 
+                    @click="toggleSpeechRecognition" 
+                    class="btn btn-speech" 
+                    :class="{ 'recording': isRecording }"
+                    :disabled="loading"
+                    :title="isRecording ? 'Stop recording' : 'Start speech to text'"
+                  >
+                    <svg v-if="!isRecording" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                      <line x1="12" y1="19" x2="12" y2="23"></line>
+                      <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="6" y="4" width="4" height="16"></rect>
+                      <rect x="14" y="4" width="4" height="16"></rect>
+                    </svg>
+                  </button>
+                  <div v-if="isRecording" class="recording-indicator">
+                    <span class="recording-text">Recording...</span>
+                    <span class="recording-dot"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-if="browserSupportsSpeech === false" class="speech-warning">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>Your browser doesn't support speech recognition. Please use Chrome or Edge browser for this feature.</span>
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button 
+              type="submit" 
+              class="btn btn-primary" 
+              :disabled="loading"
+            >
+              <span v-if="loading" class="loading-spinner"></span>
+              <span v-else>Submit Recall</span>
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Results Section -->
       <div v-if="submitted" class="results-section">
         <h4 class="results-title">Your Results</h4>
         
@@ -186,97 +215,8 @@
         <div class="next-steps">
           <h5>Your Personalized Learning Journey</h5>
           <p class="schedule-intro">
-            We've created a scientifically-optimized review schedule based on your performance pattern and the latest memory research. This personalized plan maximizes your long-term retention with minimal time investment.
+            We've created a review schedule based on your performance pattern. This personalized plan helps maximize your long-term retention with minimal time investment.
           </p>
-          
-          <!-- Forgetting Curve Visualization -->
-          <div class="forgetting-curve-container">
-            <h6>Your Memory Retention Curve</h6>
-            <div class="curve-visualization">
-              <svg viewBox="0 0 500 200" class="curve-graph">
-                <!-- Axis -->
-                <line x1="80" y1="150" x2="450" y2="150" stroke="#e5e7eb" stroke-width="1"></line> <!-- X axis -->
-                <line x1="80" y1="30" x2="80" y2="150" stroke="#e5e7eb" stroke-width="1"></line> <!-- Y axis -->
-                
-                <!-- Axis Labels -->
-                <text x="265" y="180" text-anchor="middle" class="axis-label">Time</text>
-                <text x="30" y="90" text-anchor="middle" class="axis-label" transform="rotate(-90, 30, 90)">Retention</text>
-                
-                <!-- Timepoint Markers -->
-                <line x1="80" y1="145" x2="80" y2="155" stroke="#9ca3af" stroke-width="1"></line>
-                <text x="80" y="170" text-anchor="middle" class="time-label">Now</text>
-                
-                <!-- Retention Markers -->
-                <line x1="70" y1="50" x2="90" y2="50" stroke="#9ca3af" stroke-width="1"></line>
-                <text x="60" y="55" text-anchor="end" class="retention-label">90%</text>
-                
-                <line x1="70" y1="100" x2="90" y2="100" stroke="#9ca3af" stroke-width="1"></line>
-                <text x="60" y="105" text-anchor="end" class="retention-label">50%</text>
-                
-                <line x1="70" y1="130" x2="90" y2="130" stroke="#9ca3af" stroke-width="1"></line>
-                <text x="60" y="135" text-anchor="end" class="retention-label">20%</text>
-                
-                <!-- Forgetting Curve without practice -->
-                <path :d="getRetentionCurvePath(false)" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,5"></path>
-                
-                <!-- Optimized Curve with spaced repetition -->
-                <path :d="getRetentionCurvePath(true)" fill="none" stroke="#6366f1" stroke-width="2"></path>
-                
-                <!-- Review Points -->
-                <g v-for="(date, index) in reviewSchedule" :key="'review-point-' + index">
-                  <!-- Calculate x position based on days from now -->
-                  <circle 
-                    :cx="80 + calculateGraphPosition(date)" 
-                    :cy="calculateRetentionPoint(date)" 
-                    r="5" 
-                    :class="getReviewPointClass(date)"
-                    @mouseenter="activeReviewPoint = index"
-                    @mouseleave="activeReviewPoint = null"
-                  ></circle>
-                  
-                  <!-- Add pulsing effect to today's review point -->
-                  <circle v-if="isCurrentDate(date)"
-                    :cx="80 + calculateGraphPosition(date)" 
-                    :cy="calculateRetentionPoint(date)" 
-                    r="8"
-                    class="review-point-pulse"
-                  ></circle>
-                  
-                  <!-- Review Point Tooltip -->
-                  <g v-if="activeReviewPoint === index">
-                    <rect 
-                      :x="75 + calculateGraphPosition(date) - 60" 
-                      :y="calculateRetentionPoint(date) - 55" 
-                      width="120" 
-                      height="45" 
-                      rx="4" 
-                      class="tooltip-bg"></rect>
-                    <text 
-                      :x="75 + calculateGraphPosition(date)" 
-                      :y="calculateRetentionPoint(date) - 35" 
-                      text-anchor="middle" 
-                      class="tooltip-text">{{ formatReviewDate(date) }}</text>
-                    <text 
-                      :x="75 + calculateGraphPosition(date)" 
-                      :y="calculateRetentionPoint(date) - 15" 
-                      text-anchor="middle" 
-                      class="tooltip-subtext">{{ getReviewTypeLabel(date) }}</text>
-                  </g>
-                </g>
-              </svg>
-              
-              <div class="curve-legend">
-                <div class="legend-item">
-                  <span class="legend-color no-practice"></span>
-                  <span>Without Practice</span>
-                </div>
-                <div class="legend-item">
-                  <span class="legend-color with-practice"></span>
-                  <span>With Retriv's Spaced Repetition</span>
-                </div>
-              </div>
-            </div>
-          </div>
           
           <!-- Review Schedule Cards -->
           <div class="review-schedule-container">
@@ -293,27 +233,11 @@
             </div>
           </div>
           
-          
           <div class="actions-row">
-            <button @click="addToCalendar" class="btn btn-primary">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-                <path d="M8 14h.01"></path>
-                <path d="M12 14h.01"></path>
-                <path d="M16 14h.01"></path>
-                <path d="M8 18h.01"></path>
-                <path d="M12 18h.01"></path>
-                <path d="M16 18h.01"></path>
-              </svg>
-              Add Reviews to Calendar
-            </button>
             <button @click="handleReset" class="btn btn-outline">
               Study Something Else
             </button>
-            <button @click="handleStudyAgain" class="btn btn-outline">
+            <button @click="handleStudyAgain" class="btn btn-primary">
               Practice Again
             </button>
           </div>
@@ -362,6 +286,7 @@ export default {
     const activeReviewPoint = ref(null);
     const countdownTimerValue = ref(300); // 5 minutes in seconds
     const countdownTimer = ref(null);
+    const currentPhase = ref('review'); // Start with review phase
 
     const originalText = ref(props.content);
     const pastAttempts = ref([]);
@@ -476,6 +401,13 @@ export default {
       
       return 'Continue with your scheduled reviews to maintain retention.';
     });
+    
+    const startBlurting = () => {
+      // Change to blurting phase
+      currentPhase.value = 'blurting';
+      // Start the countdown timer for blurting phase
+      startCountdown();
+    };
     
     const startCountdown = () => {
       countdownTimer.value = setInterval(() => {
@@ -600,11 +532,11 @@ export default {
       countdownTimerValue.value = 300; // Reset timer to 5 minutes
       error.value = '';
       
+      // Return to review phase
+      currentPhase.value = 'review';
+      
       // Notify parent component
       emit('study-again');
-      
-      // Start the countdown again
-      startCountdown();
     };
     
 
@@ -1101,11 +1033,10 @@ export default {
       // Fetch past attempts for this material
       await fetchPastAttempts();
       
-      // Start the countdown
-      startCountdown();
-      
       // Initialize speech recognition
       initSpeechRecognition();
+      
+      // Note: countdown timer will be started when moving to blurting phase
     });
     
     onBeforeUnmount(() => {
@@ -1133,6 +1064,8 @@ export default {
       reviewSchedule,
       timeLeft,
       matchPercentageClass,
+      currentPhase,
+      startBlurting,
 
       originalText,
       pastAttempts,
@@ -1177,6 +1110,52 @@ export default {
 </script>
 
 <style scoped>
+/* Source Material Styling */
+.source-material {
+  margin: var(--spacing-6) 0;
+  padding: var(--spacing-4);
+  background-color: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--neutral-200);
+}
+
+.source-material h4 {
+  margin-bottom: var(--spacing-3);
+  color: var(--neutral-900);
+  font-weight: var(--font-weight-medium);
+}
+
+.source-content {
+  padding: var(--spacing-4);
+  background-color: var(--neutral-50);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--primary-color);
+  white-space: pre-wrap;
+  font-size: var(--font-size-md);
+  line-height: 1.6;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.review-phase .form-actions {
+  margin-top: var(--spacing-6);
+  display: flex;
+  justify-content: center;
+}
+
+.review-phase .btn-primary {
+  padding: 0.75rem 2rem;
+  font-size: var(--font-size-md);
+  background-color: #6c5ce7;
+  transition: all 0.3s ease;
+}
+
+.review-phase .btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(108, 92, 231, 0.2);
+}
+
 /* Textarea with Speech Controls */
 .textarea-container {
   position: relative;
@@ -1879,6 +1858,8 @@ export default {
 .btn-primary {
   display: flex;
   align-items: center;
+  background-color: #6c5ce7;
+  color: white;
 }
 
 .loading-spinner {

@@ -33,17 +33,23 @@
               <h2 class="section-title">Due for Review</h2>
               <div class="reviews-header-meta">
                 <div class="review-stats-container">
-                  <div class="review-stats" v-if="reviewsDueToday > 0">
-                    <div class="review-stat-badge">
+                  <div class="review-stats" v-if="reviewsDueToday > 0 || reviewsOverdue > 0">
+                    <div class="review-stat-badge" v-if="reviewsDueToday > 0">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path>
                       </svg>
                       <span>{{ reviewsDueToday }} {{ reviewsDueToday === 1 ? 'review' : 'reviews' }} due today</span>
                     </div>
+                    <div class="review-stat-badge urgent" v-if="reviewsOverdue > 0">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                      </svg>
+                      <span>{{ reviewsOverdue }} {{ reviewsOverdue === 1 ? 'review' : 'reviews' }} overdue</span>
+                    </div>
                   </div>
-                  <div class="calendar-button-container">
-                    <CalendarButton :dueReviews="dueReviews" />
-                  </div>
+                  <!-- Calendar integration removed -->
                 </div>
               </div>
             </div>
@@ -59,7 +65,7 @@
                 <h3 class="review-title">{{ review.title }}</h3>
                 <div class="review-progress">
                   <div class="progress">
-                    <div class="progress-bar" :style="{ width: review.retentionPercentage + '%' }" :class="getRetentionClass(review.retentionPercentage)"></div>
+                    <div class="progress-bar" :style="{ width: review.retentionPercentage + '%' }" :class="getRetentionClass(review.retentionPercentage, review.isOverdue)"></div>
                   </div>
                   <span class="progress-text">{{ review.retentionPercentage }}% retention</span>
                 </div>
@@ -246,7 +252,7 @@ import { useStore } from 'vuex';
 import MaterialList from '@/components/study/MaterialList.vue';
 import InputForm from '@/components/study/InputForm.vue';
 import BlurtingForm from '@/components/study/BlurtingForm.vue';
-import CalendarButton from '@/components/study/CalendarButton.vue';
+// Calendar integration removed
 import FeynmanTechnique from '@/components/study/feynman/FeynmanTechnique.vue';
 import StudyService from '@/services/study.service';
 
@@ -256,12 +262,11 @@ export default {
     MaterialList,
     InputForm,
     BlurtingForm,
-    CalendarButton,
+    // Calendar integration removed
     FeynmanTechnique
   },
   
   setup() {
-    const error = ref('');
     const currentMode = ref('list'); // 'list', 'create', 'study', 'feynman'
     const studyMethod = ref('blurting'); // 'blurting' or 'feynman'
     const currentMaterial = ref(null);
@@ -464,7 +469,11 @@ export default {
     };
     
     // Get color class based on retention percentage
-    const getRetentionClass = (value) => {
+    const getRetentionClass = (value, isOverdue = false) => {
+      // If the item is overdue, prioritize that visual indicator
+      if (isOverdue) return 'overdue';
+      
+      // Otherwise use retention-based classes
       if (value >= 90) return 'excellent';
       if (value >= 80) return 'good';
       if (value >= 70) return 'fair';
@@ -476,13 +485,23 @@ export default {
       // Find the corresponding material
       const material = materials.value.find(m => m.id === review.materialId);
       if (material) {
-        handleSelectMaterial(material);
+        // Add the review status to the material for reference
+        const materialWithReviewStatus = {
+          ...material,
+          isOverdue: review.isOverdue,
+          dueLabel: review.dueLabel,
+          nextReview: review.nextReview
+        };
+        handleSelectMaterial(materialWithReviewStatus);
       } else {
-        // Use the review info to create a placeholder material for demo purposes
+        // Use the review info to create a placeholder material
         handleSelectMaterial({
           id: review.id,
           title: review.title,
-          content: "This is a placeholder content for the review. In a real application, this would be the actual content of the material."
+          content: "This is a placeholder content for the review. In a real application, this would be the actual content of the material.",
+          isOverdue: review.isOverdue,
+          dueLabel: review.dueLabel,
+          nextReview: review.nextReview
         });
       }
     };
@@ -517,7 +536,7 @@ export default {
           const nextReview = await StudyService.getNextReviewDate(material.id);
           if (!nextReview) return null;
           
-          // Get the latest retention score directly instead of fetching all attempts
+          // Get the latest retention score directly
           const retentionPercentage = await StudyService.getLatestRetentionScore(material.id);
           
           // Get the latest attempt for last reviewed info
@@ -526,6 +545,13 @@ export default {
           // Calculate if it's overdue or due today
           const now = new Date();
           const reviewDate = new Date(nextReview);
+          
+          // Check if the review date is valid
+          if (isNaN(reviewDate.getTime())) {
+            console.error('Invalid review date for material:', material.id);
+            return null;
+          }
+          
           const isOverdue = reviewDate < now;
           
           // Format the due label based on upcoming review schedule
@@ -535,8 +561,13 @@ export default {
           const tomorrow = new Date(today);
           tomorrow.setDate(tomorrow.getDate() + 1);
           
+          // Calculate days until review is due
+          const daysUntilDue = Math.ceil((reviewDate - today) / (1000 * 60 * 60 * 24));
+          
           if (isOverdue) {
-            dueLabel = "Past Due";
+            // Calculate days overdue
+            const daysOverdue = Math.ceil((today - reviewDate) / (1000 * 60 * 60 * 24));
+            dueLabel = daysOverdue === 1 ? "1 Day Overdue" : `${daysOverdue} Days Overdue`;
           } else {
             // Check if it's due today
             if (reviewDate.getDate() === today.getDate() && 
@@ -547,6 +578,8 @@ export default {
                        reviewDate.getMonth() === tomorrow.getMonth() && 
                        reviewDate.getFullYear() === tomorrow.getFullYear()) {
               dueLabel = "Due Tomorrow";
+            } else if (daysUntilDue <= 7) {
+              dueLabel = `Due in ${daysUntilDue} Days`;
             } else {
               dueLabel = `Due on ${reviewDate.toLocaleDateString()}`;
             }
@@ -558,16 +591,40 @@ export default {
             const lastReviewDate = attempts[0].timestamp?.toDate ? 
               attempts[0].timestamp.toDate() : new Date(attempts[0].timestamp);
             
-            // Check if it was today
-            if (lastReviewDate.toDateString() === now.toDateString()) {
-              lastReviewedLabel = "Today";
+            // Check if the last reviewed date is valid
+            if (!isNaN(lastReviewDate.getTime())) {
+              // Calculate days since last review
+              const daysSinceReview = Math.floor((now - lastReviewDate) / (1000 * 60 * 60 * 24));
+              
+              // Check if it was today
+              if (lastReviewDate.toDateString() === now.toDateString()) {
+                lastReviewedLabel = "Today";
+              } else if (daysSinceReview === 1) {
+                lastReviewedLabel = "Yesterday";
+              } else if (daysSinceReview < 7) {
+                lastReviewedLabel = `${daysSinceReview} days ago`;
+              } else {
+                lastReviewedLabel = lastReviewDate.toLocaleDateString();
+              }
             } else {
-              lastReviewedLabel = lastReviewDate.toLocaleDateString();
+              console.error('Invalid last review date for material:', material.id);
+              lastReviewedLabel = "Date error";
             }
           }
           
+          // Calculate urgency score for better sorting
+          let urgencyScore = 0;
+          if (isOverdue) {
+            // Overdue items get higher urgency based on how many days overdue
+            const daysOverdue = Math.ceil((today - reviewDate) / (1000 * 60 * 60 * 24));
+            urgencyScore = 1000 + daysOverdue; // Start at 1000 so all overdue are prioritized
+          } else {
+            // Non-overdue get urgency based on how soon they're due
+            // Lower value = sooner due = higher urgency (for sorting)
+            urgencyScore = -daysUntilDue;
+          }
+          
           return {
-      error,
             id: material.id,
             materialId: material.id,
             title: material.title,
@@ -575,20 +632,18 @@ export default {
             isOverdue,
             dueLabel,
             retentionPercentage,
-            lastReviewedLabel
+            lastReviewedLabel,
+            urgencyScore
           };
         });
         
         const reviews = (await Promise.all(reviewPromises))
           .filter(review => review !== null)
-          // Sort by date (overdue first, then by chronological order)
-          .sort((a, b) => {
-            if (a.isOverdue && !b.isOverdue) return -1;
-            if (!a.isOverdue && b.isOverdue) return 1;
-            return a.nextReview - b.nextReview;
-          });
+          // Sort by urgency score (descending), which combines overdue status and days until due
+          .sort((a, b) => b.urgencyScore - a.urgencyScore);
         
         dueReviews.value = reviews;
+        console.log('Generated due reviews:', dueReviews.value.length);
       } catch (err) {
         console.error('Failed to generate due reviews:', err);
         dueReviews.value = [];
@@ -739,6 +794,14 @@ export default {
       document.removeEventListener('click', closeFilterMenu);
     });
     
+    // Calculate the count of overdue materials
+    const reviewsOverdue = computed(() => {
+      if (!dueReviews.value || dueReviews.value.length === 0) return 0;
+      
+      // Count materials that are overdue
+      return dueReviews.value.filter(review => review.isOverdue).length;
+    });
+
     return {
       // State
       currentMode,
@@ -753,6 +816,7 @@ export default {
       hasDueReviews,
       dueReviews,
       reviewsDueToday,
+      reviewsOverdue,
       materialCategories,
       showFilterMenu,
       activeCategory,
@@ -993,6 +1057,13 @@ export default {
 .review-badge.urgent {
   background-color: rgba(239, 68, 68, 0.1);
   color: #ef4444;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
 }
 
 .review-meta {
@@ -1038,6 +1109,17 @@ export default {
 
 .progress-bar.poor {
   background: linear-gradient(90deg, #f97316, #ef4444);
+}
+
+.progress-bar.overdue {
+  background: linear-gradient(90deg, #dc2626, #991b1b);
+  animation: pulse-progress 2s infinite;
+}
+
+@keyframes pulse-progress {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
 }
 
 .progress-text {
@@ -1246,7 +1328,7 @@ export default {
 .reviews-header-meta {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   width: 100%;
 }
@@ -1261,10 +1343,6 @@ export default {
 .review-stats {
   display: flex;
   gap: var(--spacing-3);
-}
-
-.calendar-button-container {
-  min-width: 250px;
 }
 
 .review-stat-badge {

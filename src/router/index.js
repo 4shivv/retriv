@@ -66,7 +66,8 @@ const routes = [
     name: 'FAQ',
     component: FAQPage,
     meta: { 
-      title: 'FAQ - Retriv'
+      title: 'FAQ - Retriv',
+      redirectIfAuth: '/dashboard'  // Redirect authenticated users
     }
   },
   {
@@ -74,7 +75,8 @@ const routes = [
     name: 'Blog',
     component: BlogPage,
     meta: { 
-      title: 'Blog - Retriv'
+      title: 'Blog - Retriv',
+      redirectIfAuth: '/dashboard'  // Redirect authenticated users
     }
   },
   {
@@ -82,7 +84,8 @@ const routes = [
     name: 'Terms',
     component: TermsPage,
     meta: { 
-      title: 'Terms of Service - Retriv'
+      title: 'Terms of Service - Retriv',
+      redirectIfAuth: '/dashboard'  // Redirect authenticated users
     }
   },
   {
@@ -90,7 +93,8 @@ const routes = [
     name: 'Privacy',
     component: PrivacyPage,
     meta: { 
-      title: 'Privacy Policy - Retriv'
+      title: 'Privacy Policy - Retriv',
+      redirectIfAuth: '/dashboard'  // Redirect authenticated users
     }
   },
   {
@@ -98,7 +102,8 @@ const routes = [
     name: 'Contact',
     component: ContactPage,
     meta: { 
-      title: 'Contact Us - Retriv'
+      title: 'Contact Us - Retriv',
+      redirectIfAuth: '/dashboard'  // Redirect authenticated users
     }
   },
   {
@@ -106,7 +111,8 @@ const routes = [
     name: 'About',
     component: AboutPage,
     meta: { 
-      title: 'About Us - Retriv'
+      title: 'About Us - Retriv',
+      redirectIfAuth: '/dashboard'  // Redirect authenticated users
     }
   },
   {
@@ -114,7 +120,8 @@ const routes = [
     name: 'Careers',
     component: CareersPage,
     meta: { 
-      title: 'Careers - Retriv'
+      title: 'Careers - Retriv',
+      redirectIfAuth: '/dashboard'  // Redirect authenticated users
     }
   },
   {
@@ -122,7 +129,8 @@ const routes = [
     name: 'MobileApp',
     component: MobileAppPage,
     meta: { 
-      title: 'Mobile App - Retriv'
+      title: 'Mobile App - Retriv',
+      redirectIfAuth: '/dashboard'  // Redirect authenticated users
     }
   },
   {
@@ -130,7 +138,8 @@ const routes = [
     name: 'Pricing',
     component: PricingPage,
     meta: { 
-      title: 'Pricing - Retriv'
+      title: 'Pricing - Retriv',
+      redirectIfAuth: '/dashboard'  // Redirect authenticated users
     }
   },
   // Handle 404 - catch all route
@@ -195,8 +204,9 @@ router.beforeEach(async (to, from, next) => {
   } else if (requiresGuest && currentUser) {
     // If route requires guest (non-authenticated) and user is logged in, redirect to dashboard
     next('/dashboard');
-  } else if (redirectIfAuth && currentUser) {
+  } else if ((redirectIfAuth || to.path === '/') && currentUser) {
     // If route should redirect authenticated users and user is logged in, redirect to dashboard
+    // Also explicitly redirect from home page (/) for authenticated users
     next(to.meta.redirectIfAuth || '/dashboard');
   } else {
     // Proceed normally

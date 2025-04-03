@@ -1,10 +1,6 @@
 <template>
   <div class="home-page">
-    <!-- Redirect Message (only shown briefly before router redirects) -->
-    <div v-if="isAuthenticated" class="redirect-message">
-      <div class="spinner"></div>
-      <p>Redirecting to your dashboard...</p>
-    </div>
+    <!-- No redirect message needed as router will handle this -->
     <!-- Hero Section -->
     <section class="hero">
       <div class="container">
@@ -516,34 +512,7 @@
 </template>
 
 <style scoped>
-/* Redirect Message */
-.redirect-message {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(255, 255, 255, 0.9);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid rgba(99, 102, 241, 0.2);
-  border-radius: 50%;
-  border-top-color: var(--primary-color);
-  animation: spin 1s linear infinite;
-  margin-bottom: var(--spacing-4);
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+/* No redirect message styles needed */
 
 /* Hero Section */
 .hero {

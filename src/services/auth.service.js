@@ -2,7 +2,8 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   signInWithPopup,
-  signOut 
+  signOut
+  // onAuthStateChanged is now only used in main.js
 } from 'firebase/auth';
 import { auth, googleProvider } from './firebase';
 

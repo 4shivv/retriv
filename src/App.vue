@@ -11,8 +11,7 @@
 </template>
 
 <script>
-import { onMounted } from 'vue';
-import { useStore } from 'vuex';
+// No store import needed
 import AppNavbar from '@/components/ui/Navbar.vue';
 import AppFooter from '@/components/ui/Footer.vue';
 
@@ -24,12 +23,8 @@ export default {
   },
   
   setup() {
-    const store = useStore();
-    
-    onMounted(() => {
-      // Initialize auth state
-      store.dispatch('auth/initAuth');
-    });
+    // Auth state is initialized in main.js before mounting
+    // No need to dispatch auth/initAuth here
   }
 }
 </script>

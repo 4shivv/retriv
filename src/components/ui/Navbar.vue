@@ -4,7 +4,7 @@
       <nav class="navbar">
         <div class="navbar-left">
           <div class="navbar-brand">
-            <router-link to="/" class="navbar-logo">
+            <router-link :to="isAuthenticated ? '/dashboard' : '/'" class="navbar-logo">
               <div class="logo-mark">
               <img src="/dog.png" alt="Retriv.ai" class="logo-image" />
               </div>
@@ -136,8 +136,10 @@ export default {
     const userMenuOpen = ref(false);
     const scrolled = ref(false);
     
-    // Check if on home page
+    // Check if on home page (but never for authenticated users)
     const isHomePage = computed(() => {
+      // If user is authenticated, they shouldn't see the home page
+      if (isAuthenticated.value) return false;
       return route.path === '/';
     });
     
@@ -195,6 +197,13 @@ export default {
     };
     
     const navigateToHomeWithHash = (hash) => {
+      // If user is authenticated, redirect to dashboard instead
+      if (isAuthenticated.value) {
+        router.push('/dashboard');
+        closeMenu();
+        return;
+      }
+      
       if (isHomePage.value) {
         // If already on home page, just scroll to the section
         const element = document.querySelector(hash);

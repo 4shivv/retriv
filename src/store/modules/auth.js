@@ -1,4 +1,4 @@
-import { auth } from '@/services/firebase';
+// Auth is now handled in main.js
 
 const state = {
   user: null,
@@ -21,27 +21,7 @@ const mutations = {
 };
 
 const actions = {
-  initAuth({ commit }) {
-    commit('SET_LOADING', true);
-    
-    // Listen for auth state changes
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        // User is signed in
-        commit('SET_USER', {
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL
-        });
-      } else {
-        // User is signed out
-        commit('SET_USER', null);
-      }
-      
-      commit('SET_LOADING', false);
-    });
-  },
+  // No need for initAuth as it's handled in main.js
   
   setUser({ commit }, user) {
     if (user) {
@@ -54,10 +34,14 @@ const actions = {
     } else {
       commit('SET_USER', null);
     }
+    // Set loading to false when user state is set
+    commit('SET_LOADING', false);
   },
   
   clearUser({ commit }) {
     commit('SET_USER', null);
+    // Set loading to false when user state is cleared
+    commit('SET_LOADING', false);
   }
 };
 

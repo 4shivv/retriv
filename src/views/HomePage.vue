@@ -450,7 +450,7 @@
     </section>
     
     <!-- CTA Section -->
-    <section class="cta-section">
+    <section id="cta-section" class="cta-section">
       <div class="container">
         <div class="cta-card">
           <div class="cta-content">

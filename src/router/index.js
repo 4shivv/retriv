@@ -5,6 +5,11 @@ import LoginPage from '@/views/LoginPage.vue';
 import RegisterPage from '@/views/RegisterPage.vue';
 import DashboardPage from '@/views/DashboardPage.vue';
 import ProfilePage from '@/views/ProfilePage.vue';
+import FAQPage from '@/views/FAQPage.vue';
+import BlogPage from '@/views/BlogPage.vue';
+import TermsPage from '@/views/TermsPage.vue';
+import PrivacyPage from '@/views/PrivacyPage.vue';
+import ContactPage from '@/views/ContactPage.vue';
 
 const routes = [
   {
@@ -50,6 +55,46 @@ const routes = [
     meta: { 
       requiresAuth: true,
       title: 'Profile - Retriv' 
+    }
+  },
+  {
+    path: '/faq',
+    name: 'FAQ',
+    component: FAQPage,
+    meta: { 
+      title: 'FAQ - Retriv'
+    }
+  },
+  {
+    path: '/blog',
+    name: 'Blog',
+    component: BlogPage,
+    meta: { 
+      title: 'Blog - Retriv'
+    }
+  },
+  {
+    path: '/terms',
+    name: 'Terms',
+    component: TermsPage,
+    meta: { 
+      title: 'Terms of Service - Retriv'
+    }
+  },
+  {
+    path: '/privacy',
+    name: 'Privacy',
+    component: PrivacyPage,
+    meta: { 
+      title: 'Privacy Policy - Retriv'
+    }
+  },
+  {
+    path: '/contact',
+    name: 'Contact',
+    component: ContactPage,
+    meta: { 
+      title: 'Contact Us - Retriv'
     }
   },
   // Handle 404 - catch all route

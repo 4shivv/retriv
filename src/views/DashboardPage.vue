@@ -60,9 +60,31 @@
                   <div class="review-badge" :class="{ urgent: review.isOverdue }">
                     {{ review.isOverdue ? 'Overdue' : review.dueLabel }}
                   </div>
-                  <div class="review-meta">Last reviewed: {{ review.lastReviewedLabel }}</div>
+                  <div class="sr-phase-badge" v-if="review.currentPhase && review.totalReviews">
+                    Phase {{ review.currentPhase }}/{{ review.totalReviews }}
+                  </div>
                 </div>
                 <h3 class="review-title">{{ review.title }}</h3>
+                
+                <!-- Spaced Repetition Info -->
+                <div class="sr-info" v-if="review.reviewSchedule && review.reviewSchedule.length > 0">
+                  <div class="sr-timeline">
+                    <div 
+                      v-for="(date, i) in review.reviewSchedule.slice(0, 5)" 
+                      :key="i"
+                      class="sr-timeline-dot"
+                      :class="{
+                        'sr-completed': new Date(date) < new Date(), 
+                        'sr-current': i === review.currentPhase - 1,
+                        'sr-future': new Date(date) > new Date()
+                      }"
+                      :title="new Date(date).toLocaleDateString()"
+                    ></div>
+                    <div v-if="review.reviewSchedule.length > 5" class="sr-timeline-more">+{{ review.reviewSchedule.length - 5 }}</div>
+                  </div>
+                </div>
+                
+                <div class="review-meta">Last reviewed: {{ review.lastReviewedLabel }}</div>
                 <div class="review-progress">
                   <div class="progress">
                     <div class="progress-bar" :style="{ width: review.retentionPercentage + '%' }" :class="getRetentionClass(review.retentionPercentage, review.isOverdue)"></div>
@@ -533,25 +555,56 @@ export default {
         
         // Check which materials have upcoming reviews
         const reviewPromises = userMaterials.map(async material => {
-          const nextReview = await StudyService.getNextReviewDate(material.id);
-          if (!nextReview) return null;
+          // Get the most recent attempt with a review schedule
+          const attempts = await StudyService.getStudyAttempts(material.id);
+          if (!attempts || attempts.length === 0) return null;
+          
+          // Find the first attempt with a valid review schedule
+          const attemptWithSchedule = attempts.find(
+            attempt => attempt.reviewSchedule && 
+                     attempt.reviewSchedule.length > 0 && 
+                     !attempt.isDeprecatedSchedule
+          );
+          
+          if (!attemptWithSchedule) return null;
+          
+          // Get the full review schedule
+          let reviewSchedule = [];
+          if (attemptWithSchedule.reviewSchedule) {
+            reviewSchedule = attemptWithSchedule.reviewSchedule.map(
+              date => typeof date === 'string' ? new Date(date) : date.toDate()
+            );
+          }
+          
+          // Filter out invalid dates
+          reviewSchedule = reviewSchedule.filter(date => !isNaN(date.getTime()));
+          if (reviewSchedule.length === 0) return null;
+          
+          // Sort the schedule by date (ascending)
+          reviewSchedule.sort((a, b) => a - b);
           
           // Get the latest retention score directly
           const retentionPercentage = await StudyService.getLatestRetentionScore(material.id);
           
-          // Get the latest attempt for last reviewed info
-          const attempts = await StudyService.getStudyAttempts(material.id);
-          
-          // Calculate if it's overdue or due today
+          // Find the next review date (first future date in the schedule)
           const now = new Date();
+          const nextReview = reviewSchedule.find(date => date > now) || reviewSchedule[0];
           const reviewDate = new Date(nextReview);
           
-          // Check if the review date is valid
-          if (isNaN(reviewDate.getTime())) {
-            console.error('Invalid review date for material:', material.id);
-            return null;
-          }
+          // Get upcoming review dates after this one (max 3)
+          const upcomingReviews = reviewSchedule
+            .filter(date => date > reviewDate)
+            .slice(0, 3)
+            .map(date => new Date(date));
           
+          // Get the total number of reviews in the schedule
+          const totalReviews = reviewSchedule.length;
+          
+          // Calculate spaced repetition phase
+          const completedReviews = reviewSchedule.filter(date => date < now).length;
+          const currentPhase = completedReviews + 1;
+          
+          // Calculate if it's overdue or due today
           const isOverdue = reviewDate < now;
           
           // Format the due label based on upcoming review schedule
@@ -633,7 +686,11 @@ export default {
             dueLabel,
             retentionPercentage,
             lastReviewedLabel,
-            urgencyScore
+            urgencyScore,
+            upcomingReviews,
+            currentPhase,
+            totalReviews,
+            reviewSchedule
           };
         });
         
@@ -1343,6 +1400,70 @@ export default {
 .review-stats {
   display: flex;
   gap: var(--spacing-3);
+}
+
+/* Spaced Repetition UI */
+.sr-phase-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: rgba(99, 102, 241, 0.1);
+  color: var(--primary-color);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.sr-info {
+  margin-bottom: var(--spacing-3);
+}
+
+.sr-timeline {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
+}
+
+.sr-timeline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--neutral-300);
+  position: relative;
+}
+
+.sr-timeline-dot:not(:last-child):after {
+  content: "";
+  position: absolute;
+  height: 2px;
+  width: var(--spacing-4);
+  background-color: var(--neutral-300);
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.sr-timeline-dot.sr-completed {
+  background-color: var(--primary-color);
+}
+
+.sr-timeline-dot.sr-completed:after {
+  background-color: var(--primary-color);
+}
+
+.sr-timeline-dot.sr-current {
+  background-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+  transform: scale(1.2);
+}
+
+.sr-timeline-dot.sr-future {
+  background-color: var(--neutral-300);
+}
+
+.sr-timeline-more {
+  font-size: var(--font-size-xs);
+  color: var(--neutral-500);
 }
 
 .review-stat-badge {

@@ -8,28 +8,47 @@ import { onAuthStateChanged } from 'firebase/auth';
 // Create the Vue app
 const app = createApp(App);
 
-// Use plugins
+// Use store plugin
 app.use(store);
-app.use(router);
 
-// Initialize auth state before mounting the app
-// This ensures auth state is available immediately on page load
+// Wait for Firebase auth to initialize before mounting the app
+// and setting up the router
+let appMounted = false;
 onAuthStateChanged(auth, user => {
   // Update the Vuex store with user information
   if (user) {
+    // User is signed in
     store.dispatch('auth/setUser', {
       uid: user.uid,
       email: user.email,
       displayName: user.displayName,
       photoURL: user.photoURL
     });
+    
+    // If we're on the home page or another public page, redirect to dashboard
+    const currentPath = window.location.pathname;
+    if (currentPath === '/' || 
+        currentPath === '/about' || 
+        currentPath === '/pricing' || 
+        currentPath === '/blog' ||
+        currentPath === '/faq' ||
+        currentPath === '/terms' ||
+        currentPath === '/privacy' ||
+        currentPath === '/contact' ||
+        currentPath === '/careers' ||
+        currentPath === '/mobile-app') {
+      router.push('/dashboard');
+    }
   } else {
+    // User is signed out
     store.dispatch('auth/clearUser');
   }
   
-  // Only mount the app once we have the initial auth state
-  // This prevents flash of login screen before redirect
-  if (!app._container) {
+  // Mount the app if it hasn't been mounted yet
+  if (!appMounted) {
+    // Use router after auth is initialized
+    app.use(router);
     app.mount('#app');
+    appMounted = true;
   }
 });

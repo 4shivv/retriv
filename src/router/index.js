@@ -189,29 +189,31 @@ router.beforeEach(async (to, from, next) => {
   // Update document title
   document.title = to.meta.title || 'Retriv';
   
-  // Wait for Firebase auth to initialize
+  // Get current user - explicitly check auth state
   const currentUser = auth.currentUser;
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const requiresGuest = to.matched.some(record => record.meta.requiresGuest);
   const redirectIfAuth = to.matched.some(record => record.meta.redirectIfAuth);
   
+  // Force a redirect for authenticated users trying to access any public page
+  if (currentUser && (redirectIfAuth || to.path === '/')) {
+    return next('/dashboard');
+  }
+  
+  // Standard auth flow
   if (requiresAuth && !currentUser) {
     // If route requires auth and user is not logged in, redirect to login
-    next({
+    return next({
       path: '/login',
       query: { redirect: to.fullPath } // Store the path they were trying to access
     });
   } else if (requiresGuest && currentUser) {
     // If route requires guest (non-authenticated) and user is logged in, redirect to dashboard
-    next('/dashboard');
-  } else if ((redirectIfAuth || to.path === '/') && currentUser) {
-    // If route should redirect authenticated users and user is logged in, redirect to dashboard
-    // Also explicitly redirect from home page (/) for authenticated users
-    next(to.meta.redirectIfAuth || '/dashboard');
-  } else {
-    // Proceed normally
-    next();
+    return next('/dashboard');
   }
+  
+  // No auth issues, proceed normally
+  return next();
 });
 
 export default router;

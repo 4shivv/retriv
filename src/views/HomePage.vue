@@ -14,7 +14,7 @@
               Master Any Subject with <span class="text-gradient">Active Recall</span>
             </h1>
             <p class="hero-description">
-              Retriv uses cognitive neuroscience and AI to help you learn faster and remember longer. Our research-backed "blurting" technique and spaced repetition system optimize your learning for maximum retention.
+            Retriv uses cognitive neuroscience and AI to help you learn faster and remember longer, anywhere you go. Our research-backed "blurting" technique, built-in speech-to-text functionality, and adaptive spaced repetition system let you maximize learning even during your busy day.
             </p>
             <div class="hero-actions">
               <router-link to="/register" class="btn btn-primary btn-lg">Get Started Free</router-link>
@@ -33,73 +33,117 @@
                 <div class="stat-value">1k+</div>
                 <div class="stat-label">Active Users</div>
               </div>
+              <div class="stat">
+                <div class="stat-value">24/7</div>
+                <div class="stat-label">On-the-Go Learning</div>
+              </div>
             </div>
           </div>
           <div class="hero-visual">
-            <div class="mockup-window">
-            <div class="mockup-header">
-            <div class="mockup-action">
-            <span class="circle red"></span>
-            <span class="circle yellow"></span>
-            <span class="circle green"></span>
-            </div>
-            <div class="mockup-title">Retriv Active Recall</div>
-            </div>
-            <div class="mockup-body">
-            <div class="mockup-tabs">
-            <div class="mockup-tab active">Study</div>
-            <div class="mockup-tab">Analytics</div>
-            <div class="mockup-tab">History</div>
-            </div>
-            <div class="mockup-section">
-            <div class="mockup-label">Original Note</div>
-            <div class="mockup-source-text">
-              <div class="mockup-text-line w-100"></div>
-                <div class="mockup-text-line w-90"></div>
-                <div class="mockup-text-line w-95"></div>
-              <div class="mockup-text-line w-80"></div>
-              <div class="mockup-text-line w-100"></div>
-            </div>
-            </div>
-            <div class="mockup-section">
-            <div class="mockup-recall-header">
-            <div class="mockup-label">Your Recall Attempt</div>
-              <div class="mockup-timer">01:42</div>
-              </div>
-              <div class="mockup-recall-text">
-              <div class="mockup-text-line w-90 match"></div>
-            <div class="mockup-text-line w-80 match"></div>
-            <div class="mockup-text-line w-85 partial"></div>
-              <div class="mockup-text-line w-70 miss"></div>
-              <div class="mockup-text-line w-90 match"></div>
-              </div>
-              </div>
-                <div class="mockup-ai-feedback">
-                    <div class="ai-feedback-header">
-                      <div class="ai-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M21 12a9 9 0 1 0-9 9"></path>
-                          <path d="M9 9h.01"></path>
-                          <path d="M15 9h.01"></path>
-                          <path d="M12 13a3 3 0 0 0 2.24-1"></path>
+            <div class="hero-visual-wrapper">
+              <div class="mobile-device">
+                <div class="device-frame">
+                  <div class="device-status-bar">
+                    <div class="status-icons">
+                      <div class="wifi-icon"></div>
+                      <div class="battery-icon"></div>
+                    </div>
+                    <div class="time">9:41</div>
+                  </div>
+                  <div class="device-screen">
+                    <div class="app-header">
+                      <div class="app-logo">Retriv</div>
+                      <div class="user-avatar"></div>
+                    </div>
+                    <div class="app-content">
+                      <div class="content-tabs">
+                        <div class="tab active">Learn</div>
+                        <div class="tab">Review</div>
+                        <div class="tab">Stats</div>
+                      </div>
+                      <div class="study-card">
+                        <div class="card-subject">Biology</div>
+                        <div class="card-title">Cellular Respiration</div>
+                        <div class="card-prompt">Explain the process of glycolysis</div>
+                      </div>
+                      <div class="voice-input-container">
+                        <div class="voice-input-label">Tap to speak your answer</div>
+                        <div class="voice-button">
+                          <div class="mic-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                              <line x1="12" x2="12" y1="19" y2="22"></line>
+                            </svg>
+                          </div>
+                        </div>
+                        <div class="voice-waves">
+                          <div class="wave wave-1"></div>
+                          <div class="wave wave-2"></div>
+                          <div class="wave wave-3"></div>
+                          <div class="wave wave-4"></div>
+                          <div class="wave wave-5"></div>
+                        </div>
+                        <div class="speech-text">"Glycolysis is the first step where glucose is..."</div>
+                      </div>
+                    </div>
+                    <div class="app-nav">
+                      <div class="nav-item active">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                          <polyline points="9 22 9 12 15 12 15 22"></polyline>
                         </svg>
                       </div>
-                      <span>AI Feedback</span>
+                      <div class="nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="12" y1="8" x2="12" y2="12"></line>
+                          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                      </div>
+                      <div class="nav-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="8.5" cy="7" r="4"></circle>
+                          <line x1="20" y1="8" x2="20" y2="14"></line>
+                          <line x1="23" y1="11" x2="17" y2="11"></line>
+                        </svg>
+                      </div>
                     </div>
-                    <div class="ai-suggestion">
-                      <div class="mockup-text-line w-100"></div>
-                      <div class="mockup-text-line w-70"></div>
-                    </div>
-                  </div>
-                  <div class="mockup-footer">
-                    <div class="mockup-score">
-                      <div class="score-label">Recall Score</div>
-                      <div class="score-value">85%</div>
-                    </div>
-                    <div class="mockup-btn">Next Review: 3 days</div>
                   </div>
                 </div>
+                <div class="device-home-button"></div>
               </div>
+              <div class="floating-elements">
+                <div class="float-item float-item-1">
+                  <div class="float-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    </svg>
+                  </div>
+                  <div class="float-text">Voice Input</div>
+                </div>
+                <div class="float-item float-item-2">
+                  <div class="float-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </div>
+                  <div class="float-text">Learn Anywhere</div>
+                </div>
+                <div class="float-item float-item-3">
+                  <div class="float-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <path d="m4.9 4.9 14.2 14.2"></path>
+                    </svg>
+                  </div>
+                  <div class="float-text">No Internet Needed</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -135,9 +179,9 @@
                 <span>01</span>
               </div>
             </div>
-            <h3 class="feature-title">Input Your Notes</h3>
+            <h3 class="feature-title">Input Your Notes Anywhere</h3>
             <p class="feature-description">
-              Input your notes and Retriv's AI will transform them into optimized study material designed specifically for active recall learning techniques.
+              Use our powerful speech-to-text feature to capture your notes on the go, or type them in manually. Retriv's AI transforms them into optimized study material designed for active recall learning.
             </p>
           </div>
           
@@ -526,14 +570,22 @@
   position: relative;
 }
 
-/* App Mockup Styling */
-.mockup-window {
-  width: 450px;
-  background-color: white;
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xl);
-  overflow: hidden;
+/* Hero Visual Wrapper */
+.hero-visual-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Mobile Device Mockup */
+.mobile-device {
+  position: relative;
+  width: 280px;
+  height: 580px;
+  margin: 0 auto;
   animation: float 6s ease-in-out infinite;
+  z-index: 10;
 }
 
 @keyframes float {
@@ -541,183 +593,300 @@
   50% { transform: translateY(-10px); }
 }
 
-.mockup-header {
-  background-color: var(--neutral-100);
-  padding: 0.75rem 1rem;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid var(--neutral-200);
-}
-
-.mockup-action {
-  display: flex;
-  gap: 0.5rem;
-  margin-right: 1rem;
-}
-
-.circle {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-
-.red { background-color: #ff5f57; }
-.yellow { background-color: #ffbd2e; }
-.green { background-color: #28ca41; }
-
-.mockup-title {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--neutral-700);
-}
-
-.mockup-body {
-  padding: 1.5rem;
-}
-
-.mockup-tabs {
-  display: flex;
-  border-bottom: 1px solid var(--neutral-200);
-  margin-bottom: 1.5rem;
-}
-
-.mockup-tab {
-  padding: 0.75rem 1.5rem;
-  font-size: var(--font-size-sm);
-  color: var(--neutral-600);
-  cursor: pointer;
+.device-frame {
   position: relative;
+  width: 100%;
+  height: 550px;
+  background-color: #1e1e1e;
+  border-radius: 40px;
+  padding: 10px;
+  box-shadow: var(--shadow-2xl);
+  overflow: hidden;
 }
 
-.mockup-tab.active {
-  color: var(--primary-color);
+.device-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+}
+
+.status-icons {
+  display: flex;
+  gap: 8px;
+}
+
+.wifi-icon, .battery-icon {
+  width: 18px;
+  height: 8px;
+  background-color: white;
+  opacity: 0.9;
+  border-radius: 2px;
+}
+
+.time {
+  color: white;
   font-weight: var(--font-weight-medium);
+  font-size: 14px;
 }
 
-.mockup-tab.active::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 2px;
+.device-screen {
+  background-color: white;
+  height: calc(100% - 20px);
+  border-radius: 30px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
   background-color: var(--primary-color);
 }
 
-.mockup-section {
-  margin-bottom: 1.5rem;
+.app-logo {
+  color: white;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
 }
 
-.mockup-label {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--neutral-700);
-  margin-bottom: 0.75rem;
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
-.mockup-recall-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-}
-
-.mockup-timer {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  color: var(--primary-color);
-  background-color: rgba(99, 102, 241, 0.1);
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-full);
-}
-
-.mockup-source-text,
-.mockup-recall-text {
+.app-content {
+  flex: 1;
   padding: 1rem;
-  background-color: var(--neutral-50);
-  border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-}
-
-.mockup-text-line {
-  height: 12px;
-  border-radius: 6px;
-  background-color: var(--neutral-300);
-}
-
-.w-100 { width: 100%; }
-.w-95 { width: 95%; }
-.w-90 { width: 90%; }
-.w-85 { width: 85%; }
-.w-80 { width: 80%; }
-.w-70 { width: 70%; }
-
-.match { background-color: rgba(16, 185, 129, 0.6); }
-.partial { background-color: rgba(245, 158, 11, 0.6); }
-.miss { background-color: rgba(239, 68, 68, 0.6); }
-
-.mockup-ai-feedback {
+  gap: 1rem;
   background-color: var(--neutral-50);
-  border-radius: var(--radius-md);
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border-left: 3px solid var(--primary-color);
 }
 
-.ai-feedback-header {
+.content-tabs {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-  color: var(--primary-color);
+  gap: 1rem;
+  border-bottom: 1px solid var(--neutral-200);
+  padding-bottom: 0.75rem;
+}
+
+.tab {
+  color: var(--neutral-500);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
+  padding-bottom: 0.5rem;
+  position: relative;
 }
 
-.ai-icon {
+.tab.active {
+  color: var(--primary-color);
+}
+
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--primary-color);
+  border-radius: 2px;
+}
+
+.study-card {
+  background-color: white;
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 1rem;
+}
+
+.card-subject {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  color: var(--primary-color);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.card-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 1rem;
+  color: var(--neutral-800);
+}
+
+.card-prompt {
+  color: var(--neutral-600);
+  font-size: var(--font-size-sm);
+}
+
+.voice-input-container {
+  background-color: white;
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.voice-input-label {
+  font-size: var(--font-size-sm);
+  color: var(--neutral-500);
+  text-align: center;
+}
+
+.voice-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  cursor: pointer;
 }
 
-.ai-suggestion {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.mic-icon {
+  color: white;
 }
 
-.mockup-footer {
+.voice-waves {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 4px;
+  margin-top: 0.5rem;
 }
 
-.mockup-score {
+.wave {
+  width: 3px;
+  height: 20px;
+  border-radius: 2px;
+  background-color: var(--primary-color);
+  animation: wave 1.5s infinite ease-in-out;
+}
+
+@keyframes wave {
+  0%, 100% { height: 8px; }
+  50% { height: 20px; }
+}
+
+.wave-1 { animation-delay: 0s; }
+.wave-2 { animation-delay: 0.2s; }
+.wave-3 { animation-delay: 0.4s; }
+.wave-4 { animation-delay: 0.2s; }
+.wave-5 { animation-delay: 0s; }
+
+.speech-text {
+  font-style: italic;
+  color: var(--neutral-700);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.app-nav {
   display: flex;
-  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0.75rem 0;
+  background-color: white;
+  border-top: 1px solid var(--neutral-100);
 }
 
-.score-label {
-  font-size: var(--font-size-xs);
-  color: var(--neutral-600);
+.nav-item {
+  color: var(--neutral-400);
+  padding: 0.5rem;
+  border-radius: 50%;
 }
 
-.score-value {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
+.nav-item.active {
   color: var(--primary-color);
 }
 
-.mockup-btn {
-  padding: 0.5rem 1rem;
-  background: var(--primary-gradient);
-  color: white;
-  font-size: var(--font-size-sm);
+.device-home-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.15);
+  margin: 10px auto 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Floating elements */
+.floating-elements {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.float-item {
+  position: absolute;
+  background-color: white;
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-xl);
+  animation: float-items 8s infinite ease-in-out;
+}
+
+@keyframes float-items {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+.float-item-1 {
+  top: 10%;
+  right: -50px;
+  animation-delay: 0s;
+}
+
+.float-item-2 {
+  bottom: 30%;
+  left: -70px;
+  animation-delay: 1s;
+}
+
+.float-item-3 {
+  bottom: 10%;
+  right: -40px;
+  animation-delay: 2s;
+}
+
+.float-icon {
+  width: 40px;
+  height: 40px;
+  background-color: rgba(99, 102, 241, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+}
+
+.float-text {
   font-weight: var(--font-weight-medium);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+  font-size: var(--font-size-sm);
+  color: var(--neutral-700);
+  white-space: nowrap;
 }
 
 /* Background Elements */

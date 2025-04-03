@@ -1395,6 +1395,99 @@ const StudyService = {
       console.error("Error getting latest retention score:", error);
       return 0;
     }
+  },
+  
+  /**
+   * Save an exchange between a student and the Study Assistant AI
+   * @param {Object} exchangeData - The exchange data to save
+   * @param {string} exchangeData.materialId - ID of the study material
+   * @param {string} exchangeData.question - Student's question
+   * @param {string} exchangeData.answer - AI's answer
+   * @param {Date} exchangeData.timestamp - When the exchange happened
+   * @returns {string} ID of the saved exchange
+   */
+  async saveStudyAssistantExchange({ materialId, question, answer, timestamp }) {
+    // First check if the user is authenticated
+    if (!auth.currentUser) {
+      throw new Error("You must be logged in to save Study Assistant exchanges");
+    }
+    
+    try {
+      console.log("Saving Study Assistant exchange for material:", materialId);
+      
+      // Create a new exchange document
+      const docRef = await addDoc(collection(db, 'study_assistant_exchanges'), {
+        materialId,
+        userId: auth.currentUser.uid,
+        question,
+        answer,
+        timestamp: timestamp || serverTimestamp()
+      });
+      
+      console.log("Study Assistant exchange saved successfully with ID:", docRef.id);
+      return docRef.id;
+    } catch (error) {
+      console.error("Error saving Study Assistant exchange:", error);
+      throw new Error(`Failed to save Study Assistant exchange: ${error.message}`);
+    }
+  },
+  
+  /**
+   * Get previous exchanges with the Study Assistant for a particular material
+   * @param {string} materialId - ID of the study material
+   * @returns {Array} Array of exchange objects
+   */
+  async getStudyAssistantExchanges(materialId) {
+    // First check if the user is authenticated
+    if (!auth.currentUser) {
+      throw new Error("You must be logged in to view Study Assistant exchanges");
+    }
+    
+    try {
+      // Query exchanges for this material ordered by timestamp (oldest first for conversation flow)
+      try {
+        const q = query(
+          collection(db, 'study_assistant_exchanges'),
+          where('materialId', '==', materialId),
+          where('userId', '==', auth.currentUser.uid),
+          orderBy('timestamp', 'asc')
+        );
+        
+        const querySnapshot = await getDocs(q);
+        
+        return querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+      } catch (indexError) {
+        // If index error occurs, use a simpler query and sort manually
+        console.warn("Index not found error in getStudyAssistantExchanges, using fallback query:", indexError);
+        
+        const fallbackQuery = query(
+          collection(db, 'study_assistant_exchanges'),
+          where('materialId', '==', materialId),
+          where('userId', '==', auth.currentUser.uid)
+        );
+        
+        const fallbackSnapshot = await getDocs(fallbackQuery);
+        
+        // Sort manually (oldest first for conversation flow)
+        return fallbackSnapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }))
+          .sort((a, b) => {
+            if (!a.timestamp || !b.timestamp) return 0;
+            const timeA = a.timestamp.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+            const timeB = b.timestamp.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+            return timeA - timeB;
+          });
+      }
+    } catch (error) {
+      console.error("Error fetching Study Assistant exchanges:", error);
+      throw new Error(`Failed to fetch Study Assistant exchanges: ${error.message}`);
+    }
   }
 };
 

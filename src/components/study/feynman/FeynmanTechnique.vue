@@ -77,6 +77,7 @@ import { ref, onMounted } from 'vue';
 import FeynmanForm from './FeynmanForm.vue';
 import FeynmanView from './FeynmanView.vue';
 import StudyService from '@/services/study.service';
+import DeepseekService from '@/services/deepseek.service';
 
 export default {
   name: 'FeynmanTechnique',
@@ -133,7 +134,7 @@ export default {
       emit('open-chat', chatData);
     };
     
-    const sendChatMessage = () => {
+    const sendChatMessage = async () => {
       if (!chatInput.value.trim()) return;
       
       // Add user message to chat
@@ -146,13 +147,94 @@ export default {
       const userQuestion = chatInput.value;
       chatInput.value = '';
       
-      // Simulate AI response (in a real app, this would call an API)
-      setTimeout(() => {
+      // Show loading indicator
+      chatMessages.value.push({
+        type: 'assistant',
+        content: '...',
+        isLoading: true
+      });
+      
+      try {
+        // Call DeepseekService for AI response
+        const sourceContent = currentChatData.value?.content || '';
+        const title = currentChatData.value?.title || '';
+        
+        const response = await DeepseekService.generateStudyAssistantResponse({
+          sourceContent,
+          title,
+          userQuestion,
+          previousExchanges: chatMessages.value
+            .filter(msg => !msg.isLoading)
+            .map(msg => ({
+              role: msg.type === 'user' ? 'user' : 'assistant',
+              content: msg.content
+            }))
+        });
+        
+        // Remove loading message
+        chatMessages.value = chatMessages.value.filter(msg => !msg.isLoading);
+        
+        // Add AI response
         chatMessages.value.push({
           type: 'assistant',
-          content: `I understand your question about "${userQuestion}". In a real implementation, this would connect to an AI assistant API to provide a helpful response about the study material.`
+          content: response.answer
         });
-      }, 1000);
+        
+        // Save this exchange to the user's history
+        try {
+          await StudyService.saveStudyAssistantExchange({
+            materialId: props.materialId,
+            question: userQuestion,
+            answer: response.answer,
+            timestamp: new Date()
+          });
+        } catch (saveError) {
+          console.error('Error saving study assistant exchange:', saveError);
+          // Non-blocking error, user can still continue the conversation
+        }
+        
+      } catch (error) {
+        console.error('Error getting AI response:', error);
+        
+        // Remove loading message
+        chatMessages.value = chatMessages.value.filter(msg => !msg.isLoading);
+        
+        // Create a simple fallback response based on the content
+        let fallbackResponse = '';
+        const title = currentChatData.value?.title || 'this material';
+        
+        // If the explanation is available, provide more specific feedback
+        const userExplanation = currentChatData.value?.explanation || '';
+        
+        if (userExplanation) {
+          if (userQuestion.toLowerCase().includes('how did i do') || 
+              userQuestion.toLowerCase().includes('my explanation') || 
+              userQuestion.toLowerCase().includes('give feedback')) {
+            fallbackResponse = `Your explanation shows an effort to understand the key concepts. While I can't provide detailed AI feedback right now, try comparing your explanation with the original material to identify any gaps or misunderstandings. Focus on explaining concepts in your own words, as if teaching someone else.`;
+          } else {
+            fallbackResponse = `I see you're working with the Feynman technique, which is excellent for deepening understanding. While I can't access the AI service right now, continue working on explaining concepts in simple terms as if teaching someone else. This process will help you identify gaps in your knowledge.`;
+          }
+        } 
+        // Generic responses based on question type
+        else if (userQuestion.toLowerCase().includes('what is') || 
+                userQuestion.toLowerCase().includes('define') || 
+                userQuestion.toLowerCase().includes('explain')) {
+          fallbackResponse = `I understand you're asking for an explanation related to ${title}. While I can't access the AI service right now, I can suggest reviewing the material carefully, focusing on key terms and concepts. The Feynman technique involves explaining concepts in simple terms as if teaching someone else.`;
+        } else if (userQuestion.toLowerCase().includes('how') || 
+                  userQuestion.toLowerCase().includes('process')) {
+          fallbackResponse = `It seems you're asking about a process or method in ${title}. Try breaking down the content into smaller parts and explain each component in your own words. This approach helps identify areas where your understanding might be incomplete.`;
+        } else if (userQuestion.toLowerCase().includes('why')) {
+          fallbackResponse = `You're asking about reasons or rationales in ${title}. Consider the broader implications and connections between different concepts. When using the Feynman technique, asking 'why' questions helps deepen your understanding.`;
+        } else {
+          fallbackResponse = `I'm currently experiencing connection issues with the AI service. Please try again later or ask your instructor for help with your question about "${title}". Continue using the Feynman technique by explaining concepts in simple terms.`;
+        }
+        
+        // Show fallback message
+        chatMessages.value.push({
+          type: 'assistant',
+          content: fallbackResponse
+        });
+      }
     };
     
     // Load the next scheduled review date for this material

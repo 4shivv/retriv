@@ -9,7 +9,22 @@ import { auth } from './firebase';
 
 // API configuration
 const API_BASE_URL = 'https://api.deepseek.com';
+
+// Get API key from environment variables
+// In Vue.js, environment variables are accessed via process.env
 const API_KEY = process.env.VUE_APP_DEEPSEEK_API_KEY;
+
+// Logging for debugging
+console.log('DeepSeek Service Initialized');
+console.log('API Key exists:', !!API_KEY);
+console.log('API Key first few chars:', API_KEY ? `${API_KEY.substring(0, 5)}...` : 'Not found');
+
+// Handle case where API key might not be loaded correctly
+if (!API_KEY) {
+  console.error('DeepSeek API key is missing or not properly loaded from environment variables!');
+  console.error('Make sure VUE_APP_DEEPSEEK_API_KEY is set in your .env file and the application is properly loading environment variables.');
+}
+
 
 const DeepseekService = {
   /**
@@ -78,8 +93,18 @@ For example:
       
       // Parse response
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`API error: ${errorData.error?.message || 'Unknown error'}`);
+        console.error('DeepSeek API request failed with status:', response.status);
+        
+        try {
+          const errorData = await response.json();
+          console.error('API error details:', errorData);
+          throw new Error(`API error (${response.status}): ${errorData.error?.message || JSON.stringify(errorData) || 'Unknown error'}`);
+        } catch (parseError) {
+          // If we can't parse the error as JSON, use the response text
+          const errorText = await response.text();
+          console.error('Error response text:', errorText);
+          throw new Error(`API error (${response.status}): ${errorText || 'Unknown error'}`);
+        }
       }
       
       const responseData = await response.json();
@@ -173,8 +198,18 @@ For example:
       
       // Parse response
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`API error: ${errorData.error?.message || 'Unknown error'}`);
+        console.error('DeepSeek API request failed with status:', response.status);
+        
+        try {
+          const errorData = await response.json();
+          console.error('API error details:', errorData);
+          throw new Error(`API error (${response.status}): ${errorData.error?.message || JSON.stringify(errorData) || 'Unknown error'}`);
+        } catch (parseError) {
+          // If we can't parse the error as JSON, use the response text
+          const errorText = await response.text();
+          console.error('Error response text:', errorText);
+          throw new Error(`API error (${response.status}): ${errorText || 'Unknown error'}`);
+        }
       }
       
       const responseData = await response.json();
@@ -270,6 +305,170 @@ For example:
    * @param {string} text - The generated text to extract materials from
    * @returns {Array} Extracted materials
    */
+  /**
+   * Generate Study Assistant response to student questions
+   * @param {Object} params - Parameters for generating a response
+   * @param {string} params.sourceContent - The original study material content
+   * @param {string} params.title - Title of the study material
+   * @param {string} params.userQuestion - The student's question
+   * @param {Array} [params.previousExchanges=[]] - Previous chat exchanges for context
+   * @returns {Object} Generated response
+   */
+  async generateStudyAssistantResponse({
+    sourceContent,
+    title,
+    userQuestion,
+    previousExchanges = []
+  }) {
+    // First check if the user is authenticated
+    if (!auth.currentUser) {
+      throw new Error("You must be logged in to use the Study Assistant");
+    }
+    
+    try {
+      // Prepare the system prompt for a helpful study assistant with JSON output format
+      const systemPrompt = `You are an expert study assistant helping a student understand the material "${title}".
+
+Your role is to:
+1. Answer questions specifically about the source material
+2. Explain difficult concepts in clear, simple terms
+3. Provide examples to illustrate abstract ideas
+4. Clarify misunderstandings
+5. Help the student make connections between concepts
+
+Base your responses on the source material, but add explanations and examples to help understanding.
+
+OUTPUT FORMAT: You must provide your response in JSON format with the following structure:
+{
+  "answer": "Your detailed response to the student's question"
+}
+`;
+      
+      // Format previous exchanges for context
+      let conversationHistory = '';
+      if (previousExchanges.length > 0) {
+        conversationHistory = '\nPrevious conversation:\n';
+        previousExchanges.forEach(exchange => {
+          if (exchange.role === 'user') {
+            conversationHistory += `Student: ${exchange.content}\n`;
+          } else if (exchange.role === 'assistant') {
+            conversationHistory += `Assistant: ${exchange.content}\n`;
+          }
+        });
+      }
+      
+      // Prepare the user prompt with the source material and question
+      const userPrompt = `Here is the source material the student is studying:\n\n${sourceContent}\n\n${conversationHistory}\nStudent's current question: ${userQuestion}\n\nPlease provide a helpful, clear response in JSON format. Focus directly on answering the question based on the source material. Make your explanation clear and concise.`;
+      
+      // Debugging - Log request data
+      const requestBody = {
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        response_format: {
+          'type': 'json_object'
+        },
+        max_tokens: 2048, // Set a reasonable max token limit
+        temperature: 0.7, // Slightly lower temperature for more focused responses
+        stream: false
+      };
+      
+      console.log('Making DeepSeek API request with params:', {
+        url: `${API_BASE_URL}/chat/completions`,
+        model: requestBody.model,
+        response_format: requestBody.response_format,
+        system_prompt_length: systemPrompt.length,
+        user_prompt_length: userPrompt.length
+      });
+      
+      if (!API_KEY) {
+        console.error('DeepSeek API key is missing!');
+        throw new Error('API key is not configured properly. Please check your environment variables.');
+      }
+      
+      // Call the Deepseek API
+      const response = await fetch(`${API_BASE_URL}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify(requestBody)
+      });
+      
+      // Parse response
+      if (!response.ok) {
+        console.error('DeepSeek API request failed with status:', response.status);
+        
+        try {
+          const errorData = await response.json();
+          console.error('API error details:', errorData);
+          throw new Error(`API error (${response.status}): ${errorData.error?.message || JSON.stringify(errorData) || 'Unknown error'}`);
+        } catch (parseError) {
+          // If we can't parse the error as JSON, use the response text
+          const errorText = await response.text();
+          console.error('Error response text:', errorText);
+          throw new Error(`API error (${response.status}): ${errorText || 'Unknown error'}`);
+        }
+      }
+      
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log('DeepSeek API response structure:', {
+          id: responseData.id,
+          model: responseData.model,
+          choices: responseData.choices ? responseData.choices.length : 0
+        });
+      } catch (parseError) {
+        console.error('Failed to parse API response as JSON:', parseError);
+        const responseText = await response.text();
+        console.error('Response text:', responseText.substring(0, 200) + '...');
+        throw new Error('Failed to parse API response');
+      }
+      
+      const generatedContent = responseData.choices?.[0]?.message?.content;
+      
+      if (!generatedContent) {
+        console.error('No content in API response:', responseData);
+        throw new Error('No response generated from AI');
+      }
+      
+      // Parse the JSON response
+      try {
+        const parsedResponse = JSON.parse(generatedContent);
+        
+        // Check if the response has the expected structure
+        if (!parsedResponse.answer) {
+          console.warn('Response missing answer field:', parsedResponse);
+          return {
+            answer: 'I understand your question, but I had trouble formulating a proper response. Could you try rephrasing your question?'
+          };
+        }
+        
+        return {
+          answer: parsedResponse.answer
+        };
+      } catch (parseError) {
+        console.error('Error parsing JSON response:', parseError, 'Raw content:', generatedContent);
+        
+        // If JSON parsing fails but we have content, return it directly
+        if (generatedContent && typeof generatedContent === 'string' && generatedContent.trim().length > 0) {
+          return {
+            answer: generatedContent
+          };
+        }
+        
+        throw new Error('Failed to parse AI response as JSON');
+      }
+    } catch (error) {
+      console.error('Error generating study assistant response:', error);
+      throw new Error(`Failed to generate response: ${error.message}`);
+    }
+  },
+  
   _extractMaterialsFromText(text) {
     const materials = [];
     

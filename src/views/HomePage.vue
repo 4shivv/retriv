@@ -452,15 +452,64 @@
     <!-- CTA Section -->
     <section class="cta-section">
       <div class="container">
-        <div class="cta-content">
-          <h2>Ready to transform the way you learn?</h2>
-          <p>Join thousands of students who have improved their retention with Retriv's evidence-based learning system.</p>
-          <router-link to="/register" class="btn btn-primary btn-lg">Get Started Free</router-link>
+        <div class="cta-card">
+          <div class="cta-content">
+            <div class="cta-text">
+              <h2>Ready to transform your learning experience?</h2>
+              <p>Join the neuroscience-backed learning revolution and remember more with less study time.</p>
+              <ul class="cta-features">
+                <li>
+                  <div class="feature-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                  </div>
+                  <span>Active recall technology</span>
+                </li>
+                <li>
+                  <div class="feature-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                  </div>
+                  <span>Personalized learning schedules</span>
+                </li>
+                <li>
+                  <div class="feature-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                  </div>
+                  <span>Voice input & AI feedback</span>
+                </li>
+              </ul>
+            </div>
+            <div class="cta-action">
+              <div class="action-card">
+                <div class="card-badge">Get Started Today</div>
+                <h3>Free Personal Account</h3>
+                <div class="price">$0</div>
+                <p class="plan-description">Perfect for individual students and learners</p>
+                <ul class="plan-features">
+                  <li>Unlimited flashcards</li>
+                  <li>Basic spaced repetition</li>
+                  <li>Voice input support</li>
+                </ul>
+                <router-link to="/register" class="btn btn-primary btn-lg">Create Free Account</router-link>
+                <p class="no-credit-card">No credit card required</p>
+              </div>
+            </div>
+          </div>
+          <div class="cta-bg-elements">
+            <div class="bg-circle circle-1"></div>
+            <div class="bg-circle circle-2"></div>
+            <div class="bg-circle circle-3"></div>
+            <div class="bg-dots"></div>
+          </div>
         </div>
-      </div>
-      <div class="cta-bg">
-        <div class="cta-shape-1"></div>
-        <div class="cta-shape-2"></div>
       </div>
     </section>
   </div>
@@ -1344,70 +1393,228 @@
 /* CTA Section */
 .cta-section {
   position: relative;
-  background: var(--primary-gradient);
-  color: white;
   padding: 6rem 0;
   overflow: hidden;
+  background: var(--neutral-50);
+}
+
+.cta-card {
+  position: relative;
+  background: var(--primary-gradient);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  z-index: 1;
 }
 
 .cta-content {
   position: relative;
-  z-index: 1;
-  text-align: center;
-  max-width: 700px;
-  margin: 0 auto;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  padding: 3rem;
+  gap: 3rem;
 }
 
-.cta-content h2 {
+.cta-text {
+  flex: 1;
+  color: white;
+  min-width: 300px;
+}
+
+.cta-text h2 {
   font-size: var(--font-size-3xl);
-  margin-bottom: 1rem;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 1.5rem;
   color: white;
 }
 
-.cta-content p {
+.cta-text p {
+  font-size: var(--font-size-lg);
   opacity: 0.9;
   margin-bottom: 2rem;
-  font-size: var(--font-size-lg);
+  max-width: 500px;
 }
 
-.cta-content .btn-primary {
+.cta-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cta-features li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+}
+
+.feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.cta-action {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  justify-content: center;
+}
+
+.action-card {
   background: white;
+  border-radius: var(--radius-xl);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 380px;
+  position: relative;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  transform: translateY(-20px);
+  transition: transform var(--transition-normal);
+}
+
+.action-card:hover {
+  transform: translateY(-30px);
+}
+
+.card-badge {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--neutral-800);
+  color: white;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+}
+
+.action-card h3 {
+  font-size: var(--font-size-xl);
+  color: var(--neutral-900);
+  margin-bottom: 0.5rem;
+}
+
+.price {
+  font-size: 3rem;
+  font-weight: var(--font-weight-bold);
   color: var(--primary-color);
+  margin-bottom: 1rem;
 }
 
-.cta-content .btn-primary:hover {
-  background: var(--neutral-100);
+.plan-description {
+  color: var(--neutral-600);
+  margin-bottom: 1.5rem;
+  font-size: var(--font-size-sm);
+}
+
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem;
+  text-align: center;
+}
+
+.plan-features li {
+  padding: 0.5rem 0;
+  color: var(--neutral-700);
+  font-size: var(--font-size-sm);
+}
+
+.action-card .btn {
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.action-card .btn-primary {
+  background: var(--primary-color);
+  color: white;
+  font-weight: var(--font-weight-bold);
+  border: none;
+  transition: all var(--transition-normal);
+}
+
+.action-card .btn-primary:hover {
+  background: var(--primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-.cta-bg {
+.no-credit-card {
+  font-size: var(--font-size-xs);
+  color: var(--neutral-500);
+  margin-bottom: 0;
+}
+
+/* Background Elements */
+.cta-bg-elements {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  overflow: hidden;
+  z-index: 1;
 }
 
-.cta-shape-1,
-.cta-shape-2 {
+.bg-circle {
   position: absolute;
-  background-color: rgba(255, 255, 255, 0.1);
   border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.cta-shape-1 {
+.circle-1 {
   width: 300px;
   height: 300px;
-  top: -150px;
-  right: -50px;
+  top: -100px;
+  right: -100px;
+  animation: float 15s infinite alternate ease-in-out;
 }
 
-.cta-shape-2 {
+.circle-2 {
   width: 200px;
   height: 200px;
-  bottom: -100px;
-  left: -50px;
+  bottom: -50px;
+  left: 10%;
+  animation: float 20s infinite alternate-reverse ease-in-out;
+}
+
+.circle-3 {
+  width: 150px;
+  height: 150px;
+  top: 20%;
+  left: 20%;
+  animation: float 12s infinite alternate ease-in-out;
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(30px, -30px); }
+}
+
+.bg-dots {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
 /* Responsive Styles */
@@ -1482,6 +1689,27 @@
   
   .science-cards {
     grid-template-columns: 1fr;
+  }
+  
+  .cta-buttons {
+    flex-direction: column;
+  }
+  
+  .cta-section {
+    padding: 4rem 0;
+  }
+  
+  .cta-content {
+    padding: 2rem;
+    gap: 2rem;
+  }
+  
+  .cta-text h2 {
+    font-size: var(--font-size-2xl);
+  }
+  
+  .action-card {
+    padding: 2rem 1.5rem;
   }
 }
 </style>

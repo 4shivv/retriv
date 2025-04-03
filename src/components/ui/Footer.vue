@@ -3,13 +3,11 @@
     <div class="container">
       <div class="footer-columns">
         <div class="footer-column">
-          <h4 class="footer-heading">About</h4>
+          <h4 class="footer-heading">Company</h4>
           <ul class="footer-links">
-            <li><a href="#how-it-works">How It Works</a></li>
-            <li><a href="#science">Our Science</a></li>
-            <li><a href="#testimonials">Success Stories</a></li>
-            <li><a href="#">About Us</a></li>
-            <li><router-link to="/contact">Contact</router-link></li>
+            <li><router-link to="/about">About Us</router-link></li>
+            <li><router-link to="/careers">Careers</router-link></li>
+            <li><router-link to="/blog">Blog</router-link></li>
           </ul>
         </div>
 
@@ -18,16 +16,16 @@
           <ul class="footer-links">
             <li><a href="#cta-section">Pricing</a></li>
             <li><router-link to="/faq">FAQs</router-link></li>
-            <li><a href="#">Mobile App</a></li>
+            <li><router-link to="/mobile-app">Mobile App</router-link></li>
           </ul>
         </div>
 
         <div class="footer-column">
           <h4 class="footer-heading">Resources</h4>
           <ul class="footer-links">
-            <li><router-link to="/blog">Blog</router-link></li>
             <li><router-link to="/terms">Terms of Service</router-link></li>
             <li><router-link to="/privacy">Privacy Policy</router-link></li>
+            <li><router-link to="/contact">Contact</router-link></li>
           </ul>
         </div>
 

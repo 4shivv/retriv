@@ -5,7 +5,7 @@
         <div class="navbar-brand">
           <router-link to="/" class="navbar-logo">
             <div class="logo-mark">
-            <img src="/dog.jpg" alt="Retriv.ai" class="logo-image" />
+            <img src="/dog.png" alt="Retriv.ai" class="logo-image" />
             </div>
             <div class="logo-text">Retriv.ai</div>
           </router-link>

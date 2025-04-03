@@ -10,6 +10,9 @@ import BlogPage from '@/views/BlogPage.vue';
 import TermsPage from '@/views/TermsPage.vue';
 import PrivacyPage from '@/views/PrivacyPage.vue';
 import ContactPage from '@/views/ContactPage.vue';
+import CareersPage from '@/views/CareersPage.vue';
+import AboutPage from '@/views/AboutPage.vue';
+import MobileAppPage from '@/views/MobileAppPage.vue';
 
 const routes = [
   {
@@ -95,6 +98,30 @@ const routes = [
     component: ContactPage,
     meta: { 
       title: 'Contact Us - Retriv'
+    }
+  },
+  {
+    path: '/about',
+    name: 'About',
+    component: AboutPage,
+    meta: { 
+      title: 'About Us - Retriv'
+    }
+  },
+  {
+    path: '/careers',
+    name: 'Careers',
+    component: CareersPage,
+    meta: { 
+      title: 'Careers - Retriv'
+    }
+  },
+  {
+    path: '/mobile-app',
+    name: 'MobileApp',
+    component: MobileAppPage,
+    meta: { 
+      title: 'Mobile App - Retriv'
     }
   },
   // Handle 404 - catch all route

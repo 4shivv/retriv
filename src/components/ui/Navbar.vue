@@ -276,7 +276,7 @@ export default {
   width: 100%;
   z-index: var(--z-fixed);
   transition: all var(--transition-normal);
-  padding: var(--spacing-4) 0;
+  padding: var(--spacing-2) 0; /* Back to the original padding */
   background-color: transparent;
 }
 
@@ -284,7 +284,7 @@ export default {
   background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  padding: var(--spacing-2) 0;
+  padding: var(--spacing-0-5) 0; /* Further reduced padding when scrolled */
   box-shadow: var(--shadow-sm);
 }
 
@@ -292,7 +292,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px; /* Fixed height for consistent alignment */
+  height: 48px; /* Back to the original height */
 }
 
 .navbar-left {
@@ -322,8 +322,8 @@ export default {
 }
 
 .logo-image {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.5rem; /* Back to the original size */
+  height: 2.5rem; /* Back to the original size */
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   object-fit: cover;
@@ -351,7 +351,7 @@ export default {
 
 .logo-text {
   font-family: var(--font-family-heading);
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-xl); /* Return to original size */
   font-weight: var(--font-weight-bold);
   color: var(--neutral-900);
   letter-spacing: -0.01em;

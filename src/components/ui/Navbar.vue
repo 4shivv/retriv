@@ -5,9 +5,9 @@
         <div class="navbar-brand">
           <router-link to="/" class="navbar-logo">
             <div class="logo-mark">
-              <span class="logo-icon">R</span>
+            <img src="/dog.jpg" alt="Retriv.ai" class="logo-image" />
             </div>
-            <div class="logo-text">Retriv</div>
+            <div class="logo-text">Retriv.ai</div>
           </router-link>
         </div>
         
@@ -299,21 +299,17 @@ export default {
   justify-content: center;
 }
 
-.logo-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.logo-image {
   width: 2.5rem;
   height: 2.5rem;
-  background: var(--primary-gradient);
-  color: white;
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
   border-radius: var(--radius-lg);
-  font-family: var(--font-family-heading);
   box-shadow: var(--shadow-md);
-  position: relative;
-  overflow: hidden;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.navbar-logo:hover .logo-image {
+  transform: scale(1.05);
 }
 
 .logo-icon::after {

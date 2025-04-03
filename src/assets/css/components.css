@@ -44,7 +44,7 @@
 
 .btn:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.25);
 }
 
 .btn:disabled {
@@ -59,17 +59,17 @@
 .btn-primary {
   background: var(--primary-gradient);
   color: white;
-  box-shadow: 0 2px 5px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 2px 5px rgba(139, 69, 19, 0.2);
 }
 
 .btn-primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
 }
 
 .btn-primary:active {
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+  box-shadow: 0 2px 8px rgba(139, 69, 19, 0.25);
 }
 
 .btn-secondary {
@@ -244,7 +244,7 @@
 .form-control:focus {
   border-color: var(--primary-color);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.15);
 }
 
 .form-control:hover:not(:focus):not(:disabled) {

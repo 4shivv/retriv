@@ -1,0 +1,24 @@
+{
+  "name": "Retriv.ai",
+  "short_name": "Retriv.ai",
+  "icons": [
+    {
+      "src": "dog.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "dog.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "dog.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#8B4513",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}

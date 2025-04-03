@@ -1,0 +1,13 @@
+/* Simple CSS for favicon enhancement */
+
+/* Force browsers to use larger favicon versions when available */
+link[rel="icon"] {
+  /* These properties help hint to some browsers to use larger versions when available */
+  width: 32px !important;
+  height: 32px !important;
+}
+
+/* This helps override browser defaults in some cases */
+head {
+  position: relative;
+}

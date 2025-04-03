@@ -4,8 +4,18 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>dog.jpg">
+    <!-- Simple favicon setup that prioritizes the PNG format -->
+    <link rel="icon" type="image/png" href="<%= BASE_URL %>dog.png">
+    <link rel="apple-touch-icon" href="<%= BASE_URL %>dog.png">
+    <meta name="theme-color" content="#8B4513">
+    
+    <!-- Force larger favicon technique -->
+    <link rel="subresource" href="<%= BASE_URL %>dog.png">
+    
     <title>Retriv.ai</title>
+    <link rel="stylesheet" href="<%= BASE_URL %>favicon.css">
+    <!-- Script to ensure favicon works properly -->
+    <script src="<%= BASE_URL %>favicon.js"></script>
   </head>
   <body>
     <noscript>

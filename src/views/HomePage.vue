@@ -29,10 +29,7 @@
                 <div class="stat-value">80%</div>
                 <div class="stat-label">Better Retention</div>
               </div>
-              <div class="stat">
-                <div class="stat-value">1k+</div>
-                <div class="stat-label">Active Users</div>
-              </div>
+
               <div class="stat">
                 <div class="stat-value">24/7</div>
                 <div class="stat-label">On-the-Go Learning</div>

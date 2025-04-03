@@ -1,13 +1,13 @@
 :root {
   /* Dog-themed Color Palette */
-  --primary-gradient: linear-gradient(135deg, #8B4513, #A0522D);
-  --secondary-gradient: linear-gradient(135deg, #A0522D, #CD853F);
-  --primary-color: #8B4513; 
-  --primary-light: #A0522D;
-  --primary-dark: #6B3311;
-  --secondary-color: #CD853F;
-  --secondary-light: #DEB887;
-  --accent-color: #D2B48C;
+  --primary-gradient: linear-gradient(135deg, #d58d20, #e8a43b);
+  --secondary-gradient: linear-gradient(135deg, #d58d20, #edb25b);
+  --primary-color: #d58d20; 
+  --primary-light: #e8a43b;
+  --primary-dark: #bf7e1c;
+  --secondary-color: #edb25b;
+  --secondary-light: #f4c98c;
+  --accent-color: #f9e0c4;
   
   /* Neutrals - More minimal, cleaner grays */
   --neutral-50: #fafafa;

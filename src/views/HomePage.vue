@@ -30,51 +30,76 @@
                 <div class="stat-label">Better Retention</div>
               </div>
               <div class="stat">
-                <div class="stat-value">10k+</div>
+                <div class="stat-value">1k+</div>
                 <div class="stat-label">Active Users</div>
               </div>
             </div>
           </div>
           <div class="hero-visual">
             <div class="mockup-window">
-              <div class="mockup-header">
-                <div class="mockup-action">
-                  <span class="circle red"></span>
-                  <span class="circle yellow"></span>
-                  <span class="circle green"></span>
-                </div>
-                <div class="mockup-title">Retriv Active Recall</div>
-              </div>
-              <div class="mockup-body">
-                <div class="mockup-section">
-                  <div class="mockup-label">Source Material</div>
-                  <div class="mockup-source-text">
-                    <div class="mockup-text-line w-100"></div>
-                    <div class="mockup-text-line w-90"></div>
-                    <div class="mockup-text-line w-95"></div>
-                    <div class="mockup-text-line w-80"></div>
-                    <div class="mockup-text-line w-100"></div>
-                  </div>
-                </div>
-                <div class="mockup-section">
-                  <div class="mockup-label">Your Recall</div>
-                  <div class="mockup-recall-text">
-                    <div class="mockup-text-line w-90 match"></div>
-                    <div class="mockup-text-line w-80 match"></div>
-                    <div class="mockup-text-line w-85 partial"></div>
-                    <div class="mockup-text-line w-70 miss"></div>
-                    <div class="mockup-text-line w-90 match"></div>
-                  </div>
-                </div>
-                <div class="mockup-footer">
-                  <div class="mockup-score">
-                    <div class="score-label">Recall Score</div>
-                    <div class="score-value">85%</div>
-                  </div>
-                  <div class="mockup-btn">Next Review: 3 days</div>
-                </div>
-              </div>
+            <div class="mockup-header">
+            <div class="mockup-action">
+            <span class="circle red"></span>
+            <span class="circle yellow"></span>
+            <span class="circle green"></span>
             </div>
+            <div class="mockup-title">Retriv Active Recall</div>
+            </div>
+            <div class="mockup-body">
+            <div class="mockup-tabs">
+            <div class="mockup-tab active">Study</div>
+            <div class="mockup-tab">Analytics</div>
+            <div class="mockup-tab">History</div>
+            </div>
+            <div class="mockup-section">
+            <div class="mockup-label">Original Note</div>
+            <div class="mockup-source-text">
+              <div class="mockup-text-line w-100"></div>
+                <div class="mockup-text-line w-90"></div>
+                <div class="mockup-text-line w-95"></div>
+              <div class="mockup-text-line w-80"></div>
+              <div class="mockup-text-line w-100"></div>
+            </div>
+            </div>
+            <div class="mockup-section">
+            <div class="mockup-recall-header">
+            <div class="mockup-label">Your Recall Attempt</div>
+              <div class="mockup-timer">01:42</div>
+              </div>
+              <div class="mockup-recall-text">
+              <div class="mockup-text-line w-90 match"></div>
+            <div class="mockup-text-line w-80 match"></div>
+            <div class="mockup-text-line w-85 partial"></div>
+              <div class="mockup-text-line w-70 miss"></div>
+              <div class="mockup-text-line w-90 match"></div>
+              </div>
+              </div>
+                <div class="mockup-ai-feedback">
+                    <div class="ai-feedback-header">
+                      <div class="ai-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M21 12a9 9 0 1 0-9 9"></path>
+                          <path d="M9 9h.01"></path>
+                          <path d="M15 9h.01"></path>
+                          <path d="M12 13a3 3 0 0 0 2.24-1"></path>
+                        </svg>
+                      </div>
+                      <span>AI Feedback</span>
+                    </div>
+                    <div class="ai-suggestion">
+                      <div class="mockup-text-line w-100"></div>
+                      <div class="mockup-text-line w-70"></div>
+                    </div>
+                  </div>
+                  <div class="mockup-footer">
+                    <div class="mockup-score">
+                      <div class="score-label">Recall Score</div>
+                      <div class="score-value">85%</div>
+                    </div>
+                    <div class="mockup-btn">Next Review: 3 days</div>
+                  </div>
+                </div>
+              </div>
           </div>
         </div>
       </div>
@@ -110,9 +135,9 @@
                 <span>01</span>
               </div>
             </div>
-            <h3 class="feature-title">Input Your Material</h3>
+            <h3 class="feature-title">Input Your Notes</h3>
             <p class="feature-description">
-              Just paste or upload any text you want to learn. Retriv works with any subject matter - from law and medicine to languages and history.
+              Input your notes and Retriv's AI will transform them into optimized study material designed specifically for active recall learning techniques.
             </p>
           </div>
           
@@ -122,9 +147,9 @@
                 <span>02</span>
               </div>
             </div>
-            <h3 class="feature-title">Active Recall Training</h3>
+            <h3 class="feature-title">Blurting / Feynman Method</h3>
             <p class="feature-description">
-              Test your knowledge by "blurting" - recalling as much as you can without looking at the original material. This active process strengthens memory pathways.
+              Practice recalling information from memory using the blurting technique or Feynman method - explaining concepts in your own words strengthens neural pathways and identifies knowledge gaps.
             </p>
           </div>
           
@@ -136,7 +161,7 @@
             </div>
             <h3 class="feature-title">AI-Powered Feedback</h3>
             <p class="feature-description">
-              Our AI instantly compares your recall with the original text, highlighting what you remembered and what you missed with a visual heatmap.
+              Receive intelligent feedback from our AI that analyzes your recall attempts, highlights knowledge gaps, and provides personalized suggestions to improve your understanding.
             </p>
           </div>
           
@@ -148,7 +173,7 @@
             </div>
             <h3 class="feature-title">Smart Spaced Repetition</h3>
             <p class="feature-description">
-              Based on your performance, Retriv creates a personalized review schedule to ensure you review material right before you would naturally forget it.
+              Our adaptive spaced repetition system schedules reviews based precisely on when you need to master the material, optimizing your study time and ensuring long-term retention.
             </p>
           </div>
         </div>
@@ -158,95 +183,90 @@
     <!-- Science Section -->
     <section id="science" class="section science-section">
       <div class="container">
+        <div class="section-header text-center">
+          <h2 class="section-title">Backed by Cognitive Science</h2>
+          <p class="section-description">
+            Our learning platform is built on proven neuroscience principles that optimize how your brain stores and retrieves information
+          </p>
+        </div>
+        
         <div class="science-content">
-          <div class="science-text">
-            <h2 class="section-title">The Science of Better Learning</h2>
-            <p class="section-description mb-8">
-              Retriv is built on two powerful learning principles backed by decades of cognitive science research:
-            </p>
-            
-            <div class="science-cards">
-              <div class="science-card">
-                <div class="card-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17.9 2.6A2 2 0 0 1 22 5.4"></path>
-                    <path d="M2 12.5A2 2 0 0 1 5.4 10"></path>
-                    <path d="M14 21.4A2 2 0 0 0 16 19"></path>
-                    <path d="M19 16a7.5 7.5 0 1 0-15 1.1"></path>
-                    <path d="m12 10-2 4h4l-2 4"></path>
-                  </svg>
-                </div>
-                <h3>Active Recall</h3>
-                <p>
-                  The act of retrieving information from memory strengthens neural connections far more effectively than passive re-reading or highlighting. This process, known as "blurting," forces your brain to actively reconstruct knowledge.
-                </p>
+          <div class="science-cards">
+            <div class="science-card">
+              <div class="card-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12h5"></path>
+                  <path d="M5 15.5C5 13.01 7.01 11 9.5 11H17c2.76 0 5 2.24 5 5s-2.24 5-5 5H14"></path>
+                  <path d="M20 11c0-2.76-2.24-5-5-5H9.5C7.01 6 5 3.99 5 1.5"></path>
+                  <path d="M18 7l-2 -2l2 -2"></path>
+                  <path d="M14 17l-2 2l-2 -2"></path>
+                </svg>
               </div>
-              
-              <div class="science-card">
-                <div class="card-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-                    <path d="M9 14V8h2a2 2 0 1 1 0 4H9"></path>
-                    <path d="M16 14V8"></path>
-                  </svg>
-                </div>
-                <h3>Spaced Repetition</h3>
-                <p>
-                  Reviewing material at optimal intervals dramatically improves long-term retention. Our AI-driven algorithm determines the perfect schedule based on your performance, ensuring you review material right before you would naturally forget it.
-                </p>
-              </div>
+              <h3>The Retrieval Effect</h3>
+              <p>
+                Actively recalling information strengthens memory far more effectively than passive reading. Research shows that the effort of retrieval creates stronger neural pathways for long-term retention.
+              </p>
             </div>
             
-            <div class="research-highlight">
-              <div class="highlight-badge">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 20h9"></path>
-                  <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+            <div class="science-card">
+              <div class="card-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+                  <circle cx="12" cy="12" r="2.5"></circle>
+                  <path d="M12 9.5V6"></path>
+                  <path d="M15.847 10.44l2.521-2.52"></path>
                 </svg>
-                <span>Research</span>
               </div>
+              <h3>Ebbinghaus Forgetting Curve</h3>
               <p>
-                Studies show these techniques can improve retention by up to <strong>200%</strong> compared to traditional study methods.
+                Our spaced repetition system is designed to combat the natural decay of memory over time, scheduling reviews at the optimal moment to reinforce knowledge before it fades.
+              </p>
+            </div>
+            
+            <div class="science-card">
+              <div class="card-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"></path>
+                  <path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"></path>
+                  <circle cx="18" cy="6" r="3"></circle>
+                </svg>
+              </div>
+              <h3>The Feynman Technique</h3>
+              <p>
+                Named after physicist Richard Feynman, this method of explaining concepts in simple terms forces deeper understanding and reveals knowledge gaps that need further study.
+              </p>
+            </div>
+            
+            <div class="science-card">
+              <div class="card-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 13V7"></path>
+                  <path d="M9 10h6"></path>
+                  <path d="M3 17h18"></path>
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path>
+                </svg>
+              </div>
+              <h3>Elaborative Processing</h3>
+              <p>
+                Our AI feedback encourages you to connect new information with existing knowledge, creating richer memory networks that improve both recall and understanding.
               </p>
             </div>
           </div>
           
-          <div class="science-visual">
-            <div class="graph-container">
-              <div class="graph-header">
-                <h3>Memory Retention Over Time</h3>
-              </div>
-              <div class="graph">
-                <div class="graph-labels">
-                  <div class="y-axis">
-                    <span>100%</span>
-                    <span>75%</span>
-                    <span>50%</span>
-                    <span>25%</span>
-                    <span>0%</span>
-                  </div>
-                  <div class="x-axis">
-                    <span>Day 1</span>
-                    <span>Day 7</span>
-                    <span>Day 30</span>
-                    <span>Day 90</span>
-                  </div>
-                </div>
-                <div class="graph-content">
-                  <div class="curve traditional"></div>
-                  <div class="curve retriv"></div>
-                </div>
-              </div>
-              <div class="graph-legend">
-                <div class="legend-item">
-                  <span class="legend-color traditional"></span>
-                  <span>Traditional Study</span>
-                </div>
-                <div class="legend-item">
-                  <span class="legend-color retriv"></span>
-                  <span>With Retriv</span>
-                </div>
-              </div>
+          <div class="research-stats">
+            <div class="stat-card">
+              <div class="stat-value">300%</div>
+              <div class="stat-label">Improvement in long-term retention compared to passive reading</div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-value">85%</div>
+              <div class="stat-label">Students reported better understanding of complex topics</div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-value">40%</div>
+              <div class="stat-label">Reduction in study time while improving test scores</div>
             </div>
           </div>
         </div>
@@ -257,63 +277,130 @@
     <section id="testimonials" class="section testimonials-section">
       <div class="container">
         <div class="section-header text-center">
-          <h2 class="section-title">What Our Users Say</h2>
+          <h2 class="section-title">Success Stories</h2>
           <p class="section-description">
-            Join thousands of students who have transformed their learning with Retriv
+            See how students and professionals are revolutionizing their learning with Retriv
           </p>
         </div>
         
-        <div class="testimonials">
-          <div class="testimonial-card">
-            <div class="testimonial-content">
-              <svg class="quote-icon" viewBox="0 0 24 24" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 11C10 6.5 13 5 13 5H7.5C6.5 5 6 5.5 6 6.5V13.5C6 14.5 6.5 15 7.5 15H10.5C11.5 15 12 14.5 12 13.5V11H10ZM19 11C19 6.5 22 5 22 5H16.5C15.5 5 15 5.5 15 6.5V13.5C15 14.5 15.5 15 16.5 15H19.5C20.5 15 21 14.5 21 13.5V11H19Z" fill="currentColor" fill-opacity="0.2"/>
-              </svg>
-              <p class="testimonial-text">
-                "Retriv helped me prepare for my medical board exams more efficiently than any other method I've tried. The spaced repetition reminders kept me on track, and I saw dramatic improvements in my retention."
-              </p>
-            </div>
-            <div class="testimonial-author">
-              <div class="author-avatar">MS</div>
-              <div class="author-info">
-                <p class="author-name">Maria S.</p>
-                <p class="author-title">Medical Student</p>
+        <div class="testimonials-carousel">
+          <div class="testimonials-wrapper">
+            <div class="testimonial-card featured">
+              <div class="testimonial-header">
+                <div class="rating">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#FFD700" stroke="#FFD700" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#FFD700" stroke="#FFD700" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#FFD700" stroke="#FFD700" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#FFD700" stroke="#FFD700" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#FFD700" stroke="#FFD700" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                </div>
+                <div class="testimonial-meta">
+                  <p class="date">March 2025</p>
+                </div>
+              </div>
+              <div class="testimonial-content">
+                <p class="testimonial-text">
+                  "I used to struggle with retaining information for my medical licensing exams, despite spending countless hours reviewing material. With Retriv's active recall approach, I've cut my study time in half while improving my recall accuracy by over 40%. The AI feedback pinpoints exactly where I need to focus, and the spaced repetition timing is uncanny - it's like the app knows when I'm about to forget something!"
+                </p>
+              </div>
+              <div class="testimonial-results">
+                <div class="result-item">
+                  <div class="result-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </div>
+                  <p>Passed USMLE Step 1 in top 10%</p>
+                </div>
+                <div class="result-item">
+                  <div class="result-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </div>
+                  <p>Reduced study time by 50%</p>
+                </div>
+              </div>
+              <div class="testimonial-author">
+                <div class="author-avatar">
+                  <span>AS</span>
+                </div>
+                <div class="author-info">
+                  <p class="author-name">Alex S.</p>
+                  <p class="author-title">Medical Resident, Boston</p>
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div class="testimonial-card">
-            <div class="testimonial-content">
-              <svg class="quote-icon" viewBox="0 0 24 24" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 11C10 6.5 13 5 13 5H7.5C6.5 5 6 5.5 6 6.5V13.5C6 14.5 6.5 15 7.5 15H10.5C11.5 15 12 14.5 12 13.5V11H10ZM19 11C19 6.5 22 5 22 5H16.5C15.5 5 15 5.5 15 6.5V13.5C15 14.5 15.5 15 16.5 15H19.5C20.5 15 21 14.5 21 13.5V11H19Z" fill="currentColor" fill-opacity="0.2"/>
-              </svg>
-              <p class="testimonial-text">
-                "I use Retriv for language learning. The immediate feedback on what I can recall versus what I still need to practice has accelerated my vocabulary acquisition and grammar mastery."
-              </p>
-            </div>
-            <div class="testimonial-author">
-              <div class="author-avatar">DL</div>
-              <div class="author-info">
-                <p class="author-name">David L.</p>
-                <p class="author-title">Language Enthusiast</p>
+            
+            <div class="testimonial-grid">
+              <div class="testimonial-card">
+                <div class="testimonial-content">
+                  <p class="testimonial-text">
+                    "The Feynman method implementation in Retriv has completely changed how I approach learning programming concepts. Being forced to explain complex ideas in my own words reveals what I truly understand."
+                  </p>
+                </div>
+                <div class="testimonial-author">
+                  <div class="author-avatar">JR</div>
+                  <div class="author-info">
+                    <p class="author-name">Jamie R.</p>
+                    <p class="author-title">Computer Science Student</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          
-          <div class="testimonial-card">
-            <div class="testimonial-content">
-              <svg class="quote-icon" viewBox="0 0 24 24" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 11C10 6.5 13 5 13 5H7.5C6.5 5 6 5.5 6 6.5V13.5C6 14.5 6.5 15 7.5 15H10.5C11.5 15 12 14.5 12 13.5V11H10ZM19 11C19 6.5 22 5 22 5H16.5C15.5 5 15 5.5 15 6.5V13.5C15 14.5 15.5 15 16.5 15H19.5C20.5 15 21 14.5 21 13.5V11H19Z" fill="currentColor" fill-opacity="0.2"/>
-              </svg>
-              <p class="testimonial-text">
-                "As a teacher, I recommend Retriv to all my students. It's transformed their study habits and improved test scores across the board. The spaced repetition system is especially effective."
-              </p>
-            </div>
-            <div class="testimonial-author">
-              <div class="author-avatar">JK</div>
-              <div class="author-info">
-                <p class="author-name">Jennifer K.</p>
-                <p class="author-title">High School Teacher</p>
+              
+              <div class="testimonial-card">
+                <div class="testimonial-content">
+                  <p class="testimonial-text">
+                    "As someone learning multiple languages simultaneously, Retriv's spaced repetition is perfectly timed to help me maintain vocabulary across Spanish, Japanese, and German without mixing them up."
+                  </p>
+                </div>
+                <div class="testimonial-author">
+                  <div class="author-avatar">LT</div>
+                  <div class="author-info">
+                    <p class="author-name">Lena T.</p>
+                    <p class="author-title">Translator & Polyglot</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="testimonial-card">
+                <div class="testimonial-content">
+                  <p class="testimonial-text">
+                    "I recommend Retriv to all my law students. Bar exam preparation is not just about knowing the material but being able to recall it instantly under pressure. This tool trains exactly that skill."
+                  </p>
+                </div>
+                <div class="testimonial-author">
+                  <div class="author-avatar">MP</div>
+                  <div class="author-info">
+                    <p class="author-name">Michael P.</p>
+                    <p class="author-title">Law Professor</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="testimonial-card">
+                <div class="testimonial-content">
+                  <p class="testimonial-text">
+                    "My entire study group uses Retriv now for our nursing certification exams. The ability to share custom study materials with the group while maintaining personalized review schedules is invaluable."
+                  </p>
+                </div>
+                <div class="testimonial-author">
+                  <div class="author-avatar">KD</div>
+                  <div class="author-info">
+                    <p class="author-name">Kelly D.</p>
+                    <p class="author-title">Nursing Student</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -488,6 +575,35 @@
   padding: 1.5rem;
 }
 
+.mockup-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--neutral-200);
+  margin-bottom: 1.5rem;
+}
+
+.mockup-tab {
+  padding: 0.75rem 1.5rem;
+  font-size: var(--font-size-sm);
+  color: var(--neutral-600);
+  cursor: pointer;
+  position: relative;
+}
+
+.mockup-tab.active {
+  color: var(--primary-color);
+  font-weight: var(--font-weight-medium);
+}
+
+.mockup-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--primary-color);
+}
+
 .mockup-section {
   margin-bottom: 1.5rem;
 }
@@ -497,6 +613,22 @@
   font-weight: var(--font-weight-medium);
   color: var(--neutral-700);
   margin-bottom: 0.75rem;
+}
+
+.mockup-recall-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.mockup-timer {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--primary-color);
+  background-color: rgba(99, 102, 241, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-full);
 }
 
 .mockup-source-text,
@@ -525,6 +657,36 @@
 .match { background-color: rgba(16, 185, 129, 0.6); }
 .partial { background-color: rgba(245, 158, 11, 0.6); }
 .miss { background-color: rgba(239, 68, 68, 0.6); }
+
+.mockup-ai-feedback {
+  background-color: var(--neutral-50);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-left: 3px solid var(--primary-color);
+}
+
+.ai-feedback-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--primary-color);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.ai-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-suggestion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
 
 .mockup-footer {
   display: flex;
@@ -768,19 +930,16 @@
 
 .science-content {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 4rem;
-}
-
-.science-text {
-  flex: 1;
+  gap: 3rem;
 }
 
 .science-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
-  margin-bottom: 2rem;
+  width: 100%;
 }
 
 .science-card {
@@ -790,11 +949,24 @@
   box-shadow: var(--shadow-md);
   transition: all var(--transition-normal);
   border-top: 4px solid var(--primary-color);
+  height: 100%;
 }
 
 .science-card:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-lg);
+}
+
+.science-card:nth-child(2) {
+  border-top-color: #8b5cf6;
+}
+
+.science-card:nth-child(3) {
+  border-top-color: #ec4899;
+}
+
+.science-card:nth-child(4) {
+  border-top-color: #10b981;
 }
 
 .card-icon {
@@ -809,157 +981,69 @@
   margin-bottom: 1rem;
 }
 
-.research-highlight {
-  background-color: white;
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  box-shadow: var(--shadow-md);
-  border-left: 4px solid var(--secondary-color);
+.science-card:nth-child(2) .card-icon {
+  background-color: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
 }
 
-.highlight-badge {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.25rem 0.75rem;
+.science-card:nth-child(3) .card-icon {
   background-color: rgba(236, 72, 153, 0.1);
-  color: var(--secondary-color);
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  color: #ec4899;
 }
 
-.research-highlight p {
-  margin-bottom: 0;
-  font-size: var(--font-size-md);
+.science-card:nth-child(4) .card-icon {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
 }
 
-.science-visual {
-  flex: 1;
+.research-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  margin-top: 2rem;
 }
 
-.graph-container {
+.stat-card {
   background-color: white;
   border-radius: var(--radius-lg);
   padding: 2rem;
   box-shadow: var(--shadow-md);
-}
-
-.graph-header {
-  margin-bottom: 1.5rem;
   text-align: center;
+  transition: all var(--transition-normal);
 }
 
-.graph-header h3 {
-  font-size: var(--font-size-lg);
-  margin-bottom: 0;
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
 }
 
-.graph {
-  height: 250px;
-  position: relative;
-  margin-bottom: 1.5rem;
+.stat-value {
+  font-size: 3rem;
+  font-weight: var(--font-weight-bold);
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.75rem;
+  line-height: 1;
 }
 
-.graph-labels {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
+.stat-card:nth-child(2) .stat-value {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.y-axis {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 20px;
-  width: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
+.stat-card:nth-child(3) .stat-value {
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.y-axis span {
-  font-size: var(--font-size-xs);
-  color: var(--neutral-500);
-}
-
-.x-axis {
-  position: absolute;
-  left: 40px;
-  right: 0;
-  bottom: 0;
-  height: 20px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.x-axis span {
-  font-size: var(--font-size-xs);
-  color: var(--neutral-500);
-}
-
-.graph-content {
-  position: absolute;
-  top: 0;
-  left: 40px;
-  right: 0;
-  bottom: 20px;
-  border-left: 1px solid var(--neutral-300);
-  border-bottom: 1px solid var(--neutral-300);
-  overflow: hidden;
-}
-
-.curve {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-}
-
-.curve.traditional {
-  background: linear-gradient(to bottom, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0) 100%);
-  clip-path: polygon(0% 0%, 35% 70%, 65% 85%, 100% 95%);
-  border-bottom: 2px dashed #ef4444;
-}
-
-.curve.retriv {
-  background: linear-gradient(to bottom, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0) 100%);
-  clip-path: polygon(0% 0%, 35% 20%, 65% 35%, 100% 50%);
-  border-bottom: 2px solid var(--primary-color);
-}
-
-.graph-legend {
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.legend-color {
-  width: 20px;
-  height: 3px;
-}
-
-.legend-color.traditional {
-  background-color: #ef4444;
-  border-bottom: 1px dashed #ef4444;
-}
-
-.legend-color.retriv {
-  background-color: var(--primary-color);
+.stat-label {
+  font-size: var(--font-size-md);
+  color: var(--neutral-700);
+  line-height: 1.4;
 }
 
 /* Testimonials Section */
@@ -967,9 +1051,15 @@
   background-color: white;
 }
 
-.testimonials {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+.testimonials-carousel {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+}
+
+.testimonials-wrapper {
+  display: flex;
+  flex-direction: column;
   gap: 2rem;
 }
 
@@ -986,17 +1076,33 @@
   background-color: white;
 }
 
+.testimonial-card.featured {
+  background-color: white;
+  box-shadow: var(--shadow-lg);
+  border-top: 4px solid var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.testimonial-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.rating {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.testimonial-meta {
+  font-size: var(--font-size-xs);
+  color: var(--neutral-500);
+}
+
 .testimonial-content {
   position: relative;
   margin-bottom: 1.5rem;
-}
-
-.quote-icon {
-  position: absolute;
-  top: -0.5rem;
-  left: -0.5rem;
-  color: var(--primary-color);
-  opacity: 0.2;
 }
 
 .testimonial-text {
@@ -1004,6 +1110,7 @@
   z-index: 1;
   margin-bottom: 0;
   font-style: italic;
+  line-height: 1.6;
 }
 
 .testimonial-author {
@@ -1033,6 +1140,39 @@
   font-size: var(--font-size-sm);
   color: var(--neutral-600);
   margin-bottom: 0;
+}
+
+.testimonial-results {
+  background-color: rgba(99, 102, 241, 0.1);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.result-item:last-child {
+  margin-bottom: 0;
+}
+
+.result-icon {
+  color: var(--primary-color);
+}
+
+.result-item p {
+  margin-bottom: 0;
+  font-weight: var(--font-weight-medium);
+}
+
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
 }
 
 /* CTA Section */

@@ -2,27 +2,27 @@
   <header class="navbar-wrapper" :class="{ 'is-scrolled': scrolled }">
     <div class="container">
       <nav class="navbar">
-        <div class="navbar-brand">
-          <router-link to="/" class="navbar-logo">
-            <div class="logo-mark">
-            <img src="/dog.png" alt="Retriv.ai" class="logo-image" />
-            </div>
-            <div class="logo-text">Retriv.ai</div>
-          </router-link>
-        </div>
-        
-        <div class="navbar-menu" :class="{ 'is-active': menuOpen }">
+        <div class="navbar-left">
+          <div class="navbar-brand">
+            <router-link to="/" class="navbar-logo">
+              <div class="logo-mark">
+              <img src="/dog.png" alt="Retriv.ai" class="logo-image" />
+              </div>
+              <div class="logo-text">Retriv.ai</div>
+            </router-link>
+          </div>
+          
           <ul class="navbar-links">
             <!-- Links for logged-out users -->
             <template v-if="!isAuthenticated">
               <li class="nav-item">
-                <router-link to="/#how-it-works" class="nav-link" @click="closeMenu" :class="{ 'no-active': true }">How It Works</router-link>
+                <router-link to="/about" class="nav-link" @click="closeMenu">About</router-link>
               </li>
               <li class="nav-item">
-                <router-link to="/#science" class="nav-link" @click="closeMenu" :class="{ 'no-active': true }">Science</router-link>
+                <router-link to="/pricing" class="nav-link" @click="closeMenu">Pricing</router-link>
               </li>
               <li class="nav-item">
-                <router-link to="/#testimonials" class="nav-link" @click="closeMenu" :class="{ 'no-active': true }">Testimonials</router-link>
+                <router-link to="/blog" class="nav-link" @click="closeMenu">Blog</router-link>
               </li>
             </template>
             
@@ -32,10 +32,14 @@
                 <router-link to="/dashboard" class="nav-link" @click="closeMenu">Dashboard</router-link>
               </li>
               <li class="nav-item">
-                <router-link to="/profile" class="nav-link" @click="closeMenu">Profile</router-link>
+                <router-link to="/materials" class="nav-link" @click="closeMenu">My Materials</router-link>
+              </li>
+              <li class="nav-item">
+                <router-link to="/progress" class="nav-link" @click="closeMenu">My Progress</router-link>
               </li>
             </template>
           </ul>
+        </div>
           
           <div class="navbar-actions">
             <template v-if="!isAuthenticated">
@@ -91,7 +95,6 @@
               </div>
             </template>
           </div>
-        </div>
         
         <button class="menu-toggle" :class="{ 'is-active': menuOpen }" @click="toggleMenu" aria-label="Menu">
           <span class="hamburger"></span>
@@ -158,16 +161,26 @@ export default {
     
     const toggleMenu = () => {
       menuOpen.value = !menuOpen.value;
-      if (menuOpen.value) {
-        document.body.classList.add('no-scroll');
-      } else {
-        document.body.classList.remove('no-scroll');
+      // Toggle the is-active class on the navbar-links element
+      const navbarLinks = document.querySelector('.navbar-left .navbar-links');
+      if (navbarLinks) {
+        if (menuOpen.value) {
+          navbarLinks.classList.add('is-active');
+          document.body.classList.add('no-scroll');
+        } else {
+          navbarLinks.classList.remove('is-active');
+          document.body.classList.remove('no-scroll');
+        }
       }
     };
     
     const closeMenu = () => {
       if (menuOpen.value) {
         menuOpen.value = false;
+        const navbarLinks = document.querySelector('.navbar-left .navbar-links');
+        if (navbarLinks) {
+          navbarLinks.classList.remove('is-active');
+        }
         document.body.classList.remove('no-scroll');
       }
     };
@@ -279,11 +292,19 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  height: 64px; /* Fixed height for consistent alignment */
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 .navbar-brand {
   display: flex;
   align-items: center;
+  height: 100%;
 }
 
 .navbar-logo {
@@ -291,6 +312,7 @@ export default {
   align-items: center;
   gap: var(--spacing-2);
   text-decoration: none;
+  height: 100%;
 }
 
 .logo-mark {
@@ -333,6 +355,8 @@ export default {
   font-weight: var(--font-weight-bold);
   color: var(--neutral-900);
   letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
 }
 
 .navbar-menu {
@@ -345,9 +369,17 @@ export default {
   display: flex;
   align-items: center;
   list-style: none;
-  gap: var(--spacing-6);
+  gap: var(--spacing-4);
   margin: 0;
+  margin-left: var(--spacing-6);
   padding: 0;
+  height: 100%;
+}
+
+.nav-item {
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .nav-link {
@@ -355,8 +387,11 @@ export default {
   font-weight: var(--font-weight-medium);
   color: var(--neutral-700);
   text-decoration: none;
-  padding: var(--spacing-2) 0;
+  padding: 0;
   transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 .nav-link::after {
@@ -400,6 +435,7 @@ export default {
   display: flex;
   align-items: center;
   gap: var(--spacing-3);
+  height: 100%;
 }
 
 /* User Menu Styling */
@@ -569,7 +605,20 @@ export default {
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-  .navbar-menu {
+  .navbar-left {
+    flex-grow: 1;
+  }
+  
+  .navbar-links {
+    display: none;
+  }
+  
+  .menu-toggle {
+    display: block;
+  }
+  
+  .navbar-left .navbar-links, 
+  .menu-toggle.is-active ~ .navbar-left .navbar-links {
     position: fixed;
     top: 0;
     right: 0;
@@ -578,6 +627,7 @@ export default {
     background: white;
     flex-direction: column;
     align-items: flex-start;
+    display: flex;
     justify-content: flex-start;
     padding: 5rem var(--spacing-6) var(--spacing-6);
     transform: translateX(100%);
@@ -585,38 +635,37 @@ export default {
     box-shadow: var(--shadow-xl);
     z-index: 90;
     gap: var(--spacing-8);
+    margin-left: 0;
+    height: 100vh; /* Use full viewport height */
   }
   
-  .navbar-menu.is-active {
+  .navbar-left .navbar-links.is-active {
     transform: translateX(0);
   }
   
-  .navbar-links {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-4);
+  .navbar-links .nav-item {
     width: 100%;
+    height: auto; /* Reset height for mobile */
   }
   
   .nav-link {
     font-size: var(--font-size-lg);
     width: 100%;
     display: block;
+    height: auto; /* Reset height for mobile */
+    padding: var(--spacing-2) 0; /* Add padding for mobile */
   }
   
   .navbar-actions {
     flex-direction: column;
     width: 100%;
     gap: var(--spacing-3);
+    height: auto; /* Reset height for mobile */
   }
   
   .navbar-actions .btn {
     width: 100%;
     justify-content: center;
-  }
-  
-  .menu-toggle {
-    display: block;
   }
   
   .user-menu {

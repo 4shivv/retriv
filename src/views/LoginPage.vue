@@ -168,6 +168,7 @@ export default {
   justify-content: center;
   position: relative;
   padding: var(--spacing-6) var(--spacing-4);
+  padding-top: calc(var(--spacing-6) + 80px); /* Added top spacing for navbar */
   overflow: hidden;
   background-color: var(--neutral-50);
 }

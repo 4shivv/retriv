@@ -1,49 +1,52 @@
 <template>
   <div class="blurting-form card">
     <!-- Study Assistant Chat Modal -->
-    <div v-if="showChatModal" class="chat-modal-overlay">
-      <div class="chat-modal">
-        <div class="chat-modal-header">
-          <h3>Study Assistant</h3>
-          <button @click="showChatModal = false" class="close-button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-        <div class="chat-modal-body">
-          <div class="chat-conversation">
-            <div class="chat-messages">
-              <!-- Welcome message -->
-              <div class="message system-message">
-                <p>Hi there! I'm your study assistant. I can help you understand "{{ title }}" better. What questions do you have?</p>
+    <teleport to="body">
+      <div v-if="showChatModal" class="chat-modal-overlay">
+        <div class="chat-modal">
+          <div class="chat-modal-header">
+            <h3>Study Assistant</h3>
+            <button @click="showChatModal = false" class="close-button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="chat-modal-body">
+            <div class="chat-conversation">
+              <div class="chat-messages" ref="chatMessagesContainer">
+                <!-- Welcome message -->
+                <div class="message system-message">
+                  <p>Hi there! I'm your study assistant. I can help you understand "{{ title }}" better. What questions do you have?</p>
+                </div>
+                
+                <!-- Dynamic messages -->
+                <div v-for="(message, index) in chatMessages" :key="index" 
+                     :class="['message', message.type === 'user' ? 'user-message' : 'assistant-message', message.isLoading ? 'loading-message' : '']">
+                  <p v-if="message.isLoading"><span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></p>
+                  <p v-else>{{ message.content }}</p>
+                </div>
               </div>
-              
-              <!-- Dynamic messages -->
-              <div v-for="(message, index) in chatMessages" :key="index" 
-                   :class="['message', message.type === 'user' ? 'user-message' : 'assistant-message']">
-                <p>{{ message.content }}</p>
+              <div class="chat-input-container">
+                <textarea 
+                  class="chat-input" 
+                  placeholder="Ask a question about the material..." 
+                  v-model="chatInput"
+                  @keydown.enter.prevent="sendChatMessage"
+                ></textarea>
+                <button class="send-button" @click="sendChatMessage">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                  </svg>
+                </button>
               </div>
-            </div>
-            <div class="chat-input-container">
-              <textarea 
-                class="chat-input" 
-                placeholder="Ask a question about the material..." 
-                v-model="chatInput"
-                @keydown.enter.prevent="sendChatMessage"
-              ></textarea>
-              <button class="send-button" @click="sendChatMessage">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="22" y1="2" x2="11" y2="13"></line>
-                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                </svg>
-              </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </teleport>
     <div class="card-header">
       <h3>{{ title }}</h3>
       <div v-if="currentPhase === 'blurting'" class="timer-badge" :class="timeLeft.includes('0:') ? 'urgent' : ''">
@@ -358,6 +361,7 @@ export default {
     const showChatModal = ref(false);
     const chatInput = ref('');
     const chatMessages = ref([]);
+    const chatMessagesContainer = ref(null);
     
     const router = useRouter();
     
@@ -601,11 +605,19 @@ export default {
     };
     
     const openAiChat = () => {
+      // Clear previous messages (except welcome message)
+      chatMessages.value = [];
+      chatInput.value = '';
+      
       // Show the chat modal
       showChatModal.value = true;
       
-      // Clear previous messages
-      chatMessages.value = [];
+      // Make sure we wait for the modal to render before scrolling
+      setTimeout(() => {
+        if (chatMessagesContainer.value) {
+          chatMessagesContainer.value.scrollTop = 0;
+        }
+      }, 100);
       
       // Optionally emit event to parent component
       emit('open-chat', {
@@ -615,6 +627,14 @@ export default {
         // Add context about which step the user is in
         phase: currentPhase.value
       });
+    };
+    
+    const scrollToBottom = () => {
+      setTimeout(() => {
+        if (chatMessagesContainer.value) {
+          chatMessagesContainer.value.scrollTop = chatMessagesContainer.value.scrollHeight;
+        }
+      }, 50);
     };
     
     const sendChatMessage = async () => {
@@ -630,12 +650,18 @@ export default {
       const userQuestion = chatInput.value;
       chatInput.value = '';
       
+      // Scroll to bottom after adding the user's message
+      scrollToBottom();
+      
       // Show loading indicator
       chatMessages.value.push({
         type: 'assistant',
-        content: '...',
+        content: '',
         isLoading: true
       });
+      
+      // Scroll again to show the loading indicator
+      scrollToBottom();
       
       try {
         // Call DeepseekService for AI response
@@ -659,6 +685,9 @@ export default {
           type: 'assistant',
           content: response.answer
         });
+        
+        // Scroll to bottom after adding the AI's response
+        scrollToBottom();
         
         // Save this exchange to the user's history
         try {
@@ -1234,7 +1263,9 @@ export default {
       showChatModal,
       chatInput,
       chatMessages,
+      chatMessagesContainer,
       sendChatMessage,
+      scrollToBottom,
 
       originalText,
       pastAttempts,
@@ -2061,7 +2092,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
+  backdrop-filter: blur(2px);
 }
 
 .chat-modal {
@@ -2070,10 +2102,18 @@ export default {
   max-height: 80vh;
   background-color: white;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  animation: modalAppear 0.3s ease-out forwards;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+@keyframes modalAppear {
+  0% { opacity: 0; transform: scale(0.96) translateY(20px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .chat-modal-header {
@@ -2130,6 +2170,8 @@ export default {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
+  scroll-behavior: smooth;
+  max-height: calc(70vh - 120px);
 }
 
 .message {
@@ -2138,11 +2180,13 @@ export default {
   border-radius: var(--radius-lg);
   position: relative;
   animation: messageAppear 0.3s ease-out forwards;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  word-break: break-word;
 }
 
 @keyframes messageAppear {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 .system-message {
@@ -2175,6 +2219,34 @@ export default {
   margin: 0;
   line-height: 1.5;
   white-space: pre-wrap;
+}
+
+.loading-message p {
+  min-height: 24px;
+}
+
+.loading-dots span {
+  animation: loadingDots 1.4s infinite;
+  animation-fill-mode: both;
+  font-size: 1.5rem;
+  opacity: 0;
+  display: inline-block;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes loadingDots {
+  0% { opacity: 0; transform: translateY(0); }
+  25% { opacity: 1; transform: translateY(-3px); }
+  50% { opacity: 1; transform: translateY(0); }
+  75% { opacity: 1; transform: translateY(3px); }
+  100% { opacity: 0; transform: translateY(0); }
 }
 
 .chat-input-container {

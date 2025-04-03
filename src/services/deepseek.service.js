@@ -326,8 +326,10 @@ For example:
     }
     
     try {
-      // Prepare the system prompt for a helpful study assistant with JSON output format
-      const systemPrompt = `You are an expert study assistant helping a student understand the material "${title}".
+      // Prepare messages array for the chat API
+      const systemMessage = {
+        role: 'system',
+        content: `You are an expert study assistant helping a student understand the material "${title}".
 
 Your role is to:
 1. Answer questions specifically about the source material
@@ -336,51 +338,55 @@ Your role is to:
 4. Clarify misunderstandings
 5. Help the student make connections between concepts
 
-Base your responses on the source material, but add explanations and examples to help understanding.
-
-OUTPUT FORMAT: You must provide your response in JSON format with the following structure:
-{
-  "answer": "Your detailed response to the student's question"
-}
-`;
+Base your responses on the source material, but add explanations and examples to help understanding.`
+      };
       
-      // Format previous exchanges for context
-      let conversationHistory = '';
+      // Create the initial message that provides context
+      const contextMessage = {
+        role: 'user',
+        content: `Here is the source material the student is studying:\n\n${sourceContent}`
+      };
+      
+      // Format previous exchanges for API (if any)
+      const previousMessages = [];
       if (previousExchanges.length > 0) {
-        conversationHistory = '\nPrevious conversation:\n';
         previousExchanges.forEach(exchange => {
-          if (exchange.role === 'user') {
-            conversationHistory += `Student: ${exchange.content}\n`;
-          } else if (exchange.role === 'assistant') {
-            conversationHistory += `Assistant: ${exchange.content}\n`;
+          if (!exchange.isLoading) {
+            previousMessages.push({
+              role: exchange.type === 'user' ? 'user' : 'assistant',
+              content: exchange.content
+            });
           }
         });
       }
       
-      // Prepare the user prompt with the source material and question
-      const userPrompt = `Here is the source material the student is studying:\n\n${sourceContent}\n\n${conversationHistory}\nStudent's current question: ${userQuestion}\n\nPlease provide a helpful, clear response in JSON format. Focus directly on answering the question based on the source material. Make your explanation clear and concise.`;
+      // Add the current user question
+      const currentQuestionMessage = {
+        role: 'user',
+        content: userQuestion
+      };
       
-      // Debugging - Log request data
+      // Construct the complete messages array for the API request
+      const messages = [
+        systemMessage,
+        contextMessage,
+        ...previousMessages,
+        currentQuestionMessage
+      ];
+      
+      // Prepare the API request body
       const requestBody = {
         model: 'deepseek-chat',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        response_format: {
-          'type': 'json_object'
-        },
+        messages: messages,
         max_tokens: 2048, // Set a reasonable max token limit
         temperature: 0.7, // Slightly lower temperature for more focused responses
         stream: false
       };
       
-      console.log('Making DeepSeek API request with params:', {
+      console.log('Making DeepSeek API request:', {
         url: `${API_BASE_URL}/chat/completions`,
         model: requestBody.model,
-        response_format: requestBody.response_format,
-        system_prompt_length: systemPrompt.length,
-        user_prompt_length: userPrompt.length
+        messageCount: messages.length
       });
       
       if (!API_KEY) {
@@ -429,6 +435,7 @@ OUTPUT FORMAT: You must provide your response in JSON format with the following 
         throw new Error('Failed to parse API response');
       }
       
+      // Get the generated content from the API response
       const generatedContent = responseData.choices?.[0]?.message?.content;
       
       if (!generatedContent) {
@@ -436,33 +443,10 @@ OUTPUT FORMAT: You must provide your response in JSON format with the following 
         throw new Error('No response generated from AI');
       }
       
-      // Parse the JSON response
-      try {
-        const parsedResponse = JSON.parse(generatedContent);
-        
-        // Check if the response has the expected structure
-        if (!parsedResponse.answer) {
-          console.warn('Response missing answer field:', parsedResponse);
-          return {
-            answer: 'I understand your question, but I had trouble formulating a proper response. Could you try rephrasing your question?'
-          };
-        }
-        
-        return {
-          answer: parsedResponse.answer
-        };
-      } catch (parseError) {
-        console.error('Error parsing JSON response:', parseError, 'Raw content:', generatedContent);
-        
-        // If JSON parsing fails but we have content, return it directly
-        if (generatedContent && typeof generatedContent === 'string' && generatedContent.trim().length > 0) {
-          return {
-            answer: generatedContent
-          };
-        }
-        
-        throw new Error('Failed to parse AI response as JSON');
-      }
+      // Return the response in the expected format
+      return {
+        answer: generatedContent
+      };
     } catch (error) {
       console.error('Error generating study assistant response:', error);
       throw new Error(`Failed to generate response: ${error.message}`);

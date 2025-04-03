@@ -1,122 +1,118 @@
 <template>
   <div class="about-page">
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="container">
+        <div class="hero-content">
+          <img src="/dog.png" alt="Retriv Dog Logo" class="dog-logo"/>
+          <h1>About Retriv</h1>
+          <p>Making learning more effective, anywhere and anytime</p>
+        </div>
+      </div>
+    </div>
+    
     <div class="container">
-      <div class="about-header">
-        <h1 class="about-title">About Retriv</h1>
-        <p class="about-subtitle">Building the future of learning with cognitive science</p>
-      </div>
-      
-      <div class="about-section">
-        <div class="about-image">
-          <div class="image-placeholder">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2s.35 3.5 4.5 7.5C21 13.5 22 22 22 22H2s1-8.5 5.5-12.5C11.65 5.5 12 2 12 2z"></path>
-              <path d="M12 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"></path>
-            </svg>
-            <p>Company mission image</p>
-          </div>
-        </div>
-        <div class="about-content">
-          <h2>Our Story</h2>
-          <p>Retriv was founded in 2023 by a team of cognitive scientists, educators, and technologists with a shared passion for revolutionizing how people learn. We recognized that despite advances in educational technology, most digital learning tools weren't built around how the brain actually works.</p>
-          <p>Our journey began when our founders experienced firsthand the gap between traditional study methods and the science of learning. Through research and experimentation, we developed a learning system based on active recall, spaced repetition, and the Feynman technique—proven methods that dramatically improve retention and understanding.</p>
-          <p>Today, Retriv is helping thousands of students and professionals learn more effectively, using less time while remembering more. We're committed to making evidence-based learning techniques accessible to everyone through intuitive technology.</p>
-        </div>
-      </div>
-      
-      <div class="values-section">
-        <h2>Our Values</h2>
-        <div class="values-grid">
-          <div class="value-card">
-            <div class="value-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-              </svg>
-            </div>
-            <h3>Evidence-Based Approach</h3>
-            <p>We build our learning tools on proven cognitive science, not fleeting trends. Every feature is grounded in research about how people learn most effectively.</p>
-          </div>
-          
-          <div class="value-card">
-            <div class="value-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-              </svg>
-            </div>
-            <h3>Continuous Learning</h3>
-            <p>We embody the principles we promote. Everyone at Retriv commits to being a lifelong learner, constantly growing and improving.</p>
-          </div>
-          
-          <div class="value-card">
-            <div class="value-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
-                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
-                <path d="M4 22h16"></path>
-                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
-                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
-                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
-              </svg>
-            </div>
-            <h3>User-Centered Design</h3>
-            <p>We prioritize simplicity and usability, making powerful learning techniques accessible to everyone regardless of technical proficiency.</p>
-          </div>
-          
-          <div class="value-card">
-            <div class="value-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M16 16h.01"></path>
-                <path d="M8 16h.01"></path>
-                <path d="M12 20v-4"></path>
-                <path d="M20 12a8 8 0 0 0-16 0"></path>
-                <path d="M12 12h8"></path>
-              </svg>
-            </div>
-            <h3>Transparency</h3>
-            <p>We believe in open communication with our users and within our team. We share our successes, acknowledge our failures, and grow from both.</p>
+      <!-- Mission Section -->
+      <div class="mission-section">
+        <div class="mission-card">
+          <h2>Our Mission</h2>
+          <div class="mission-content">
+            <p>
+              At Retriv, our mission is simple: help people learn more effectively in the moments between moments.
+              Whether you're driving, cooking, cleaning, or just taking a walk, we believe these times can become
+              valuable learning opportunities.
+            </p>
           </div>
         </div>
       </div>
       
-      <div class="team-section">
-        <h2>Our Leadership Team</h2>
-        <div class="team-grid">
-          <div class="team-card">
-            <div class="member-photo">
-              <div class="photo-placeholder">JD</div>
+      <!-- Story Section -->
+      <div class="story-section">
+        <h2>Our Story</h2>
+        <div class="story-content">
+          <div class="story-text">
+            <p>
+              Retriv began when our small team realized people were becoming increasingly dependent on AI tools,
+              but weren't using them effectively for learning. Students and professionals alike struggle to retain
+              information long-term, even with powerful resources at their disposal.
+            </p>
+            <p>
+              We knew we could do better. By applying proven cognitive science techniques, we built a platform that
+              doesn't just help you memorize facts—it builds deeper understanding and long-term retention. Retriv
+              makes powerful learning methods accessible to everyone, anywhere, anytime.
+            </p>
+          </div>
+          <div class="story-image">
+            <img src="/dog.png" alt="Retriv Dog Logo" class="side-logo"/>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Approach Section -->
+      <div class="approach-section">
+        <h2>Our Learning Methods</h2>
+        <div class="approach-cards">
+          <div class="approach-card">
+            <div class="card-header">
+              <span class="card-number">01</span>
+              <h3>Active Recall</h3>
             </div>
-            <h3>Jane Doe</h3>
-            <p class="member-title">Co-Founder & CEO</p>
-            <p class="member-bio">Former cognitive neuroscience researcher with expertise in memory formation. Led educational technology initiatives at Stanford University before founding Retriv.</p>
+            <p>
+              Instead of passive reading, active recall forces your brain to retrieve information without looking at the source material.
+              This strengthens neural pathways and improves long-term retention far more effectively than simply re-reading content.
+            </p>
           </div>
           
-          <div class="team-card">
-            <div class="member-photo">
-              <div class="photo-placeholder">JS</div>
+          <div class="approach-card">
+            <div class="card-header">
+              <span class="card-number">02</span>
+              <h3>Blurting Method</h3>
             </div>
-            <h3>John Smith</h3>
-            <p class="member-title">Co-Founder & CTO</p>
-            <p class="member-bio">Software architect with over 15 years of experience building adaptive learning systems. Previously led engineering teams at Khan Academy and Coursera.</p>
+            <p>
+              The blurting technique encourages you to "blurt out" everything you know about a topic before reviewing,
+              which helps identify knowledge gaps and builds confidence by showing what you already understand.
+            </p>
           </div>
           
-          <div class="team-card">
-            <div class="member-photo">
-              <div class="photo-placeholder">MC</div>
+          <div class="approach-card">
+            <div class="card-header">
+              <span class="card-number">03</span>
+              <h3>Feynman Technique</h3>
             </div>
-            <h3>Maria Chen</h3>
-            <p class="member-title">Chief Product Officer</p>
-            <p class="member-bio">Educational psychologist specializing in instructional design. Passionate about creating learning experiences that adapt to individual needs and learning styles.</p>
+            <p>
+              Named after Nobel Prize-winning physicist Richard Feynman, this method involves explaining concepts in simple,
+              conversational language as if teaching someone else. This ensures deep understanding rather than superficial memorization.
+            </p>
           </div>
-          
-          <div class="team-card">
-            <div class="member-photo">
-              <div class="photo-placeholder">DP</div>
-            </div>
-            <h3>David Park</h3>
-            <p class="member-title">Chief Science Officer</p>
-            <p class="member-bio">Ph.D. in Learning Sciences with research focus on knowledge retention and active recall methodologies. Published author on cognitive approaches to education.</p>
+        </div>
+      </div>
+      
+      <!-- Stats Section -->
+      <div class="stats-section">
+        <div class="stats-card">
+          <div class="stat">
+            <div class="stat-number">2x</div>
+            <div class="stat-label">Faster Learning</div>
           </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <div class="stat-number">80%</div>
+            <div class="stat-label">Better Retention</div>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Accessible Learning</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- CTA Section -->
+      <div class="cta-section">
+        <h2>Ready to transform how you learn?</h2>
+        <div class="cta-buttons">
+          <router-link to="/register" class="btn btn-primary">Get Started Free</router-link>
+          <router-link to="/pricing" class="btn btn-outline">View Plans</router-link>
         </div>
       </div>
     </div>
@@ -130,219 +126,333 @@ export default {
 </script>
 
 <style scoped>
+/* Base Styles */
 .about-page {
-  padding: 5rem 0;
-  background-color: var(--neutral-50);
+  color: var(--neutral-800);
+  background-color: #f9fafb;
 }
 
-.about-header {
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: var(--neutral-900);
+}
+
+/* Hero Section */
+.hero-section {
+  background-color: white;
+  padding: 6rem 0;
   text-align: center;
   margin-bottom: 4rem;
 }
 
-.about-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--neutral-900);
-  margin-bottom: 1rem;
-}
-
-.about-subtitle {
-  font-size: 1.25rem;
-  color: var(--neutral-600);
-  max-width: 700px;
+.hero-content {
+  max-width: 800px;
   margin: 0 auto;
 }
 
-.about-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-  margin-bottom: 5rem;
-  align-items: center;
+.dog-logo {
+  width: 120px;
+  height: 120px;
+  border-radius: 24px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
 }
 
-.about-image {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.image-placeholder {
-  width: 100%;
-  aspect-ratio: 4/3;
-  background-color: var(--neutral-100);
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: var(--neutral-400);
-}
-
-.image-placeholder svg {
+.hero-content h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
   margin-bottom: 1rem;
-}
-
-.about-content h2 {
-  font-size: 1.75rem;
-  font-weight: 600;
   color: var(--neutral-900);
+  line-height: 1.2;
+}
+
+.hero-content p {
+  font-size: 1.5rem;
+  color: var(--neutral-600);
+}
+
+/* Mission Section */
+.mission-section {
+  margin-bottom: 5rem;
+}
+
+.mission-card {
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 16px;
+  padding: 3rem;
+  position: relative;
+}
+
+.mission-card h2 {
+  color: white;
+  font-size: 2.5rem;
   margin-bottom: 1.5rem;
 }
 
-.about-content p {
-  color: var(--neutral-700);
+.mission-content {
+  font-size: 1.4rem;
   line-height: 1.6;
+  max-width: 800px;
+}
+
+/* Story Section */
+.story-section {
+  margin-bottom: 5rem;
+}
+
+.story-content {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.story-text {
+  font-size: 1.125rem;
+  line-height: 1.8;
+}
+
+.story-text p {
   margin-bottom: 1.5rem;
 }
 
-.about-content p:last-child {
+.story-text p:last-child {
   margin-bottom: 0;
 }
 
-.values-section {
+.story-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.side-logo {
+  width: 150px;
+  height: 150px;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Approach Section */
+.approach-section {
   margin-bottom: 5rem;
 }
 
-.values-section h2 {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: var(--neutral-900);
-  margin-bottom: 2rem;
-  text-align: center;
-}
-
-.values-grid {
+.approach-cards {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
 }
 
-.value-card {
+.approach-card {
   background-color: white;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
 }
 
-.value-card:hover {
+.approach-card:hover {
   transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
-.value-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
-  background-color: var(--neutral-100);
+.card-header {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: baseline;
   margin-bottom: 1.5rem;
+}
+
+.card-number {
+  font-size: 1.125rem;
+  font-weight: 700;
   color: var(--primary-color);
+  margin-right: 0.75rem;
 }
 
-.value-card h3 {
+.approach-card h3 {
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--neutral-900);
-  margin-bottom: 0.75rem;
 }
 
-.value-card p {
+.approach-card p {
   color: var(--neutral-600);
   line-height: 1.6;
-  margin: 0;
 }
 
-.team-section h2 {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: var(--neutral-900);
-  margin-bottom: 2rem;
-  text-align: center;
+/* Stats Section */
+.stats-section {
+  margin-bottom: 5rem;
 }
 
-.team-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
-}
-
-.team-card {
+.stats-card {
   background-color: white;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  text-align: center;
-  transition: transform 0.2s;
-}
-
-.team-card:hover {
-  transform: translateY(-5px);
-}
-
-.member-photo {
-  margin-bottom: 1.5rem;
-}
-
-.photo-placeholder {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: var(--primary-gradient);
-  color: white;
-  font-size: 2rem;
-  font-weight: 600;
+  border-radius: 16px;
+  padding: 3rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  margin: 0 auto;
 }
 
-.team-card h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--neutral-900);
+.stat {
+  text-align: center;
+  flex: 1;
+}
+
+.stat-number {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--primary-color);
   margin-bottom: 0.5rem;
+  line-height: 1;
 }
 
-.member-title {
-  font-size: 0.875rem;
-  color: var(--primary-color);
-  font-weight: 500;
-  margin-bottom: 1rem;
-}
-
-.member-bio {
-  font-size: 0.875rem;
+.stat-label {
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--neutral-600);
-  line-height: 1.6;
-  margin: 0;
 }
 
+.stat-divider {
+  width: 1px;
+  height: 60px;
+  background-color: var(--neutral-200);
+}
+
+/* CTA Section */
+.cta-section {
+  background-color: var(--neutral-100);
+  border-radius: 16px;
+  padding: 3rem;
+  text-align: center;
+  margin-bottom: 5rem;
+}
+
+.cta-section h2 {
+  margin-bottom: 2rem;
+}
+
+.cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #c07e1d;
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+.btn-outline:hover {
+  background-color: rgba(213, 141, 32, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
 @media (max-width: 992px) {
-  .about-section {
-    grid-template-columns: 1fr;
-  }
-  
-  .values-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .team-grid {
+  .approach-cards {
     grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .stats-card {
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .stat-divider {
+    width: 60px;
+    height: 1px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-content h1 {
+    font-size: 2.5rem;
+  }
+  
+  .hero-content p {
+    font-size: 1.2rem;
+  }
+  
+  .mission-content {
+    font-size: 1.2rem;
+  }
+  
+  .story-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .story-image {
+    display: none;
+  }
+  
+  .approach-cards {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 576px) {
-  .team-grid {
-    grid-template-columns: 1fr;
+  .container {
+    padding: 0 1.5rem;
   }
   
-  .about-title {
+  .hero-section {
+    padding: 4rem 0;
+  }
+  
+  .mission-card,
+  .stats-card,
+  .cta-section {
+    padding: 2rem 1.5rem;
+  }
+  
+  .dog-logo {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .mission-card h2 {
     font-size: 2rem;
+  }
+  
+  .stat-number {
+    font-size: 2.5rem;
+  }
+  
+  .cta-buttons {
+    flex-direction: column;
   }
 }
 </style>

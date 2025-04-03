@@ -13,6 +13,7 @@ import ContactPage from '@/views/ContactPage.vue';
 import CareersPage from '@/views/CareersPage.vue';
 import AboutPage from '@/views/AboutPage.vue';
 import MobileAppPage from '@/views/MobileAppPage.vue';
+import PricingPage from '@/views/PricingPage.vue';
 
 const routes = [
   {
@@ -122,6 +123,14 @@ const routes = [
     component: MobileAppPage,
     meta: { 
       title: 'Mobile App - Retriv'
+    }
+  },
+  {
+    path: '/pricing',
+    name: 'Pricing',
+    component: PricingPage,
+    meta: { 
+      title: 'Pricing - Retriv'
     }
   },
   // Handle 404 - catch all route

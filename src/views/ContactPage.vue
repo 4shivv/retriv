@@ -6,7 +6,11 @@
         <p class="contact-subtitle">Have questions or feedback? We'd love to hear from you.</p>
       </div>
 
-      <div class="contact-content">
+      <div class="contact-card">
+        <div class="dog-icon">
+          <img src="/dog.png" alt="Retriv Dog Logo" class="dog-logo"/>
+        </div>
+
         <div class="contact-form-container">
           <form class="contact-form" @submit.prevent="submitForm">
             <div class="form-group">
@@ -47,65 +51,28 @@
         </div>
         
         <div class="contact-info">
-          <div class="contact-info-card">
-            <h3>Contact Information</h3>
-            <div class="contact-detail">
-              <div class="contact-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                </svg>
-              </div>
-              <div>
-                <strong>Phone</strong>
-                <p>+1 (800) 555-1234</p>
-              </div>
-            </div>
-            
-            <div class="contact-detail">
+          <div class="contact-info-header">
+            <h3>Quick Contact</h3>
+            <p>You can also reach us directly via:</p>
+          </div>
+          
+          <div class="contact-methods">
+            <div class="contact-method">
               <div class="contact-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
               </div>
-              <div>
-                <strong>Email</strong>
-                <p>info@retriv.com</p>
-              </div>
-            </div>
-            
-            <div class="contact-detail">
-              <div class="contact-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-              </div>
-              <div>
-                <strong>Address</strong>
-                <p>123 Learning Lane<br>San Francisco, CA 94105</p>
-              </div>
-            </div>
-            
-            <div class="contact-detail">
-              <div class="contact-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-              </div>
-              <div>
-                <strong>Hours</strong>
-                <p>Monday - Friday: 9am - 5pm PST<br>Weekend: Closed</p>
-              </div>
+              <a href="mailto:info@retriv.com">info@retriv.com</a>
             </div>
             
             <div class="contact-socials">
-              <a href="#" class="social-link" aria-label="Instagram">
+              <a href="#" class="social-link" aria-label="LinkedIn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                  <rect x="2" y="9" width="4" height="12"></rect>
+                  <circle cx="4" cy="4" r="2"></circle>
                 </svg>
               </a>
               <a href="#" class="social-link" aria-label="Discord">
@@ -118,14 +85,18 @@
                   <path d="M9 12.75h0a.75.75 0 0 1-.75-.75h0a.75.75 0 0 1 .75-.75h0a.75.75 0 0 1 .75.75h0a.75.75 0 0 1-.75.75Z"></path>
                 </svg>
               </a>
-              <a href="#" class="social-link" aria-label="LinkedIn">
+              <a href="#" class="social-link" aria-label="Instagram">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-                  <rect x="2" y="9" width="4" height="12"></rect>
-                  <circle cx="4" cy="4" r="2"></circle>
+                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
                 </svg>
               </a>
             </div>
+          </div>
+          
+          <div class="response-time">
+            <p>We typically respond to all inquiries within 24-48 hours during business days.</p>
           </div>
         </div>
       </div>
@@ -184,6 +155,9 @@ export default {
 .contact-page {
   padding: 5rem 0;
   background-color: var(--neutral-50);
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
 }
 
 .contact-header {
@@ -205,19 +179,37 @@ export default {
   margin: 0 auto;
 }
 
-.contact-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  max-width: 1000px;
+.contact-card {
+  background-color: white;
+  border-radius: 16px;
+  padding: 3rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  max-width: 800px;
   margin: 0 auto;
+  position: relative;
+}
+
+.dog-icon {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  border-radius: 50%;
+  padding: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dog-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .contact-form-container {
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  padding: 2rem;
+  margin-top: 2rem;
+  margin-bottom: 3rem;
 }
 
 .form-group {
@@ -266,25 +258,39 @@ textarea.form-control {
   text-align: center;
 }
 
-.contact-info-card {
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  padding: 2rem;
-  height: 100%;
+.contact-info {
+  border-top: 1px solid var(--neutral-200);
+  padding-top: 2rem;
 }
 
-.contact-info-card h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
+.contact-info-header {
+  text-align: center;
   margin-bottom: 1.5rem;
+}
+
+.contact-info-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
   color: var(--neutral-900);
 }
 
-.contact-detail {
+.contact-info-header p {
+  color: var(--neutral-600);
+}
+
+.contact-methods {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
+}
+
+.contact-method {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .contact-icon {
@@ -299,22 +305,21 @@ textarea.form-control {
   flex-shrink: 0;
 }
 
-.contact-detail strong {
-  display: block;
-  margin-bottom: 0.25rem;
-  color: var(--neutral-900);
+.contact-method a {
+  color: var(--primary-color);
+  font-weight: 500;
+  text-decoration: none;
 }
 
-.contact-detail p {
-  color: var(--neutral-600);
-  line-height: 1.5;
-  margin: 0;
+.contact-method a:hover {
+  text-decoration: underline;
 }
 
 .contact-socials {
   display: flex;
   gap: 1rem;
-  margin-top: 2rem;
+  justify-content: center;
+  margin-top: 1rem;
 }
 
 .social-link {
@@ -335,22 +340,51 @@ textarea.form-control {
   transform: translateY(-2px);
 }
 
+.response-time {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: var(--neutral-500);
+  font-size: 0.875rem;
+}
+
+.btn-primary {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+}
+
 @media (max-width: 768px) {
-  .contact-content {
-    grid-template-columns: 1fr;
-  }
-  
   .contact-title {
     font-size: 2rem;
   }
   
-  .contact-form-container {
-    order: 2;
+  .contact-card {
+    padding: 2rem 1.5rem;
+    margin-top: 3rem;
   }
   
-  .contact-info {
-    order: 1;
-    margin-bottom: 2rem;
+  .dog-icon {
+    top: -40px;
+  }
+  
+  .dog-logo {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 576px) {
+  .contact-page {
+    padding: 3rem 0;
   }
 }
 </style>

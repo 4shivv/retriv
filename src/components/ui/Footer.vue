@@ -14,7 +14,7 @@
         <div class="footer-column">
           <h4 class="footer-heading">Product</h4>
           <ul class="footer-links">
-            <li><a href="#cta-section">Pricing</a></li>
+            <li><router-link to="/pricing">Pricing</router-link></li>
             <li><router-link to="/faq">FAQs</router-link></li>
             <li><router-link to="/mobile-app">Mobile App</router-link></li>
           </ul>

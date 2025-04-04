@@ -3,18 +3,17 @@
     <div class="container">
       <nav class="navbar">
         <div class="navbar-left">
-          <div class="navbar-brand">
-            <router-link :to="isAuthenticated ? '/dashboard' : '/'" class="navbar-logo">
-              <div class="logo-mark">
-              <img src="/dog.png" alt="Retriv.ai" class="logo-image" />
-              </div>
-              <div class="logo-text">Retriv.ai</div>
-            </router-link>
-          </div>
-          
-          <ul class="navbar-links">
-            <!-- Links for logged-out users -->
-            <template v-if="!isAuthenticated">
+          <template v-if="!isAuthenticated">
+            <div class="navbar-brand">
+              <router-link to="/" class="navbar-logo">
+                <div class="logo-mark">
+                <img src="/dog.png" alt="Retriv.ai" class="logo-image" />
+                </div>
+                <div class="logo-text">Retriv.ai</div>
+              </router-link>
+            </div>
+            
+            <ul class="navbar-links">
               <li class="nav-item">
                 <router-link to="/about" class="nav-link" @click="closeMenu">About</router-link>
               </li>
@@ -24,15 +23,19 @@
               <li class="nav-item">
                 <router-link to="/blog" class="nav-link" @click="closeMenu">Blog</router-link>
               </li>
-            </template>
-            
-            <!-- Links for logged-in users -->
-            <template v-else>
-              <li class="nav-item">
-                <router-link to="/dashboard" class="nav-link" @click="closeMenu">Dashboard</router-link>
-              </li>
-            </template>
-          </ul>
+            </ul>
+          </template>
+          
+          <!-- For logged-in users, just show the logo without the dashboard text -->
+          <template v-else>
+            <div class="navbar-brand">
+              <router-link to="/dashboard" class="navbar-logo">
+                <div class="logo-mark">
+                <img src="/dog.png" alt="Retriv.ai" class="logo-image" />
+                </div>
+              </router-link>
+            </div>
+          </template>
         </div>
           
           <div class="navbar-actions">
@@ -41,15 +44,44 @@
               <router-link to="/register" class="btn btn-primary" @click="closeMenu">Get Started</router-link>
             </template>
             <template v-else>
+              <!-- Search Box (moved from dashboard) -->
+              <div class="search-box">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input 
+                  type="text" 
+                  v-model="searchQuery" 
+                  placeholder="Search materials..." 
+                  class="search-input"
+                  @input="handleSearch"
+                >
+              </div>
+              
+              <!-- Add New Material Button (moved from dashboard) -->
+              <button @click="handleAddNew" class="btn btn-primary add-new-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span class="btn-text">Add New</span>
+              </button>
+              
+              <!-- User Menu Toggle (moved from sidebar) -->
               <div class="user-menu" v-click-outside="closeUserMenu">
-                <button class="user-menu-toggle" @click="toggleUserMenu">
+                <button class="user-menu-toggle" @click="toggleUserMenu" :title="userEmail">
                   <div class="avatar">
                     {{ userInitials }}
                   </div>
                 </button>
                 <div class="user-dropdown" v-show="userMenuOpen">
                   <div class="user-dropdown-header">
-                    <p class="user-email">{{ userEmail }}</p>
+                    <div class="avatar-large">{{ userInitials }}</div>
+                    <div class="user-info">
+                      <p class="user-email">{{ userEmail }}</p>
+                      <p class="user-role">{{ userRole }}</p>
+                    </div>
                   </div>
                   <div class="user-dropdown-body">
                     <router-link to="/dashboard" class="dropdown-item" @click="closeUserMenu">
@@ -67,14 +99,6 @@
                       </svg>
                       Profile
                     </router-link>
-                    <div class="dropdown-divider"></div>
-                    <button class="dropdown-item" @click="handleAddNew">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                      </svg>
-                      Add New Material
-                    </button>
                     <div class="dropdown-divider"></div>
                     <button class="dropdown-item text-danger" @click="handleLogout">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -99,7 +123,7 @@
 </template>
 
 <script>
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import AuthService from '@/services/auth.service';
@@ -129,6 +153,7 @@ export default {
     const menuOpen = ref(false);
     const userMenuOpen = ref(false);
     const scrolled = ref(false);
+    const searchQuery = ref('');
     
     // Check if on home page (but never for authenticated users)
     const isHomePage = computed(() => {
@@ -212,9 +237,29 @@ export default {
     };
     
     const handleAddNew = () => {
-      closeUserMenu();
+      if (userMenuOpen.value) {
+        closeUserMenu();
+      }
       router.push('/dashboard?action=create');
     };
+    
+    // Handle search input changes
+    const handleSearch = () => {
+      // Emit a custom event for the search query
+      // This will be captured by the dashboard component
+      window.dispatchEvent(new CustomEvent('navbar-search', {
+        detail: { query: searchQuery.value }
+      }));
+    };
+    
+    // Clear search when navigating
+    watch(route, () => {
+      searchQuery.value = '';
+    });
+    
+    const userRole = computed(() => {
+      return 'Member'; // This could be dynamic based on user roles in a real app
+    });
     
     const handleLogout = async () => {
       try {
@@ -255,17 +300,20 @@ export default {
       isAuthenticated,
       userEmail,
       userInitials,
+      userRole,
       menuOpen,
       userMenuOpen,
       scrolled,
       isHomePage,
+      searchQuery,
       toggleMenu,
       closeMenu,
       toggleUserMenu,
       closeUserMenu,
       navigateToHomeWithHash,
       handleAddNew,
-      handleLogout
+      handleLogout,
+      handleSearch
     };
   }
 }
@@ -273,29 +321,32 @@ export default {
 
 <style scoped>
 .navbar-wrapper {
-  position: fixed;
+  position: sticky;
   top: 0;
   left: 0;
   width: 100%;
   z-index: var(--z-fixed);
   transition: all var(--transition-normal);
-  padding: var(--spacing-2) 0; /* Back to the original padding */
-  background-color: transparent;
-}
-
-.navbar-wrapper.is-scrolled {
+  padding: var(--spacing-2) 0;
   background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  padding: var(--spacing-0-5) 0; /* Further reduced padding when scrolled */
   box-shadow: var(--shadow-sm);
+}
+
+.navbar-wrapper.is-scrolled {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  padding: var(--spacing-0-5) 0; /* Further reduced padding when scrolled */
 }
 
 .navbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 48px; /* Back to the original height */
+  height: 60px;
+  padding: 0 var(--spacing-4);
 }
 
 .navbar-left {
@@ -437,8 +488,61 @@ export default {
 .navbar-actions {
   display: flex;
   align-items: center;
-  gap: var(--spacing-3);
+  gap: var(--spacing-4);
   height: 100%;
+}
+
+/* Search Box Styling */
+.search-box {
+  position: relative;
+  width: 240px;
+}
+
+.search-icon {
+  position: absolute;
+  top: 50%;
+  left: 0.75rem;
+  transform: translateY(-50%);
+  color: var(--neutral-500);
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem 1rem 0.5rem 2.5rem;
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-normal);
+  background-color: var(--neutral-100);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+  background-color: white;
+}
+
+/* Add New Button Styling */
+.add-new-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: 0.5rem 1rem;
+  font-size: var(--font-size-sm);
+  background-color: var(--primary-color);
+  border-radius: var(--radius-md);
+  border: none;
+  color: white;
+  font-weight: var(--font-weight-medium);
+}
+
+.add-new-btn .icon {
+  transition: transform var(--transition-normal);
+}
+
+.add-new-btn:hover .icon {
+  transform: rotate(90deg);
 }
 
 /* User Menu Styling */
@@ -606,18 +710,67 @@ export default {
   }
 }
 
+/* Added new navbar app title for logged-in users */
+.navbar-app-title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--neutral-800);
+  margin-left: var(--spacing-4);
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* Improved user dropdown header */
+.user-dropdown-header {
+  padding: var(--spacing-4);
+  border-bottom: 1px solid var(--neutral-200);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.avatar-large {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: var(--primary-gradient);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.user-info {
+  flex: 1;
+}
+
 /* Responsive Styles */
 @media (max-width: 768px) {
   .navbar-left {
     flex-grow: 1;
   }
   
-  .navbar-links {
+  /* Only show menu toggle for non-authenticated users */
+  .menu-toggle {
     display: none;
   }
   
-  .menu-toggle {
+  /* For non-authenticated users */
+  :not(.with-sidebar) .navbar-links {
+    display: none;
+  }
+  
+  :not(.with-sidebar) .menu-toggle {
     display: block;
+  }
+  
+  /* For authenticated users, ensure clean layout */
+  .with-sidebar .navbar-wrapper {
+    height: 60px;
   }
   
   .navbar-left .navbar-links, 

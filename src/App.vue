@@ -1,12 +1,12 @@
 <template>
-  <div id="app" :class="{ 'with-sidebar': isAuthenticated, 'sidebar-collapsed': sidebarCollapsed }">
-    <AppNavbar v-if="!isAuthenticated" />
+  <div id="app" :class="{ 'dark-theme': darkMode, 'with-sidebar': isAuthenticated, 'sidebar-collapsed': sidebarCollapsed }">
     <AppSidebar v-if="isAuthenticated" @sidebar-toggle="handleSidebarToggle" />
-    
-    <main class="app-main" :class="{ 'with-sidebar': isAuthenticated }">
-      <router-view />
-    </main>
-    
+    <div class="main-container" :class="{ 'with-sidebar': isAuthenticated }">
+      <AppNavbar />
+      <main class="app-main">
+        <router-view />
+      </main>
+    </div>
     <AppFooter />
   </div>
 </template>
@@ -68,28 +68,98 @@ export default {
 @import './assets/css/base.css';
 @import './assets/css/components.css';
 
-.app-main {
-  min-height: calc(100vh - 200px);
+/* Main container that holds navbar and content */
+.main-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
 }
 
-.app-main.with-sidebar {
-  padding-left: 250px;
-  transition: padding-left var(--transition-normal);
+/* When the sidebar is present, adjust main container */
+.main-container.with-sidebar {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  transition: margin-left var(--transition-normal), width var(--transition-normal);
 }
 
 /* When the sidebar is collapsed */
-#app.sidebar-collapsed .app-main.with-sidebar {
+#app.sidebar-collapsed .main-container.with-sidebar {
+  margin-left: 64px;
+  width: calc(100% - 64px);
+}
+
+/* Fix z-index to ensure proper layering of navbar and sidebar */
+#app .navbar-wrapper {
+  z-index: calc(var(--z-fixed) - 1); /* Make navbar z-index lower than sidebar */
+}
+
+/* Add shadow to sidebar only on mobile to avoid double shadow with navbar */
+@media (min-width: 769px) {
+  #app.with-sidebar .navbar-wrapper {
+    box-shadow: none;
+    border-bottom: 1px solid var(--neutral-200);
+  }
+}
+
+.app-main {
+  flex: 1;
+  min-height: calc(100vh - 60px); /* Account for navbar height */
+  padding: 1rem;
+}
+
+/* Remove the old sidebar padding approach */
+/* .app-main.with-sidebar {
+  padding-left: 250px;
+  transition: padding-left var(--transition-normal);
+} */
+
+/* Adjust navbar for the new layout */
+#app .navbar-wrapper {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: var(--z-fixed);
+}
+
+/* No need for these anymore since we're using margin on the container */
+/* #app.with-sidebar .navbar-wrapper {
+  padding-left: 250px;
+  transition: padding-left var(--transition-normal);
+  box-shadow: var(--shadow-sm);
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+} */
+
+/* #app.sidebar-collapsed .app-main.with-sidebar {
   padding-left: 70px;
 }
 
+#app.sidebar-collapsed .navbar-wrapper {
+  padding-left: 70px;
+} */
+
 /* Mobile styles */
 @media (max-width: 768px) {
-  .app-main.with-sidebar {
-    padding-left: 0;
+  .main-container.with-sidebar {
+    margin-left: 0;
+    width: 100%;
   }
   
-  #app.sidebar-collapsed .app-main.with-sidebar {
-    padding-left: 0;
+  #app.sidebar-collapsed .main-container.with-sidebar {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  /* Add padding at the top to account for navbar */
+  .app-main {
+    padding-top: 1.5rem;
+  }
+  
+  /* Ensure navbar stays above sidebar on mobile */
+  #app .navbar-wrapper {
+    z-index: calc(var(--z-fixed) + 1);
   }
 }
 </style>

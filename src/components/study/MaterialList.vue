@@ -9,15 +9,36 @@
       
       <div v-else-if="!materials || materials.length === 0" class="empty-state">
         <div class="empty-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
-            <line x1="7" y1="2" x2="7" y2="22"></line>
-            <line x1="17" y1="2" x2="17" y2="22"></line>
-            <line x1="2" y1="12" x2="22" y2="12"></line>
-            <line x1="2" y1="7" x2="7" y2="7"></line>
-            <line x1="2" y1="17" x2="7" y2="17"></line>
-            <line x1="17" y1="17" x2="22" y2="17"></line>
-            <line x1="17" y1="7" x2="22" y2="7"></line>
+          <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Sleeping dog with books -->
+            <!-- Main body/back -->
+            <path d="M9 15c0-3 1-5.5 4-5.5s4 2 4.5 5c.3 2 0 3.5-1.5 3.5" fill="none" />
+            <!-- Head -->
+            <circle cx="8" cy="12" r="3.2" />
+            <!-- Ears -->
+            <path d="M5.5 10c-.8-1-1.5-.6-1.5.2" stroke-width="0.9" />
+            <path d="M6 9.5c-.4-1.2.3-1.8 1.2-1" stroke-width="0.9" />
+            <!-- Face details -->
+            <circle cx="6.8" cy="11.2" r="0.4" fill="currentColor" />
+            <path d="M7.5 13.2c.8.4 1.5.2 1.8-.2" />
+            <path d="M9 12c0 .1-.1.2-.2.2" />
+            <!-- Sleeping Z's -->
+            <path d="M11 9l1.2-.8-1-.8" stroke-width="0.7" />
+            <path d="M12.5 7.5l1.8-1.2-1.5-1.2" stroke-width="0.7" />
+            <!-- Paws -->
+            <path d="M6 15c.5.3 1.2.4 2 0" />
+            <circle cx="16" cy="18" r="1" />
+            <!-- Wagging tail -->
+            <path d="M17 16c1-.2 2-1 2-2.5" stroke-width="1" />
+            <!-- Books scattered around -->
+            <rect x="13" y="18" width="6" height="1.5" rx="0.3" />
+            <rect x="12" y="19.5" width="5" height="1.5" rx="0.3" />
+            <rect x="7" y="17" width="4" height="1.5" rx="0.3" />
+            <rect x="5" y="18.5" width="6" height="1.5" rx="0.3" />
+            <rect x="9" y="20" width="5" height="1.5" rx="0.3" />
+            <!-- Collar -->
+            <path d="M6.8 15.3c.8.3 1.8.3 2.4 0" stroke-width="0.7" stroke="#6366f1" />
+            <circle cx="8" cy="15.3" r="0.25" fill="#6366f1" stroke="none" />
           </svg>
         </div>
         <h3>No study materials yet</h3>

@@ -50,7 +50,7 @@
         
         <!-- Folder Links -->
         <li class="nav-section">
-          <div class="nav-section-title" v-if="!collapsed">Folders</div>
+          <div class="nav-section-title" v-if="!collapsed">FOLDERS</div>
           <!-- Create New Folder Button -->
           <button @click="openCreateFolderModal" class="nav-link add-folder-button" title="Create New Folder">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -74,54 +74,8 @@
       </ul>
     </nav>
     
-    <!-- User Section at Bottom -->
     <div class="sidebar-footer">
-      <div class="user-section" v-click-outside="closeUserMenu">
-        <button class="user-menu-toggle" @click="toggleUserMenu" :title="userEmail">
-          <div class="avatar">
-            {{ userInitials }}
-          </div>
-          <div class="user-info" v-if="!collapsed">
-            <p class="user-email">{{ userEmail }}</p>
-            <p class="user-role">{{ userRole }}</p>
-          </div>
-          <svg v-if="!collapsed" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{'rotate-180': userMenuOpen}">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </button>
-        
-        <div class="user-dropdown" v-show="userMenuOpen">
-          <div class="user-dropdown-header" v-if="collapsed">
-            <p class="user-email">{{ userEmail }}</p>
-          </div>
-          <div class="user-dropdown-body">
-            <router-link to="/dashboard" class="dropdown-item" @click="closeUserMenu">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="3" y1="9" x2="21" y2="9"></line>
-                <line x1="9" y1="21" x2="9" y2="9"></line>
-              </svg>
-              Dashboard
-            </router-link>
-            <router-link to="/profile" class="dropdown-item" @click="closeUserMenu">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-              Profile
-            </router-link>
-            <div class="dropdown-divider"></div>
-            <button class="dropdown-item text-danger" @click="handleLogout">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-              </svg>
-              Sign Out
-            </button>
-          </div>
-        </div>
-      </div>
+      <!-- Empty footer but keeping for structure -->
     </div>
   </aside>
   </div>
@@ -185,7 +139,6 @@ import { computed, ref, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { auth } from '@/services/firebase';
-import AuthService from '@/services/auth.service';
 
 export default {
   name: 'AppSidebar',
@@ -211,7 +164,8 @@ export default {
     const router = useRouter();
     const store = useStore();
     const collapsed = ref(false);
-    const userMenuOpen = ref(false);
+    // User menu moved to navbar
+  const userMenuOpen = ref(false); // Keeping for backwards compatibility
     const isMobile = ref(false);
     const isMobileSidebarOpen = ref(false);
     
@@ -261,14 +215,9 @@ export default {
       return 'Member'; // This could be dynamic based on user roles in a real app
     });
     
-    const toggleUserMenu = (event) => {
-      event.stopPropagation();
-      userMenuOpen.value = !userMenuOpen.value;
-    };
-    
-    const closeUserMenu = () => {
-      userMenuOpen.value = false;
-    };
+    // User menu functions moved to navbar
+    const toggleUserMenu = () => {};
+    const closeUserMenu = () => {};
     
     // Folder management methods
     const openCreateFolderModal = () => {
@@ -339,16 +288,7 @@ export default {
       }
     };
     
-    const handleLogout = async () => {
-      try {
-        await AuthService.logout();
-        store.dispatch('auth/clearUser');
-        closeUserMenu();
-        router.push('/');
-      } catch (err) {
-        console.error('Logout failed:', err);
-      }
-    };
+    // Logout handling moved to navbar
     
     // Toggle mobile sidebar
     const toggleMobileSidebar = () => {
@@ -426,7 +366,7 @@ export default {
       toggleCollapse,
       toggleUserMenu,
       closeUserMenu,
-      handleLogout,
+
       toggleMobileSidebar,
       closeMobileSidebar,
       // Folder related
@@ -455,13 +395,14 @@ export default {
   background-color: white;
   display: flex;
   flex-direction: column;
-  transition: width var(--transition-normal);
+  transition: all var(--transition-normal);
   box-shadow: var(--shadow-md);
   z-index: var(--z-fixed);
+  border-right: 1px solid var(--neutral-200);
 }
 
 .sidebar.is-collapsed {
-  width: 70px;
+  width: 64px;
 }
 
 .sidebar-header {
@@ -470,7 +411,10 @@ export default {
   justify-content: space-between;
   padding: var(--spacing-4) var(--spacing-4);
   border-bottom: 1px solid var(--neutral-200);
-  height: 70px;
+  height: 60px; /* Match navbar height */
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .sidebar-logo {
@@ -488,8 +432,8 @@ export default {
 }
 
 .logo-image {
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   object-fit: cover;
@@ -564,11 +508,22 @@ export default {
   font-size: var(--font-size-md);
 }
 
+.sidebar.is-collapsed .nav-link {
+  justify-content: center;
+  padding: var(--spacing-3) 0;
+}
+
 .nav-link:hover, 
 .nav-link.router-link-active {
   background-color: var(--neutral-100);
   color: var(--primary-color);
   border-left-color: var(--primary-color);
+}
+
+.sidebar.is-collapsed .nav-link:hover,
+.sidebar.is-collapsed .nav-link.router-link-active {
+  border-left-color: transparent;
+  border-left-width: 0;
 }
 
 .add-new-button, .add-folder-button {

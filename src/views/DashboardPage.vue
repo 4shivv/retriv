@@ -6,15 +6,6 @@
         <div class="header-content">
           <h1 class="dashboard-title">Active Recall Dashboard</h1>
         </div>
-        <div class="header-actions">
-          <button v-if="currentMode !== 'create'" @click="currentMode = 'create'" class="btn btn-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            Add New Material
-          </button>
-        </div>
       </header>
 
       <!-- Loading State -->
@@ -24,11 +15,11 @@
       </div>
 
       <!-- Dashboard Content -->
-      <template v-else>
+      <div v-else>
         <!-- Materials List Mode -->
         <div v-if="currentMode === 'list'" class="dashboard-content">
           <!-- Due Reviews Section -->
-          <section class="reviews-section" v-if="hasDueReviews">
+          <section v-if="hasDueReviews" class="reviews-section">
             <div class="section-header">
               <h2 class="section-title">Due for Review</h2>
               <div class="reviews-header-meta">
@@ -115,21 +106,7 @@
           <section class="materials-section">
             <div class="section-header">
               <h2 class="section-title">Your Study Materials</h2>
-              <!-- Unified Search and Filter Section -->
               <div class="materials-filter">
-                <div class="search-box">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                  </svg>
-                  <input 
-                    type="text" 
-                    v-model="searchQuery" 
-                    placeholder="Search materials..." 
-                    class="search-input"
-                    @input="filterMaterials"
-                  >
-                </div>
                 <button @click="showFilterMenu = !showFilterMenu" class="filter-toggle-btn" :class="{ active: showFilterMenu }">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
@@ -262,7 +239,7 @@
             @completed="handleFeynmanCompleted"
           />
         </div>
-      </template>
+      </div>
     </div>
   </div>
 </template>
@@ -817,6 +794,12 @@ export default {
       }
     };
     
+    // Handle search from navbar
+    const handleNavbarSearch = (event) => {
+      searchQuery.value = event.detail.query;
+      filterMaterials();
+    };
+    
     onMounted(async () => {
       // Check authentication
       const user = store.getters['auth/user'];
@@ -839,6 +822,9 @@ export default {
         
         // Add event listener to close filter menu when clicking outside
         document.addEventListener('click', closeFilterMenu);
+        
+        // Add event listener for navbar search
+        window.addEventListener('navbar-search', handleNavbarSearch);
       } catch (err) {
         console.error("Error initializing dashboard:", err);
       } finally {
@@ -846,9 +832,10 @@ export default {
       }
     });
     
-    // Remove event listener when component is unmounted
+    // Remove event listeners when component is unmounted
     onBeforeUnmount(() => {
       document.removeEventListener('click', closeFilterMenu);
+      window.removeEventListener('navbar-search', handleNavbarSearch);
     });
     
     // Calculate the count of overdue materials

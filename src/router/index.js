@@ -5,6 +5,7 @@ import LoginPage from '@/views/LoginPage.vue';
 import RegisterPage from '@/views/RegisterPage.vue';
 import DashboardPage from '@/views/DashboardPage.vue';
 import ProfilePage from '@/views/ProfilePage.vue';
+import FolderPage from '@/views/folders/FolderPage.vue';
 import FAQPage from '@/views/FAQPage.vue';
 import BlogPage from '@/views/BlogPage.vue';
 import TermsPage from '@/views/TermsPage.vue';
@@ -59,6 +60,15 @@ const routes = [
     meta: { 
       requiresAuth: true,
       title: 'Profile - Retriv' 
+    }
+  },
+  {
+    path: '/folder/:id',
+    name: 'Folder',
+    component: FolderPage,
+    meta: { 
+      requiresAuth: true,
+      title: 'Folder - Retriv' 
     }
   },
   {

@@ -900,9 +900,15 @@ export default {
 
 <style scoped>
 .dashboard {
-  padding-top: 5rem;
+  padding-top: 1.5rem;
   min-height: 100vh;
   background-color: var(--neutral-50);
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    padding-top: 5rem; /* Provide space for mobile toggle button */
+  }
 }
 
 /* Dashboard Header */

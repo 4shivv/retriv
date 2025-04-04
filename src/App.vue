@@ -105,7 +105,7 @@ export default {
 .app-main {
   flex: 1;
   min-height: calc(100vh - 60px); /* Account for navbar height */
-  padding: 1rem;
+  padding: 0 1rem 1rem 1rem;
 }
 
 /* Remove the old sidebar padding approach */

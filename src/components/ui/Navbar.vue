@@ -334,7 +334,7 @@ export default {
   max-width: 100%;
   z-index: var(--z-fixed);
   transition: all var(--transition-normal);
-  padding: var(--spacing-2) 0;
+  padding: var(--spacing-1) 0;
   background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
@@ -352,7 +352,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 60px;
+  height: 52px;
   padding: 0 var(--spacing-6);
   width: 100vw;
   max-width: 100%;

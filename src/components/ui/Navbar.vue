@@ -323,7 +323,7 @@ export default {
   max-width: 100%;
   margin: 0 auto;
   padding: 0;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .navbar-wrapper {
@@ -557,6 +557,7 @@ export default {
 /* User Menu Styling */
 .user-menu {
   position: relative;
+  z-index: 1400;
 }
 
 .user-menu-toggle {
@@ -569,6 +570,19 @@ export default {
 .user-menu-toggle .avatar {
   transition: all var(--transition-normal);
   border: 2px solid transparent;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--primary-gradient);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
 }
 
 .user-menu-toggle:hover .avatar {
@@ -585,16 +599,21 @@ export default {
   background: white;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
-  z-index: 1000;
+  z-index: 1500;
   animation: scaleIn 0.2s var(--transition-bounce);
   transform-origin: top right;
   overflow: hidden;
   border: 1px solid var(--neutral-200);
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
 }
 
 .user-dropdown-header {
   padding: var(--spacing-4);
   border-bottom: 1px solid var(--neutral-200);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
 }
 
 .user-email {
@@ -609,7 +628,9 @@ export default {
 }
 
 .dropdown-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: var(--spacing-3) var(--spacing-4);
   color: var(--neutral-700);
   font-weight: var(--font-weight-medium);
@@ -645,10 +666,21 @@ export default {
   background-color: var(--neutral-200);
 }
 
-.dropdown-item {
+.avatar-large {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: var(--primary-gradient);
+  color: white;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.user-info {
+  flex: 1;
 }
 
 /* Mobile Menu Toggle */
@@ -729,32 +761,6 @@ export default {
   display: flex;
   align-items: center;
   height: 100%;
-}
-
-/* Improved user dropdown header */
-.user-dropdown-header {
-  padding: var(--spacing-4);
-  border-bottom: 1px solid var(--neutral-200);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-}
-
-.avatar-large {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-full);
-  background: var(--primary-gradient);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-}
-
-.user-info {
-  flex: 1;
 }
 
 /* Responsive Styles */

@@ -91,7 +91,7 @@ export default {
 
 /* Fix z-index to ensure proper layering of navbar and sidebar */
 #app .navbar-wrapper {
-  z-index: calc(var(--z-fixed) - 1); /* Make navbar z-index lower than sidebar */
+  z-index: var(--z-fixed); /* Use the standard fixed z-index */
 }
 
 /* Add shadow to sidebar only on mobile to avoid double shadow with navbar */

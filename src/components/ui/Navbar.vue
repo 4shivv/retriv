@@ -1,6 +1,6 @@
 <template>
   <header class="navbar-wrapper" :class="{ 'is-scrolled': scrolled }">
-    <div class="container">
+    <div class="navbar-container">
       <nav class="navbar">
         <div class="navbar-left">
           <template v-if="!isAuthenticated">
@@ -26,13 +26,11 @@
             </ul>
           </template>
           
-          <!-- For logged-in users, just show the logo without the dashboard text -->
+          <!-- For logged-in users, don't show any logo -->
           <template v-else>
             <div class="navbar-brand">
               <router-link to="/dashboard" class="navbar-logo">
-                <div class="logo-mark">
-                <img src="/dog.png" alt="Retriv.ai" class="logo-image" />
-                </div>
+                <!-- Logo removed as requested -->
               </router-link>
             </div>
           </template>
@@ -320,11 +318,20 @@ export default {
 </script>
 
 <style scoped>
+.navbar-container {
+  width: 100vw;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  overflow-x: hidden;
+}
+
 .navbar-wrapper {
   position: sticky;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 100vw;
+  max-width: 100%;
   z-index: var(--z-fixed);
   transition: all var(--transition-normal);
   padding: var(--spacing-2) 0;
@@ -338,7 +345,7 @@ export default {
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  padding: var(--spacing-0-5) 0; /* Further reduced padding when scrolled */
+  padding: var(--spacing-1) 0; /* Reduced padding when scrolled */
 }
 
 .navbar {
@@ -346,7 +353,9 @@ export default {
   align-items: center;
   justify-content: space-between;
   height: 60px;
-  padding: 0 var(--spacing-4);
+  padding: 0 var(--spacing-6);
+  width: 100vw;
+  max-width: 100%;
 }
 
 .navbar-left {
@@ -376,8 +385,8 @@ export default {
 }
 
 .logo-image {
-  width: 2.5rem; /* Back to the original size */
-  height: 2.5rem; /* Back to the original size */
+  width: 2rem; /* Slightly smaller logo size */
+  height: 2rem; /* Slightly smaller logo size */
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   object-fit: cover;
@@ -405,7 +414,7 @@ export default {
 
 .logo-text {
   font-family: var(--font-family-heading);
-  font-size: var(--font-size-xl); /* Return to original size */
+  font-size: var(--font-size-lg); /* Smaller font size */
   font-weight: var(--font-weight-bold);
   color: var(--neutral-900);
   letter-spacing: -0.01em;

@@ -16,10 +16,12 @@
       <!-- Sidebar Header with Logo -->
     <div class="sidebar-header">
       <router-link v-if="!collapsed" :to="'/dashboard'" class="sidebar-logo">
-        <div class="logo-mark">
-          <img src="/dog.png" alt="Retriv.ai" class="logo-image" />
+        <div class="logo-container">
+          <div class="logo-mark">
+            <img src="/dog.png" alt="Retriv.ai" class="logo-image" />
+          </div>
+          <div class="study-space-text">Study Space</div>
         </div>
-        <div class="logo-text">Retriv.ai</div>
       </router-link>
       <button @click="toggleCollapse" class="collapse-toggle" :class="{ 'logo-position': collapsed }">
         <svg v-if="collapsed" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -409,9 +411,9 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-4) var(--spacing-4);
+  padding: var(--spacing-3) var(--spacing-4);
   border-bottom: 1px solid var(--neutral-200);
-  height: 60px; /* Match navbar height */
+  height: 75px; /* Increased to accommodate vertical layout */
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
@@ -419,15 +421,17 @@ export default {
 
 .sidebar.is-collapsed .sidebar-header {
   justify-content: center;
+  height: 60px; /* Return to original height when collapsed */
   padding: var(--spacing-4) var(--spacing-2);
 }
 
 .sidebar-logo {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
+  justify-content: flex-start;
   text-decoration: none;
   height: 100%;
+  width: 100%;
 }
 
 .logo-mark {
@@ -449,12 +453,19 @@ export default {
   transform: scale(1.05);
 }
 
-.logo-text {
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.study-space-text {
   font-family: var(--font-family-heading);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  color: var(--neutral-900);
-  letter-spacing: -0.01em;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--neutral-600);
+  margin-top: var(--spacing-1);
+  letter-spacing: 0.02em;
   white-space: nowrap;
 }
 

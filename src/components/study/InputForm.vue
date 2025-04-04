@@ -141,15 +141,15 @@
         </div>
         
         <div class="form-group">
-          <label for="category" class="form-label">Category</label>
-          <div class="category-dropdown-container">
+          <label for="folder" class="form-label">Folder</label>
+          <div class="folder-dropdown-container">
             <!-- Custom Dropdown Trigger -->
-            <div class="category-dropdown-trigger" @click="toggleCategoryDropdown" :class="{ 'active': showCategoryDropdown }">
-              <div class="selected-category">
-                <div v-if="selectedCategoryOption" class="category-tag" :class="getCategoryColorClass(selectedCategoryOption)">
-                  <span>{{ selectedCategoryOption === 'custom' ? customCategory : selectedCategoryOption }}</span>
+            <div class="folder-dropdown-trigger" @click="toggleFolderDropdown" :class="{ 'active': showFolderDropdown }">
+              <div class="selected-folder">
+                <div v-if="selectedFolder" class="folder-tag" :style="{ backgroundColor: selectedFolder.color || '#6366F1' }">
+                  <span>{{ selectedFolder.name }}</span>
                 </div>
-                <span v-else class="placeholder-text">Select a category</span>
+                <span v-else class="placeholder-text">Select a folder</span>
               </div>
               <div class="dropdown-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -158,9 +158,9 @@
               </div>
             </div>
 
-            <!-- Enhanced Dropdown Content -->
-            <div v-if="showCategoryDropdown" class="category-dropdown-content">
-              <div class="category-search">
+            <!-- Folder Dropdown Content -->
+            <div v-if="showFolderDropdown" class="folder-dropdown-content">
+              <div class="folder-search">
                 <div class="search-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"></circle>
@@ -169,99 +169,59 @@
                 </div>
                 <input 
                   type="text" 
-                  v-model="categorySearchTerm" 
+                  v-model="folderSearchTerm" 
                   class="form-control" 
-                  placeholder="Search or create category"
-                  @input="handleCategorySearch"
-                  @keydown.enter="handleCategorySearchEnter"
-                  ref="categorySearchInput"
+                  placeholder="Search folders"
+                  @input="handleFolderSearch"
+                  ref="folderSearchInput"
                 />
               </div>
               
-              <div class="category-groups">
-                <!-- Default Categories -->
-                <div class="category-group" v-if="filteredDefaultCategories.length > 0">
-                  <div class="category-group-label">Default Categories</div>
-                  <div class="category-options">
+              <div class="folder-groups">
+                <!-- User's Folders -->
+                <div class="folder-group" v-if="filteredFolders.length > 0">
+                  <div class="folder-group-label">Your Folders</div>
+                  <div class="folder-options">
                     <div 
-                      v-for="cat in filteredDefaultCategories" 
-                      :key="cat" 
-                      class="category-option" 
-                      @click="selectCategory(cat)"
-                      :class="[getCategoryColorClass(cat), { 'active': selectedCategoryOption === cat }]"
+                      v-for="folder in filteredFolders" 
+                      :key="folder.id" 
+                      class="folder-option" 
+                      @click="selectFolder(folder)"
+                      :class="{ 'active': selectedFolder && selectedFolder.id === folder.id }"
+                      :style="{ borderLeft: `3px solid ${folder.color || '#6366F1'}` }"
                     >
-                      <span class="category-name">{{ cat }}</span>
-                      <div class="category-option-actions">
-                        <span class="category-select-icon" v-if="selectedCategoryOption === cat">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                          </svg>
-                        </span>
-                        <button 
-                          class="category-delete-button" 
-                          @click.stop="deleteCategoryPrompt(cat)"
-                          title="Delete category"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Custom Categories -->
-                <div class="category-group" v-if="filteredCustomCategories.length > 0">
-                  <div class="category-group-label">Your Categories</div>
-                  <div class="category-options">
-                    <div 
-                      v-for="cat in filteredCustomCategories" 
-                      :key="cat" 
-                      class="category-option" 
-                      @click="selectCategory(cat)"
-                      :class="[getCategoryColorClass(cat), { 'active': selectedCategoryOption === cat }]"
-                    >
-                      <span class="category-name">{{ cat }}</span>
-                      <div class="category-option-actions">
-                        <span class="category-select-icon" v-if="selectedCategoryOption === cat">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                          </svg>
-                        </span>
-                        <button 
-                          class="category-delete-button" 
-                          @click.stop="deleteCategoryPrompt(cat)"
-                          title="Delete category"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Create New Category Option -->
-                <div class="category-group" v-if="showCreateNewCategory">
-                  <div class="category-group-label">Create New</div>
-                  <div class="category-options">
-                    <div 
-                      class="category-option category-option-new" 
-                      @click="createNewCategory"
-                    >
-                      <span class="category-name">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="category-new-icon">
-                          <line x1="12" y1="5" x2="12" y2="19"></line>
-                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <div class="folder-icon" :style="{ color: folder.color || '#6366F1' }">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11z"></path>
                         </svg>
-                        Create "{{ categorySearchTerm }}"
+                      </div>
+                      <span class="folder-name">{{ folder.name }}</span>
+                      <span class="folder-select-icon" v-if="selectedFolder && selectedFolder.id === folder.id">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
                       </span>
                     </div>
                   </div>
+                </div>
+
+                <!-- No Folders Message -->
+                <div v-if="!filteredFolders.length && !isLoadingFolders" class="no-folders-message">
+                  <p>No folders found. Create a folder first to organize your materials.</p>
+                  <button class="create-folder-btn" @click="createNewFolder">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11z"></path>
+                      <line x1="12" y1="11" x2="12" y2="17"></line>
+                      <line x1="9" y1="14" x2="15" y2="14"></line>
+                    </svg>
+                    Create New Folder
+                  </button>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div v-if="isLoadingFolders" class="loading-folders">
+                  <div class="folder-spinner"></div>
+                  <p>Loading folders...</p>
                 </div>
               </div>
             </div>
@@ -705,7 +665,7 @@
 
 <script>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import StudyService from '@/services/study.service';
 import { auth } from '@/services/firebase';
 
@@ -714,6 +674,9 @@ export default {
   emits: ['material-saved'],
   
   setup(props, { emit }) {
+    const router = useRouter();
+    const route = useRoute();
+    
     // Input mode switcher (manual or AI)
     const inputMode = ref('manual');
     
@@ -730,6 +693,81 @@ export default {
     const aiGeneratedMaterials = ref([]);
     const title = ref('');
     const content = ref('');
+    
+    // Folder-related state
+    const selectedFolder = ref(null);
+    const folders = ref([]);
+    const isLoadingFolders = ref(false);
+    const showFolderDropdown = ref(false);
+    const folderSearchTerm = ref('');
+    const folderSearchInput = ref(null);
+    const filteredFolders = computed(() => {
+      if (!folderSearchTerm.value) return folders.value;
+      return folders.value.filter(folder => 
+        folder.name.toLowerCase().includes(folderSearchTerm.value.toLowerCase())
+      );
+    });
+    
+    // Check if we have a folderId in the URL query params
+    onMounted(() => {
+      const { folderId } = route.query;
+      if (folderId) {
+        loadFolders().then(() => {
+          const folder = folders.value.find(f => f.id === folderId);
+          if (folder) {
+            selectedFolder.value = folder;
+          }
+        });
+      } else {
+        loadFolders();
+      }
+    });
+    
+    // Load folders from localStorage
+    const loadFolders = async () => {
+      isLoadingFolders.value = true;
+      try {
+        const savedFolders = localStorage.getItem('user-folders');
+        if (savedFolders) {
+          folders.value = JSON.parse(savedFolders);
+        }
+      } catch (err) {
+        console.error('Error loading folders:', err);
+      } finally {
+        isLoadingFolders.value = false;
+      }
+    };
+    
+    // Toggle folder dropdown
+    const toggleFolderDropdown = () => {
+      showFolderDropdown.value = !showFolderDropdown.value;
+      
+      if (showFolderDropdown.value) {
+        folderSearchTerm.value = '';
+        nextTick(() => {
+          folderSearchInput.value?.focus();
+        });
+      }
+    };
+    
+    // Handle folder search
+    const handleFolderSearch = () => {
+      // Implementation is handled by the computed property
+    };
+    
+    // Select a folder
+    const selectFolder = (folder) => {
+      selectedFolder.value = folder;
+      showFolderDropdown.value = false;
+    };
+    
+    // Create a new folder
+    const createNewFolder = () => {
+      // Navigate to dashboard with create folder action
+      router.push('/dashboard?action=createFolder');
+    };
+    
+    // For old code compatibility
     const selectedCategoryOption = ref('');
     const customCategory = ref('');
     const showCustomCategoryInput = ref(false);
@@ -803,8 +841,6 @@ export default {
     
     // Track frequently used categories
     const frequentCategories = ref([]);
-    
-    const router = useRouter();
     
     const category = computed(() => {
       if (selectedCategoryOption.value === 'custom') {
@@ -1296,6 +1332,8 @@ export default {
       // Reset manual form
       title.value = '';
       content.value = '';
+      selectedFolder.value = null;
+      folderSearchTerm.value = '';
       selectedCategoryOption.value = '';
       customCategory.value = '';
       showCustomCategoryInput.value = false;
@@ -1341,7 +1379,7 @@ export default {
       reader.readAsText(file);
     };
     
-    // Original handleSubmit with minor modifications
+    // Updated handleSubmit to use folders
     const handleSubmit = async () => {
       try {
         loading.value = true;
@@ -1363,18 +1401,27 @@ export default {
           return;
         }
         
+        // Ensure a folder is selected
+        if (!selectedFolder.value) {
+          error.value = 'Please select a folder to organize your material';
+          return;
+        }
+        
         // Ensure a learning deadline is set
         if (!deadline.value) {
           error.value = 'Please set a learning deadline to create your study plan';
           return;
         }
         
+        // Use the selected folder for the category
+        const folderCategory = selectedFolder.value.name;
+        
         // The userId parameter isn't actually used, as StudyService uses auth.currentUser.uid
         const materialId = await StudyService.saveStudyMaterial(
           auth.currentUser.uid,
           title.value,
           content.value,
-          category.value, // Add category parameter
+          folderCategory, // Use folder name as category
           getDeadlineInDays() // Add deadline parameter
         );
         
@@ -1387,7 +1434,8 @@ export default {
             id: materialId,
             title: title.value,
             content: content.value,
-            category: category.value, // Add category to the material object
+            category: folderCategory, // Add folder as category
+            folderId: selectedFolder.value.id, // Add the folderId
             createdAt: new Date(),
             userId: auth.currentUser.uid,
             deadline: getDeadlineInDays()
@@ -1430,6 +1478,18 @@ export default {
       filteredCustomCategories,
       filteredFrequentCategories,
       showCreateNewCategory,
+      // Folder-related properties and methods
+      selectedFolder,
+      folders,
+      isLoadingFolders,
+      showFolderDropdown,
+      folderSearchTerm,
+      folderSearchInput,
+      filteredFolders,
+      toggleFolderDropdown,
+      handleFolderSearch,
+      selectFolder,
+      createNewFolder,
       // Deadline refs and methods
       deadline,
       customDeadlineDate,
@@ -1621,13 +1681,13 @@ export default {
   to { transform: rotate(360deg); }
 }
 
-/* Enhanced Category Dropdown Styling */
-.category-dropdown-container {
+/* Enhanced Category and Folder Dropdown Styling */
+.category-dropdown-container, .folder-dropdown-container {
   position: relative;
   width: 100%;
 }
 
-.category-dropdown-trigger {
+.category-dropdown-trigger, .folder-dropdown-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1641,18 +1701,18 @@ export default {
   box-shadow: var(--shadow-sm);
 }
 
-.category-dropdown-trigger:hover {
+.category-dropdown-trigger:hover, .folder-dropdown-trigger:hover {
   border-color: var(--primary-color);
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 
-.category-dropdown-trigger.active {
+.category-dropdown-trigger.active, .folder-dropdown-trigger.active {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), var(--shadow-md);
 }
 
-.selected-category {
+.selected-category, .selected-folder {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
@@ -1674,13 +1734,14 @@ export default {
   transition: transform var(--transition-normal);
 }
 
-.category-dropdown-trigger.active .dropdown-icon {
+.category-dropdown-trigger.active .dropdown-icon,
+.folder-dropdown-trigger.active .dropdown-icon {
   transform: rotate(180deg);
   color: var(--primary-color);
 }
 
-/* Category Tag Styling */
-.category-tag {
+/* Category and Folder Tag Styling */
+.category-tag, .folder-tag {
   display: inline-flex;
   align-items: center;
   padding: 0.25rem 0.75rem;
@@ -1717,7 +1778,7 @@ export default {
 }
 
 /* Dropdown Content Styling */
-.category-dropdown-content {
+.category-dropdown-content, .folder-dropdown-content {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
@@ -1737,40 +1798,47 @@ export default {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.category-search {
+.category-search, .folder-search {
   padding: var(--spacing-3);
   border-bottom: 1px solid var(--neutral-200);
   position: sticky;
   top: 0;
   background-color: white;
   z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.search-icon {
+  color: var(--neutral-400);
 }
 
 /* Add padding at the bottom to ensure all options are visible when scrolling */
-.category-groups::after {
+.category-groups::after, .folder-groups::after {
   content: '';
   display: block;
   height: 12px;
 }
 
-.category-groups {
+.category-groups, .folder-groups {
   padding: var(--spacing-2);
   padding-right: 10px; /* Extra space for scrollbar */
 }
 
-.category-group {
+.category-group, .folder-group {
   margin-bottom: var(--spacing-5);
   padding-bottom: var(--spacing-3);
   border-bottom: 1px solid var(--neutral-200);
 }
 
-.category-group:last-child {
+.category-group:last-child, .folder-group:last-child {
   margin-bottom: 0;
   border-bottom: none;
   padding-bottom: 0;
 }
 
-.category-group-label {
+.category-group-label, .folder-group-label {
   padding: 0 var(--spacing-3);
   margin-bottom: var(--spacing-3);
   font-size: var(--font-size-xs);
@@ -1784,13 +1852,13 @@ export default {
   display: inline-block;
 }
 
-.category-options {
+.category-options, .folder-options {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-1);
 }
 
-.category-option {
+.category-option, .folder-option {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1804,19 +1872,90 @@ export default {
   border: 1px solid transparent;
 }
 
-.category-option:hover {
+.category-option:hover, .folder-option:hover {
   background-color: var(--neutral-100);
   border-color: var(--neutral-300);
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
 }
 
-.category-option.active {
+.category-option.active, .folder-option.active {
   background-color: var(--primary-color);
   color: white;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
   font-weight: var(--font-weight-medium);
+}
+
+.folder-option {
+  display: flex;
+  align-items: center;
+  padding: 10px var(--spacing-3);
+  gap: var(--spacing-3);
+}
+
+.folder-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.folder-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-select-icon {
+  margin-left: var(--spacing-2);
+}
+
+.no-folders-message {
+  text-align: center;
+  padding: var(--spacing-6);
+  color: var(--neutral-600);
+}
+
+.create-folder-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-4);
+  padding: 8px 16px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-normal);
+}
+
+.create-folder-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.loading-folders {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-6);
+  color: var(--neutral-600);
+}
+
+.folder-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid rgba(99, 102, 241, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--spacing-3);
 }
 
 /* Make category color classes more subtle when not active */

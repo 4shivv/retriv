@@ -10,30 +10,21 @@
           </div>
         </div>
         <div class="folder-actions">
-          <button @click="showFolderOptions = !showFolderOptions" class="btn btn-outline btn-icon folder-options-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="1"></circle>
-              <circle cx="19" cy="12" r="1"></circle>
-              <circle cx="5" cy="12" r="1"></circle>
+          <button class="btn btn-outline folder-action-btn" @click="openRenameModal" title="Rename Folder">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
             </svg>
+            <span>Rename</span>
           </button>
           
-          <div v-if="showFolderOptions" class="folder-options-dropdown">
-            <button class="dropdown-item" @click="openRenameModal">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-              </svg>
-              Rename Folder
-            </button>
-            <button class="dropdown-item text-danger" @click="confirmDeleteFolder">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
-              Delete Folder
-            </button>
-          </div>
+          <button class="btn btn-outline btn-danger folder-action-btn" @click="confirmDeleteFolder" title="Delete Folder">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            <span>Delete</span>
+          </button>
           
           <button @click="handleAddNew" class="btn btn-primary">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
@@ -203,7 +194,6 @@ export default {
     const loading = ref(true);
     const folder = ref(null);
     const materials = ref([]);
-    const showFolderOptions = ref(false);
     
     // Rename modal state
     const showRenameModal = ref(false);
@@ -338,7 +328,6 @@ export default {
     // Folder rename functionality
     const openRenameModal = () => {
       showRenameModal.value = true;
-      showFolderOptions.value = false;
       
       // Focus on input after modal is shown
       setTimeout(() => {
@@ -393,7 +382,6 @@ export default {
     // Folder delete functionality
     const confirmDeleteFolder = () => {
       showDeleteModal.value = true;
-      showFolderOptions.value = false;
     };
     
     const cancelDeleteFolder = () => {
@@ -412,6 +400,9 @@ export default {
           
           // Save updated folders
           localStorage.setItem('user-folders', JSON.stringify(updatedFolders));
+          
+          // Force sidebar to update by dispatching a custom event
+          window.dispatchEvent(new CustomEvent('folder-deleted', { detail: { folderId: folderId.value } }));
         }
         
         // Redirect to dashboard
@@ -424,12 +415,7 @@ export default {
       }
     };
     
-    // Click outside handler for folder options
-    const handleClickOutside = (event) => {
-      if (showFolderOptions.value && !event.target.closest('.folder-options-btn') && !event.target.closest('.folder-options-dropdown')) {
-        showFolderOptions.value = false;
-      }
-    };
+
     
     // Watch for route changes to reload folder data
     watch(() => route.params.id, (newId, oldId) => {
@@ -442,9 +428,6 @@ export default {
     onMounted(() => {
       loadFolder();
       loadMaterials();
-      
-      // Add click outside listener
-      document.addEventListener('click', handleClickOutside);
     });
     
     return {
@@ -455,7 +438,7 @@ export default {
       folderName,
       folderHeaderStyle,
       folderColors,
-      showFolderOptions,
+
       showRenameModal,
       showDeleteModal,
       newFolderName,
@@ -521,6 +504,33 @@ export default {
   display: flex;
   gap: var(--spacing-3);
   position: relative;
+}
+
+.folder-action-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: 0.5rem 1rem;
+  transition: all var(--transition-normal);
+}
+
+.folder-action-btn svg {
+  transition: transform 0.2s ease;
+}
+
+.folder-action-btn:hover svg {
+  transform: scale(1.2);
+}
+
+.btn-danger {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.btn-danger:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: #dc2626;
+  color: #dc2626;
 }
 
 .btn-icon {

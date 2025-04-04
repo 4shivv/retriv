@@ -46,9 +46,13 @@
             <span v-if="!collapsed">Dashboard</span>
           </router-link>
         </li>
-        <!-- Create New Folder Button -->
-        <li class="nav-item">
-          <button @click="openCreateFolderModal" class="nav-link add-new-button" title="Create New Folder">
+        
+        
+        <!-- Folder Links -->
+        <li class="nav-section">
+          <div class="nav-section-title" v-if="!collapsed">Folders</div>
+          <!-- Create New Folder Button -->
+          <button @click="openCreateFolderModal" class="nav-link add-folder-button" title="Create New Folder">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11z"></path>
               <line x1="12" y1="11" x2="12" y2="17"></line>
@@ -56,12 +60,7 @@
             </svg>
             <span v-if="!collapsed">Create New Folder</span>
           </button>
-        </li>
-        
-        <!-- Folder Links -->
-        <li class="nav-section" v-if="folders.length > 0">
-          <div class="nav-section-title" v-if="!collapsed">Folders</div>
-          <ul class="folder-list">
+          <ul class="folder-list" v-if="folders.length > 0">
             <li v-for="folder in folders" :key="folder.id" class="nav-item">
               <router-link :to="'/folder/' + folder.id" class="nav-link folder-link" :title="folder.name">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -396,12 +395,24 @@ export default {
       }
     };
     
+    // Listen for folder deletion events
+    const handleFolderDeleted = (event) => {
+      const { folderId } = event.detail;
+      if (folderId) {
+        folders.value = folders.value.filter(folder => folder.id !== folderId);
+        saveFolders();
+      }
+    };
+    
+    window.addEventListener('folder-deleted', handleFolderDeleted);
+    
     // Call init function to initialize sidebar
     init();
     
     // Cleanup event listeners
     onBeforeUnmount(() => {
       window.removeEventListener('resize', checkMobile);
+      window.removeEventListener('folder-deleted', handleFolderDeleted);
     });
     
     return {
@@ -560,13 +571,21 @@ export default {
   border-left-color: var(--primary-color);
 }
 
-.add-new-button {
+.add-new-button, .add-folder-button {
   color: var(--primary-color);
   font-weight: var(--font-weight-medium);
 }
 
-.add-new-button:hover {
+.add-new-button:hover, .add-folder-button:hover {
   background-color: rgba(99, 102, 241, 0.1);
+}
+
+.add-folder-button {
+  margin-bottom: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  padding-left: var(--spacing-4);
 }
 
 .sidebar-footer {

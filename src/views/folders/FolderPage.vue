@@ -190,7 +190,6 @@
 <script>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useStore } from 'vuex';
 import StudyService from '@/services/study.service';
 
 export default {
@@ -199,7 +198,6 @@ export default {
   setup() {
     const route = useRoute();
     const router = useRouter();
-    const store = useStore();
     
     // State
     const loading = ref(true);

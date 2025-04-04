@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import AppNavbar from '@/components/ui/Navbar.vue';
 import AppSidebar from '@/components/ui/Sidebar';

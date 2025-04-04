@@ -182,9 +182,10 @@
 </template>
 
 <script>
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
+import { computed, ref, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import { auth } from '@/services/firebase';
 import AuthService from '@/services/auth.service';
 
 export default {
@@ -300,7 +301,7 @@ export default {
           name: newFolderName.value.trim(),
           color: newFolderColor.value,
           createdAt: new Date(),
-          userId: store.getters['auth/user'].uid
+          userId: auth.currentUser?.uid || 'user-1'
         };
         
         // In a real app, you would save this to a database/service
@@ -369,7 +370,7 @@ export default {
     };
     
     // Initialize collapsed state from localStorage and check for mobile view
-    const init = () => {
+    function init() {
       const savedState = localStorage.getItem('sidebar-collapsed');
       if (savedState !== null) {
         collapsed.value = savedState === 'true';
@@ -383,7 +384,7 @@ export default {
       
       // Load folders from localStorage
       loadFolders();
-    };
+    }
     
     // Check if we're on a mobile device
     const checkMobile = () => {
@@ -395,7 +396,7 @@ export default {
       }
     };
     
-    // Call init function
+    // Call init function to initialize sidebar
     init();
     
     // Cleanup event listeners

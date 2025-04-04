@@ -31,12 +31,6 @@
               <li class="nav-item">
                 <router-link to="/dashboard" class="nav-link" @click="closeMenu">Dashboard</router-link>
               </li>
-              <li class="nav-item">
-                <router-link to="/materials" class="nav-link" @click="closeMenu">My Materials</router-link>
-              </li>
-              <li class="nav-item">
-                <router-link to="/progress" class="nav-link" @click="closeMenu">My Progress</router-link>
-              </li>
             </template>
           </ul>
         </div>

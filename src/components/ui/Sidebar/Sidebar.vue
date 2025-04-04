@@ -15,13 +15,13 @@
     <aside class="sidebar" :class="{ 'is-collapsed': collapsed, 'is-open': isMobileSidebarOpen }">
       <!-- Sidebar Header with Logo -->
     <div class="sidebar-header">
-      <router-link :to="'/dashboard'" class="sidebar-logo">
+      <router-link v-if="!collapsed" :to="'/dashboard'" class="sidebar-logo">
         <div class="logo-mark">
           <img src="/dog.png" alt="Retriv.ai" class="logo-image" />
         </div>
-        <div class="logo-text" v-if="!collapsed">Retriv.ai</div>
+        <div class="logo-text">Retriv.ai</div>
       </router-link>
-      <button @click="toggleCollapse" class="collapse-toggle">
+      <button @click="toggleCollapse" class="collapse-toggle" :class="{ 'logo-position': collapsed }">
         <svg v-if="collapsed" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="13 17 18 12 13 7"></polyline>
           <polyline points="6 17 11 12 6 7"></polyline>
@@ -417,6 +417,11 @@ export default {
   -webkit-backdrop-filter: var(--glass-blur);
 }
 
+.sidebar.is-collapsed .sidebar-header {
+  justify-content: center;
+  padding: var(--spacing-4) var(--spacing-2);
+}
+
 .sidebar-logo {
   display: flex;
   align-items: center;
@@ -465,6 +470,14 @@ export default {
   color: var(--neutral-700);
   cursor: pointer;
   transition: all var(--transition-normal);
+}
+
+.collapse-toggle.logo-position {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  position: relative;
+  left: 0;
 }
 
 .collapse-toggle:hover {

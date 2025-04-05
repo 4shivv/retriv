@@ -80,7 +80,7 @@
                 <div class="user-dropdown" v-show="userMenuOpen">
                   <div class="user-dropdown-header">
                     <div class="user-info">
-                      <p class="user-email">{{ userEmail }}</p>
+                      <p class="user-name">{{ userName }}</p>
                       <p class="user-role">{{ userRole }}</p>
                     </div>
                   </div>
@@ -162,6 +162,19 @@ export default {
     const userEmail = computed(() => {
       const user = store.getters['auth/user'];
       return user ? user.email : '';
+    });
+    
+    const userName = computed(() => {
+      const user = store.getters['auth/user'];
+      if (!user) return '';
+      
+      // If user has a displayName, use it
+      if (user.displayName) return user.displayName;
+      
+      // Otherwise, use the part of the email before the @ symbol
+      const email = user.email;
+      const parts = email.split('@');
+      return parts[0];
     });
     
     const userInitials = computed(() => {
@@ -292,6 +305,7 @@ export default {
     return {
       isAuthenticated,
       userEmail,
+      userName,
       userInitials,
       userRole,
       menuOpen,
@@ -500,7 +514,7 @@ export default {
 /* Center navbar section (slightly left of center) */
 .navbar-center {
   position: absolute;
-  left: 39%;
+  left: 45%;
   transform: translateX(-50%);
   z-index: 10;
 }
@@ -615,9 +629,6 @@ export default {
 .user-dropdown-header {
   padding: var(--spacing-4);
   border-bottom: 1px solid var(--neutral-200);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
 }
 
 .user-email {
@@ -685,16 +696,20 @@ export default {
 
 .user-info {
   width: 100%;
-  text-align: center;
-  padding: var(--spacing-2);
+  text-align: left;
+  padding: 0;
 }
 
-.user-email {
+.user-name {
   font-size: var(--font-size-md);
   margin: 0;
   color: var(--neutral-800);
   font-weight: var(--font-weight-semibold);
   margin-bottom: var(--spacing-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .user-role {

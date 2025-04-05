@@ -509,7 +509,7 @@ export default {
 /* Center navbar section (slightly left of center) */
 .navbar-center {
   position: absolute;
-  left: 45%;
+  left: 39%;
   transform: translateX(-50%);
   z-index: 10;
 }
@@ -517,7 +517,7 @@ export default {
 /* Search Box Styling */
 .search-box {
   position: relative;
-  width: 320px;
+  width: 600px;
 }
 
 .search-icon {

@@ -78,8 +78,8 @@ export default {
 
 /* When the sidebar is present, adjust main container */
 .main-container.with-sidebar {
-  margin-left: 250px;
-  width: calc(100% - 250px);
+  margin-left: 220px;
+  width: calc(100% - 220px);
   transition: margin-left var(--transition-normal), width var(--transition-normal);
 }
 

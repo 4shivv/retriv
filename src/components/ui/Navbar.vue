@@ -514,7 +514,7 @@ export default {
 /* Center navbar section (slightly left of center) */
 .navbar-center {
   position: absolute;
-  left: 45%;
+  left: 35%;
   transform: translateX(-50%);
   z-index: 10;
 }

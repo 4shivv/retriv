@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard">
-    <div class="container">
+    <div class="container container-xl">
       <!-- Dashboard Header -->
       <header class="dashboard-header">
         <div class="header-content">
@@ -887,7 +887,7 @@ export default {
 
 <style scoped>
 .dashboard {
-  padding-top: 1.5rem;
+  padding-top: 1rem;
   min-height: 100vh;
   background-color: var(--neutral-50);
 }
@@ -1068,14 +1068,14 @@ export default {
 
 .due-reviews {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--spacing-6);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-5);
 }
 
 .review-card {
   background-color: white;
   border-radius: var(--radius-lg);
-  padding: var(--spacing-6);
+  padding: var(--spacing-5);
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-normal);
   border: 1px solid var(--neutral-200);

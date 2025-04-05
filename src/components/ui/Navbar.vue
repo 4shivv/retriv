@@ -36,26 +36,30 @@
           </template>
         </div>
           
+          <!-- Center search input for logged in users -->
+          <div class="navbar-center" v-if="isAuthenticated">
+            <!-- Search Box (moved from dashboard) -->
+            <div class="search-box">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input 
+                type="text" 
+                v-model="searchQuery" 
+                placeholder="Search materials..." 
+                class="search-input"
+                @input="handleSearch"
+              >
+            </div>
+          </div>
+          
           <div class="navbar-actions">
             <template v-if="!isAuthenticated">
               <router-link to="/login" class="btn btn-ghost" @click="closeMenu">Sign In</router-link>
               <router-link to="/register" class="btn btn-primary" @click="closeMenu">Get Started</router-link>
             </template>
             <template v-else>
-              <!-- Search Box (moved from dashboard) -->
-              <div class="search-box">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input 
-                  type="text" 
-                  v-model="searchQuery" 
-                  placeholder="Search materials..." 
-                  class="search-input"
-                  @input="handleSearch"
-                >
-              </div>
               
               <!-- Add New Material Button (moved from dashboard) -->
               <button @click="handleAddNew" class="btn btn-primary add-new-btn">
@@ -356,6 +360,7 @@ export default {
   padding: 0 var(--spacing-6);
   width: 100vw;
   max-width: 100%;
+  position: relative;
 }
 
 .navbar-left {
@@ -501,10 +506,18 @@ export default {
   height: 100%;
 }
 
+/* Center navbar section (slightly left of center) */
+.navbar-center {
+  position: absolute;
+  left: 45%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
 /* Search Box Styling */
 .search-box {
   position: relative;
-  width: 240px;
+  width: 320px;
 }
 
 .search-icon {

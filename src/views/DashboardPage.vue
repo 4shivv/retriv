@@ -189,7 +189,29 @@
             </button>
           </div>
 
-          <InputForm @material-saved="handleMaterialSaved" />
+          <!-- Navigate directly to the CreateStudyCardView instead -->
+          <div class="create-options">
+            <div class="create-option-card" @click="navigateToCreate('manual')">
+              <div class="option-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </div>
+              <h3>Create Study Card</h3>
+              <p>Manually create your own study cards</p>
+            </div>
+            
+            <div class="create-option-card" @click="navigateToCreate('ai')">
+              <div class="option-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18.5 22q-1.05 0-1.775-.725T16 19.5q0-1.05.725-1.775T18.5 17q1.05 0 1.775.725T21 19.5q0 1.05-.725 1.775T18.5 22ZM18.5 7q-1.05 0-1.775-.725T16 4.5q0-1.05.725-1.775T18.5 2q1.05 0 1.775.725T21 4.5q0 1.05-.725 1.775T18.5 7ZM5.5 14.5q-1.05 0-1.775-.725T3 12q0-1.05.725-1.775T5.5 9.5q1.05 0 1.775.725T8 12q0 1.05-.725 1.775T5.5 14.5ZM18.5 12l-13 0M18.5 4.5l-13 7.5M18.5 19.5l-13-7.5"></path>
+                </svg>
+              </div>
+              <h3>Create With AI</h3>
+              <p>Let AI generate study cards for you</p>
+            </div>
+          </div>
         </div>
 
         <!-- Study Mode -->
@@ -249,7 +271,7 @@ import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import MaterialList from '@/components/study/MaterialList.vue';
-import InputForm from '@/components/study/InputForm.vue';
+// InputForm has been removed and replaced with direct navigation
 import BlurtingForm from '@/components/study/BlurtingForm.vue';
 // Calendar integration removed
 import FeynmanTechnique from '@/components/study/feynman/FeynmanTechnique.vue';
@@ -259,7 +281,6 @@ export default {
   name: 'DashboardPage',
   components: {
     MaterialList,
-    InputForm,
     BlurtingForm,
     // Calendar integration removed
     FeynmanTechnique
@@ -737,6 +758,15 @@ export default {
       }
     };
     
+    // Navigate to the appropriate create view based on type
+    const navigateToCreate = (type) => {
+      if (type === 'manual') {
+        router.push('/study/create');
+      } else if (type === 'ai') {
+        router.push('/study/create-with-ai');
+      }
+    };
+    
     const handleMaterialEdited = async (updatedMaterial) => {
       // Find and update the material in the local array
       const index = materials.value.findIndex(m => m.id === updatedMaterial.id);
@@ -880,6 +910,7 @@ export default {
       getRetentionClass,
       reviewMaterial,
       viewAllDueReviews,
+      navigateToCreate,
     };
   }
 }
@@ -1511,6 +1542,58 @@ export default {
 .btn-sm {
   font-size: var(--font-size-sm);
   padding: 0.35rem 0.75rem;
+}
+
+/* Create Options */
+.create-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-6);
+  margin-top: var(--spacing-8);
+}
+
+.create-option-card {
+  background-color: white;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-8);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  border: 1px solid var(--neutral-200);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.create-option-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
+}
+
+.create-option-card .option-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+  border-radius: 50%;
+  margin-bottom: var(--spacing-4);
+}
+
+.create-option-card h3 {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-3);
+  color: var(--neutral-900);
+}
+
+.create-option-card p {
+  color: var(--neutral-600);
+  margin-bottom: 0;
 }
 
 /* Responsive styles */

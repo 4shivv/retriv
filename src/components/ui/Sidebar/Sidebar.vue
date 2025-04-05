@@ -531,7 +531,6 @@ export default {
   height: 36px;
   margin: 0;
   position: relative;
-  left: 0;
 }
 
 .collapse-toggle:hover {

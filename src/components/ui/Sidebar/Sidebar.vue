@@ -454,10 +454,11 @@ export default {
   justify-content: space-between;
   padding: var(--spacing-3) var(--spacing-4);
   border-bottom: 1px solid var(--neutral-200);
-  height: 75px; /* Increased to accommodate vertical layout */
+  height: 80px; /* Increased height slightly */
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
+  padding-top: var(--spacing-6); /* Increased padding at the top */
 }
 
 .sidebar.is-collapsed .sidebar-header {
@@ -506,7 +507,7 @@ export default {
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--neutral-600);
-  margin-top: var(--spacing-1);
+  margin-top: var(--spacing-2);
   letter-spacing: 0.02em;
   white-space: nowrap;
 }

@@ -392,7 +392,7 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
-  width: 250px;
+  width: 220px;
   height: 100vh;
   background-color: white;
   display: flex;
@@ -516,8 +516,8 @@ export default {
 .nav-link {
   display: flex;
   align-items: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-3) var(--spacing-4);
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-3);
   color: var(--neutral-700);
   text-decoration: none;
   transition: all var(--transition-normal);
@@ -529,7 +529,7 @@ export default {
   width: 100%;
   text-align: left;
   cursor: pointer;
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-sm);
 }
 
 .sidebar.is-collapsed .nav-link {
@@ -564,7 +564,7 @@ export default {
   font-size: var(--font-size-sm);
   display: flex;
   align-items: center;
-  padding-left: var(--spacing-4);
+  padding-left: var(--spacing-3);
 }
 
 .sidebar-footer {
@@ -729,7 +729,7 @@ export default {
 }
 
 .nav-section-title {
-  padding: 0 var(--spacing-4);
+  padding: 0 var(--spacing-3);
   color: var(--neutral-500);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);

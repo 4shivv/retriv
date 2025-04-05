@@ -12,606 +12,448 @@
         </div>
       </div>
       
-      <div class="source-type-selector">
-      <div class="source-option" 
-           :class="{ active: sourceType === 'text' }"
-           @click="sourceType = 'text'">
-        <div class="option-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
-          </svg>
-        </div>
-        <div class="option-label">Source Text</div>
-      </div>
-
-      <div class="source-option" 
-           :class="{ active: sourceType === 'question' }"
-           @click="sourceType = 'question'">
-        <div class="option-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-          </svg>
-        </div>
-        <div class="option-label">Ask a Question</div>
-      </div>
-
-      <div class="source-option" 
-           :class="{ active: sourceType === 'file' }"
-           @click="sourceType = 'file'">
-        <div class="option-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <path d="M12 18v-6"></path>
-            <path d="M8 15h8"></path>
-          </svg>
-        </div>
-        <div class="option-label">Upload a File</div>
-      </div>
-    </div>
-
-    <div class="input-section">
-      <div v-if="sourceType === 'text'">
-        <label for="source-text" class="input-label">
-          Paste your source material here
-          <span class="input-tip">AI will break this down into focused study cards</span>
-        </label>
-        <textarea 
-          id="source-text" 
-          v-model="sourceContent" 
-          class="input-area"
-          placeholder="Paste text from your notes, textbook, or any learning material..."
-          rows="10"></textarea>
-      </div>
-
-      <div v-else-if="sourceType === 'question'">
-        <label for="source-question" class="input-label">
-          Enter your question
-          <span class="input-tip">AI will create comprehensive study materials to answer this</span>
-        </label>
-        <textarea 
-          id="source-question" 
-          v-model="sourceContent" 
-          class="input-area"
-          placeholder="E.g., 'Explain the process of photosynthesis' or 'How does the electoral college work?'"
-          rows="4"></textarea>
-      </div>
-
-      <div v-else-if="sourceType === 'file'">
-        <label for="source-file" class="input-label">
-          Upload a file
-          <span class="input-tip">Supported formats: .txt, .pdf, .doc, .docx</span>
-        </label>
-        <div class="file-upload-area" 
-             :class="{ 'has-file': fileUploaded }"
-             @click="triggerFileInput"
-             @dragover.prevent="dragOver = true"
-             @dragleave.prevent="dragOver = false"
-             @drop.prevent="handleFileDrop">
-          <input 
-            type="file" 
-            ref="fileInput" 
-            @change="handleFileChange" 
-            class="file-input" 
-            accept=".txt,.pdf,.doc,.docx" />
+      <div v-if="aiStep === 'input'">
+        <div class="form-group">
+          <label class="form-label">Source Type</label>
+          <p class="form-text">Select how you want to create your study materials. All cards will share the same category and deadline.</p>
           
-          <div v-if="!fileUploaded" class="upload-placeholder" :class="{ 'drag-over': dragOver }">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
-            <span class="upload-text">
-              Drag & drop a file or click to browse
-            </span>
-          </div>
-          
-          <div v-else class="file-info">
-            <div class="file-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="ai-source-options">
+            <button 
+              type="button" 
+              @click="aiSourceType = 'text'" 
+              class="ai-source-btn" 
+              :class="{ active: aiSourceType === 'text' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="17" y1="10" x2="3" y2="10"></line>
+                <line x1="21" y1="6" x2="3" y2="6"></line>
+                <line x1="21" y1="14" x2="3" y2="14"></line>
+                <line x1="17" y1="18" x2="3" y2="18"></line>
+              </svg>
+              <span>Paste Text</span>
+            </button>
+            
+            <button 
+              type="button" 
+              @click="aiSourceType = 'question'" 
+              class="ai-source-btn" 
+              :class="{ active: aiSourceType === 'question' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <span>Ask Question</span>
+            </button>
+            
+            <button 
+              type="button" 
+              @click="aiSourceType = 'file'" 
+              class="ai-source-btn" 
+              :class="{ active: aiSourceType === 'file' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
               </svg>
-            </div>
-            <div class="file-details">
-              <div class="file-name">{{ fileName }}</div>
-              <div class="file-size">{{ formatFileSize(fileSize) }}</div>
-            </div>
-            <button class="remove-file" @click.stop="removeFile">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
+              <span>Upload File</span>
             </button>
           </div>
         </div>
-        <div v-if="fileError" class="file-error">{{ fileError }}</div>
-      </div>
-    </div>
-
-    <div class="generate-options">
-      <!-- Card Count Option -->
-      <div class="option-group">
-        <label class="option-label">
-          Number of study cards to generate:
-          <div class="counter-input">
-            <button class="counter-btn" @click="decrementCardCount" :disabled="cardCount <= 1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-            </button>
-            <input type="number" v-model.number="cardCount" min="1" max="20" class="counter-value" />
-            <button class="counter-btn" @click="incrementCardCount" :disabled="cardCount >= 20">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-            </button>
-          </div>
-        </label>
-      </div>
       
-      <!-- Category Selection -->
-      <div class="option-group">
-        <label class="option-label">Category:</label>
-        <select v-model="selectedCategory" class="form-control">
-          <option value="" disabled>Select a category</option>
-          <!-- System Categories -->
-          <optgroup label="Default Categories">
-            <option v-for="cat in systemCategories" :key="cat" :value="cat">{{ cat }}</option>
-          </optgroup>
-          <!-- Custom Categories -->
-          <optgroup label="Your Categories" v-if="userCustomCategories.length > 0">
-            <option v-for="cat in userCustomCategories" :key="cat" :value="cat">{{ cat }}</option>
-          </optgroup>
-          <!-- Frequent Categories -->
-          <optgroup label="Frequently Used" v-if="frequentCategories.length > 0">
-            <option v-for="cat in frequentCategories" :key="cat" :value="cat">{{ cat }}</option>
-          </optgroup>
-        </select>
-      </div>
-      
-      <!-- Learning Deadline -->
-      <div class="option-group">
-        <label class="option-label">Learning Deadline (optional):</label>
-        <div class="deadline-selection">
-          <div class="deadline-presets">
-            <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '1' }" @click="selectDeadline('1')">1 Day</button>
-            <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '3' }" @click="selectDeadline('3')">3 Days</button>
-            <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '7' }" @click="selectDeadline('7')">1 Week</button>
-            <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '14' }" @click="selectDeadline('14')">2 Weeks</button>
-            <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '30' }" @click="selectDeadline('30')">1 Month</button>
-            <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === 'custom' }" @click="selectDeadline('custom')">Custom</button>
+        <!-- Source Type Specific Form -->
+        <div class="form-group">
+          <!-- Text Input Source -->
+          <div v-if="aiSourceType === 'text'">
+            <label for="aiSourceText" class="form-label">Content</label>
+            <textarea
+              id="aiSourceText"
+              v-model="aiSourceText"
+              class="form-control"
+              rows="10"
+              placeholder="Paste or type your text content here. The AI will analyze this content and generate study materials."
+              required
+            ></textarea>
           </div>
-          <div v-if="deadline === 'custom'" class="custom-deadline-input">
-            <input type="date" v-model="customDeadlineDate" class="form-control" :min="minDate">
+          
+          <!-- Question Input Source -->
+          <div v-if="aiSourceType === 'question'">
+            <label for="aiSourceQuestion" class="form-label">Your Question</label>
+            <textarea
+              id="aiSourceQuestion"
+              v-model="aiSourceQuestion"
+              class="form-control"
+              rows="6"
+              placeholder="Enter your question here. The AI will generate comprehensive study materials that answer this question."
+              required
+            ></textarea>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-actions">
-      <button type="button" class="btn btn-outline btn-lg" @click="cancelGeneration">Cancel</button>
-      <button type="button" class="btn btn-primary btn-lg" @click="generateMaterials" :disabled="isGenerating || !canGenerate">
-        <span v-if="isGenerating" class="loading-spinner"></span>
-        <span v-else>
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-            <path d="M18.5 22q-1.05 0-1.775-.725T16 19.5q0-1.05.725-1.775T18.5 17q1.05 0 1.775.725T21 19.5q0 1.05-.725 1.775T18.5 22ZM18.5 7q-1.05 0-1.775-.725T16 4.5q0-1.05.725-1.775T18.5 2q1.05 0 1.775.725T21 4.5q0 1.05-.725 1.775T18.5 7ZM5.5 14.5q-1.05 0-1.775-.725T3 12q0-1.05.725-1.775T5.5 9.5q1.05 0 1.775.725T8 12q0 1.05-.725 1.775T5.5 14.5ZM18.5 12l-13 0M18.5 4.5l-13 7.5M18.5 19.5l-13-7.5"></path>
-          </svg>
-          Generate Study Cards
-        </span>
-      </button>
-    </div>
-
-    <!-- Generated Materials Preview -->
-    <div v-if="generatedMaterials.length > 0" class="generated-materials">
-      <h3 class="preview-title">Generated Study Cards</h3>
-      
-      <div class="preview-cards">
-        <div 
-          v-for="(material, index) in generatedMaterials" 
-          :key="index" 
-          class="preview-card"
-          :class="{ 'selected': material.selected }"
-          @click="toggleMaterialSelection(index)">
-          <div class="card-header">
-            <h4 class="card-title">{{ material.title }}</h4>
-            <div class="card-selection">
-              <div class="checkbox" :class="{ 'checked': material.selected }">
-                <svg v-if="material.selected" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
+          
+          <!-- File Input Source -->
+          <div v-if="aiSourceType === 'file'">
+            <label class="form-label">Upload Source File</label>
+            <div class="file-upload-container">
+              <input
+                type="file"
+                id="ai-file-upload"
+                @change="handleAiFileUpload"
+                class="file-input"
+                accept=".txt,.md,.doc,.docx"
+                :disabled="loading"
+              />
+              <label for="ai-file-upload" class="file-upload-label">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
                 </svg>
+                <span>Choose file</span>
+              </label>
+              <span v-if="aiFileName" class="file-name">{{ aiFileName }}</span>
+            </div>
+            <p class="form-text">
+              Supported file types: .txt, .md, .doc, .docx
+            </p>
+          </div>
+        </div>
+          
+        <!-- Folder Selection -->
+        <div class="form-group">
+          <label for="folder" class="form-label">Folder</label>
+          <div class="folder-dropdown-container">
+            <!-- Custom Dropdown Trigger -->
+            <div class="folder-dropdown-trigger" @click="toggleFolderDropdown" :class="{ 'active': showFolderDropdown }">
+              <div class="selected-folder">
+                <div v-if="selectedFolder" class="folder-tag" :style="{ backgroundColor: selectedFolder.color || '#6366F1' }">
+                  <span>{{ selectedFolder.name }}</span>
+                </div>
+                <span v-else class="placeholder-text">Select a folder</span>
+              </div>
+              <div class="dropdown-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Folder Dropdown Content -->
+            <div v-if="showFolderDropdown" class="folder-dropdown-content">
+              <div class="folder-search">
+                <div class="search-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                </div>
+                <input 
+                  type="text" 
+                  v-model="folderSearchTerm" 
+                  class="form-control" 
+                  placeholder="Search folders"
+                  @input="handleFolderSearch"
+                  ref="folderSearchInput"
+                />
+              </div>
+              
+              <div class="folder-groups">
+                <!-- User's Folders -->
+                <div class="folder-group" v-if="filteredFolders.length > 0">
+                  <div class="folder-group-label">Your Folders</div>
+                  <div class="folder-options">
+                    <div 
+                      v-for="folder in filteredFolders" 
+                      :key="folder.id" 
+                      class="folder-option" 
+                      @click="selectFolder(folder)"
+                      :class="{ 'active': selectedFolder && selectedFolder.id === folder.id }"
+                      :style="{ borderLeft: `3px solid ${folder.color || '#6366F1'}` }"
+                    >
+                      <div class="folder-icon" :style="{ color: folder.color || '#6366F1' }">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11z"></path>
+                        </svg>
+                      </div>
+                      <span class="folder-name">{{ folder.name }}</span>
+                      <span class="folder-select-icon" v-if="selectedFolder && selectedFolder.id === folder.id">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- No Folders Message -->
+                <div v-if="!filteredFolders.length && !isLoadingFolders" class="no-folders-message">
+                  <p>No folders found. Create a folder first to organize your materials.</p>
+                  <button type="button" class="create-folder-btn" @click="createNewFolder">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11z"></path>
+                      <line x1="12" y1="11" x2="12" y2="17"></line>
+                      <line x1="9" y1="14" x2="15" y2="14"></line>
+                    </svg>
+                    Create New Folder
+                  </button>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div v-if="isLoadingFolders" class="loading-folders">
+                  <div class="folder-spinner"></div>
+                  <p>Loading folders...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+          
+        <!-- Learning Deadline Selection for AI-generated cards -->
+        <div class="form-group">
+          <label for="deadline" class="form-label">Learning Deadline</label>
+          <div class="deadline-selection">
+            <div class="deadline-presets">
+              <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '1' }" @click="selectDeadline('1')">1 Day</button>
+              <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '3' }" @click="selectDeadline('3')">3 Days</button>
+              <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '7' }" @click="selectDeadline('7')">1 Week</button>
+              <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '14' }" @click="selectDeadline('14')">2 Weeks</button>
+              <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === '30' }" @click="selectDeadline('30')">1 Month</button>
+              <button type="button" class="deadline-preset-button" :class="{ 'active': deadline === 'custom' }" @click="selectDeadline('custom')">Custom</button>
+            </div>
+            <div v-if="deadline === 'custom'" class="custom-deadline-input">
+              <input type="date" v-model="customDeadlineDate" class="form-control" :min="minDate">
+            </div>
+          </div>
+          <p class="form-text deadline-helper">Setting a deadline helps the app create an optimized review schedule for maximum retention by your target date.</p>
+        </div>
+          
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline btn-lg" @click="cancel">Cancel</button>
+          <button type="button" @click="generateWithAi" class="btn btn-primary btn-lg" :disabled="loading || !canGenerateWithAi || !selectedFolder">
+            <span v-if="loading">
+              <span class="loading-spinner"></span>
+              <span class="ml-2">Generating...</span>
+            </span>
+            <span v-else class="btn-content">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                <path d="M18.5 22q-1.05 0-1.775-.725T16 19.5q0-1.05.725-1.775T18.5 17q1.05 0 1.775.725T21 19.5q0 1.05-.725 1.775T18.5 22ZM18.5 7q-1.05 0-1.775-.725T16 4.5q0-1.05.725-1.775T18.5 2q1.05 0 1.775.725T21 4.5q0 1.05-.725 1.775T18.5 7ZM5.5 14.5q-1.05 0-1.775-.725T3 12q0-1.05.725-1.775T5.5 9.5q1.05 0 1.775.725T8 12q0 1.05-.725 1.775T5.5 14.5ZM18.5 12l-13 0M18.5 4.5l-13 7.5M18.5 19.5l-13-7.5"></path>
+              </svg>
+              Generate with AI
+            </span>
+          </button>
+        </div>
+      </div>
+        
+      <!-- AI Result Preview Step -->
+      <div v-if="aiStep === 'preview'" class="ai-preview-container">
+        <h4 class="preview-title">AI-Generated Study Materials</h4>
+        <p class="preview-description">Review the generated materials below. You can edit, remove, or save them as is. All cards will have the same folder and learning deadline you selected.</p>
+        
+        <!-- Show error if generation failed -->
+        <div v-if="error" class="alert alert-danger">
+          <div class="alert-content">
+            <div class="alert-text">{{ error }}</div>
+          </div>
+        </div>
+        
+        <!-- Loading state while generating -->
+        <div v-if="loading" class="ai-loading-state">
+          <div class="ai-loading-spinner"></div>
+          <p>Generating your study materials...</p>
+          <p class="loading-description">The AI is analyzing your content and creating optimized study cards.</p>
+        </div>
+        
+        <!-- Result Cards -->
+        <div v-else class="ai-generated-cards">
+          <div v-for="(card, index) in aiGeneratedMaterials" :key="index" class="ai-material-card">
+            <div class="card-header-actions">
+              <span class="card-index">Card {{ index + 1 }}</span>
+              <button @click="removeGeneratedCard(index)" class="remove-card-btn" title="Remove card">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            
+            <div class="card-content-editable">
+              <div class="form-group mb-2">
+                <label class="form-label">Title</label>
+                <input 
+                  type="text" 
+                  v-model="card.title" 
+                  class="form-control" 
+                  placeholder="Card title"
+                />
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Content</label>
+                <textarea 
+                  v-model="card.content" 
+                  class="form-control" 
+                  rows="6" 
+                  placeholder="Card content"
+                ></textarea>
               </div>
             </div>
           </div>
           
-          <div class="card-content">
-            <p>{{ formatContentForDisplay(material.content) }}</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="preview-actions">
-        <div class="selection-summary">
-          <div class="selection-info">
-            {{ selectedCount }} of {{ generatedMaterials.length }} cards selected
-          </div>
-          <div class="selection-details" v-if="selectedCount > 0">
-            <div class="selection-detail-item">
-              <span class="detail-label">Category:</span>
-              <span class="detail-value">{{ selectedCategory }}</span>
-            </div>
-            <div class="selection-detail-item" v-if="deadline">
-              <span class="detail-label">Learning Deadline:</span>
-              <span class="detail-value">
-                {{ deadline === 'custom' ? formatCustomDeadline(customDeadlineDate) : 
-                  deadline === '1' ? '1 Day' :
-                  deadline === '3' ? '3 Days' :
-                  deadline === '7' ? '1 Week' :
-                  deadline === '14' ? '2 Weeks' :
-                  deadline === '30' ? '1 Month' : '' }}
-              </span>
-            </div>
+          <!-- No cards message -->
+          <div v-if="aiGeneratedMaterials.length === 0" class="no-cards-message">
+            <p>No cards were generated. Try providing different content or adjusting your input.</p>
           </div>
         </div>
         
-        <div class="button-group">
-          <button type="button" class="btn btn-outline btn-lg" @click="toggleSelectAll">
-            {{ allSelected ? 'Deselect All' : 'Select All' }}
-          </button>
-          <button type="button" class="btn btn-primary btn-lg" @click="saveMaterials" :disabled="selectedCount === 0 || !selectedCategory">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-              <polyline points="17 21 17 13 7 13 7 21"></polyline>
-              <polyline points="7 3 7 8 15 8"></polyline>
-            </svg>
-            Save Selected Cards
-          </button>
+        <div class="preview-actions">
+          <div class="action-group">
+            <button type="button" @click="aiStep = 'input'" class="btn btn-outline btn-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span>Back</span>
+            </button>
+          </div>
+          
+          <div class="action-group">
+            <button type="button" @click="saveGeneratedMaterials" class="btn btn-primary btn-lg" :disabled="loading || aiGeneratedMaterials.length === 0">
+              <span v-if="loading" class="loading-spinner"></span>
+              <span v-else class="btn-content">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                  <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                  <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                Save All Cards
+              </span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import DeepseekService from '@/services/deepseek.service';
 import StudyService from '@/services/study.service';
 import { auth } from '@/services/firebase';
-import { useRouter } from 'vue-router';
 
 export default {
   name: 'AiGenerateForm',
-  emits: ['cancel', 'material-saved', 'materials-saved'],
+  emits: ['material-saved', 'materials-saved', 'cancel'],
   
   setup(props, { emit }) {
     const router = useRouter();
-    // Form state
-    const sourceType = ref('text');
-    const sourceContent = ref('');
-    const cardCount = ref(5);
-    const isGenerating = ref(false);
-    const generatedMaterials = ref([]);
-    const error = ref('');
+    const route = useRoute();
     
-    // Category and deadline state
-    const selectedCategory = ref('');
+    // AI mode state
+    const aiStep = ref('input');
+    const aiSourceType = ref('text');
+    const aiSourceText = ref('');
+    const aiSourceQuestion = ref('');
+    const aiFileName = ref('');
+    const aiFileContent = ref('');
+    const aiGeneratedMaterials = ref([]);
+    
+    // Common state
+    const error = ref('');
+    const loading = ref(false);
+    
+    // Folder-related state
+    const selectedFolder = ref(null);
+    const folders = ref([]);
+    const isLoadingFolders = ref(false);
+    const showFolderDropdown = ref(false);
+    const folderSearchTerm = ref('');
+    const folderSearchInput = ref(null);
+    const filteredFolders = computed(() => {
+      if (!folderSearchTerm.value) return folders.value;
+      return folders.value.filter(folder => 
+        folder.name.toLowerCase().includes(folderSearchTerm.value.toLowerCase())
+      );
+    });
+    
+    // Deadline related variables
     const deadline = ref('');
     const customDeadlineDate = ref('');
     
-    // Predefined categories
-    const systemCategories = [
-      'Programming',
-      'Languages',
-      'Science',
-      'Math',
-      'History',
-      'Art'
-    ];
-    
-    // Custom categories
-    const userCustomCategories = ref([]);
-    const frequentCategories = ref([]);
-    
-    // File upload state
-    const fileInput = ref(null);
-    const fileUploaded = ref(false);
-    const fileName = ref('');
-    const fileSize = ref(0);
-    const fileError = ref('');
-    const dragOver = ref(false);
-    const fileContent = ref('');
-    
-    // Computed properties
-    const canGenerate = computed(() => {
-      if (sourceType.value === 'text' || sourceType.value === 'question') {
-        return sourceContent.value.trim().length > 0;
-      } else if (sourceType.value === 'file') {
-        return fileUploaded.value;
-      }
-      return false;
-    });
-    
-    const selectedCount = computed(() => {
-      return generatedMaterials.value.filter(m => m.selected).length;
-    });
-    
-    const allSelected = computed(() => {
-      return generatedMaterials.value.length > 0 && 
-             selectedCount.value === generatedMaterials.value.length;
-    });
-    
-    // Methods
-    const incrementCardCount = () => {
-      if (cardCount.value < 20) {
-        cardCount.value++;
-      }
-    };
-    
-    const decrementCardCount = () => {
-      if (cardCount.value > 1) {
-        cardCount.value--;
-      }
-    };
-    
-    const triggerFileInput = () => {
-      fileInput.value.click();
-    };
-    
-    const handleFileChange = async (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        await processFile(file);
-      }
-    };
-    
-    const handleFileDrop = async (event) => {
-      dragOver.value = false;
-      const file = event.dataTransfer.files[0];
-      if (file) {
-        await processFile(file);
-      }
-    };
-    
-    const processFile = async (file) => {
-      // Check file type
-      const allowedTypes = [
-        'text/plain', 
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-      ];
-      
-      if (!allowedTypes.includes(file.type)) {
-        fileError.value = 'Unsupported file type. Please upload a .txt, .pdf, .doc, or .docx file.';
-        return;
-      }
-      
-      // Check file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        fileError.value = 'File is too large. Maximum size is 10MB.';
-        return;
-      }
-      
-      fileError.value = '';
-      fileUploaded.value = true;
-      fileName.value = file.name;
-      fileSize.value = file.size;
-      
-      // Read file content
-      try {
-        // For txt files, read directly
-        if (file.type === 'text/plain') {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            fileContent.value = e.target.result;
-            sourceContent.value = e.target.result;
-          };
-          reader.readAsText(file);
-        } else {
-          // For other files, we would use a library to extract text
-          // This is a placeholder - in a real implementation, you would need
-          // to use appropriate libraries to extract text from PDFs, DOCs, etc.
-          fileContent.value = `Content extracted from ${file.name}`;
-          sourceContent.value = fileContent.value;
-        }
-      } catch (error) {
-        console.error('Error reading file:', error);
-        fileError.value = 'Error reading file. Please try again.';
-      }
-    };
-    
-    const removeFile = () => {
-      fileUploaded.value = false;
-      fileName.value = '';
-      fileSize.value = 0;
-      fileContent.value = '';
-      sourceContent.value = '';
-      fileInput.value.value = null;
-    };
-    
-    const formatFileSize = (bytes) => {
-      if (bytes === 0) return '0 Bytes';
-      
-      const k = 1024;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    };
-    
-    const generateMaterials = async () => {
-      if (!canGenerate.value) return;
-      
-      isGenerating.value = true;
-      error.value = '';
-      
-      try {
-        // Check authentication
-        if (!auth.currentUser) {
-          error.value = "You must be logged in to generate materials with AI";
-          router.push('/login');
-          return;
-        }
-        
-        // Check if category is selected
-        if (!selectedCategory.value) {
-          error.value = 'Please select a category for your study materials';
-          return;
-        }
-        
-        let content = sourceContent.value;
-        
-        // If file is uploaded, use fileContent
-        if (sourceType.value === 'file' && fileContent.value) {
-          content = fileContent.value;
-        }
-        
-        // Call the DeepseekService to generate materials
-        const materials = await DeepseekService.generateStudyMaterials(content, sourceType.value);
-        
-        // Add selected property to each material
-        generatedMaterials.value = materials.map(material => ({ 
-          ...material, 
-          selected: true 
-        }));
-        
-        // Limit to the requested number of cards
-        if (generatedMaterials.value.length > cardCount.value) {
-          generatedMaterials.value = generatedMaterials.value.slice(0, cardCount.value);
-        }
-      } catch (err) {
-        console.error('Error generating materials:', err);
-        error.value = err.message || 'Failed to generate study materials';
-      } finally {
-        isGenerating.value = false;
-      }
-    };
-    
-    const toggleMaterialSelection = (index) => {
-      if (index >= 0 && index < generatedMaterials.value.length) {
-        generatedMaterials.value[index].selected = !generatedMaterials.value[index].selected;
-      }
-    };
-    
-    const toggleSelectAll = () => {
-      const newValue = !allSelected.value;
-      generatedMaterials.value.forEach(material => {
-        material.selected = newValue;
-      });
-    };
-    
-    const saveMaterials = async () => {
-      // Filter only selected materials
-      const selectedMaterials = generatedMaterials.value.filter(m => m.selected);
-      
-      if (selectedMaterials.length === 0) {
-        return;
-      }
-      
-      if (!selectedCategory.value) {
-        error.value = 'Please select a category for your study materials';
-        return;
-      }
-      
-      try {
-        // Check if user is authenticated
-        if (!auth.currentUser) {
-          console.error("No authenticated user");
-          error.value = "You must be logged in to save materials";
-          router.push('/login');
-          return;
-        }
-        
-        // Determine deadline in days
-        const deadlineDays = getDeadlineInDays();
-        
-        // Save each material to the database
-        const savedMaterials = [];
-        
-        for (const material of selectedMaterials) {
-          const materialId = await StudyService.saveStudyMaterial(
-            auth.currentUser.uid,
-            material.title,
-            material.content,
-            selectedCategory.value, // Use the selected category
-            deadlineDays           // Use the deadline
-          );
-          
-          savedMaterials.push({
-            id: materialId,
-            title: material.title,
-            content: material.content,
-            category: selectedCategory.value,
-            deadline: deadlineDays,
-            createdAt: new Date(),
-            userId: auth.currentUser.uid
-          });
-        }
-        
-        // Emit materials saved event
-        if (savedMaterials.length === 1) {
-          emit('material-saved', savedMaterials[0]);
-        } else {
-          emit('materials-saved', savedMaterials);
-        }
-      } catch (err) {
-        console.error('Error saving materials:', err);
-        error.value = err.message || 'Failed to save study materials';
-      }
-    };
-    
-    const cancelGeneration = () => {
-      emit('cancel');
-    };
-    
-    // Helper method to format content for display
-    const formatContentForDisplay = (content) => {
-      // If content is already a string, just return it
-      if (typeof content === 'string') {
-        return content;
-      }
-      
-      // If content is a JSON string, try to parse it
-      if (typeof content === 'string' && 
-          (content.trim().startsWith('[') || content.trim().startsWith('```json'))) {
-        try {
-          // Clean JSON formatting
-          const cleaned = content
-            .replace(/```json\s*/g, '')
-            .replace(/```/g, '')
-            .trim();
-          
-          // Parse the JSON
-          const parsed = JSON.parse(cleaned);
-          
-          // If it's an array with objects that have content fields
-          if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].content) {
-            return parsed[0].content;
-          }
-        } catch (e) {
-          // If parsing fails, return the original content
-          console.error('Error parsing content for display:', e);
-        }
-      }
-      
-      // Default case: return the content as-is or empty string if it's null/undefined
-      return content || '';
-    };
-    
-    // Deadline handling
+    // Compute minimum date for custom deadline (today)
     const minDate = computed(() => {
       const today = new Date();
       return today.toISOString().split('T')[0];
     });
     
+    // Check if we have a folderId in the URL query params
+    onMounted(() => {
+      const { folderId } = route.query;
+      if (folderId) {
+        loadFolders().then(() => {
+          const folder = folders.value.find(f => f.id === folderId);
+          if (folder) {
+            selectedFolder.value = folder;
+          }
+        });
+      } else {
+        loadFolders();
+      }
+    });
+    
+    // Load folders from localStorage
+    const loadFolders = async () => {
+      isLoadingFolders.value = true;
+      try {
+        const savedFolders = localStorage.getItem('user-folders');
+        if (savedFolders) {
+          folders.value = JSON.parse(savedFolders);
+        }
+      } catch (err) {
+        console.error('Error loading folders:', err);
+      } finally {
+        isLoadingFolders.value = false;
+      }
+    };
+    
+    // Toggle folder dropdown
+    const toggleFolderDropdown = () => {
+      showFolderDropdown.value = !showFolderDropdown.value;
+      
+      if (showFolderDropdown.value) {
+        folderSearchTerm.value = '';
+        nextTick(() => {
+          folderSearchInput.value?.focus();
+        });
+      }
+    };
+    
+    // Handle folder search
+    const handleFolderSearch = () => {
+      // Implementation is handled by the computed property
+    };
+    
+    // Select a folder
+    const selectFolder = (folder) => {
+      selectedFolder.value = folder;
+      showFolderDropdown.value = false;
+    };
+    
+    // Create a new folder
+    const createNewFolder = () => {
+      // Navigate to dashboard with create folder action
+      router.push('/dashboard?action=createFolder');
+    };
+    
+    // Cancel creation
+    const cancel = () => {
+      emit('cancel');
+    };
+    
+    // Function to handle deadline selection
     const selectDeadline = (value) => {
       deadline.value = value;
       if (value !== 'custom') {
@@ -624,14 +466,6 @@ export default {
           customDeadlineDate.value = defaultDate.toISOString().split('T')[0];
         }
       }
-    };
-    
-    // Format custom deadline date for display
-    const formatCustomDeadline = (dateStr) => {
-      if (!dateStr) return '';
-      
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     };
     
     // Convert deadline selection to days for the API
@@ -649,81 +483,253 @@ export default {
       return deadline.value === 'custom' ? null : parseInt(deadline.value);
     };
     
-    // Load user's custom categories
-    const loadUserCustomCategories = async () => {
-      try {
-        const materials = await StudyService.getStudyMaterials();
-        const customCats = new Set();
-        
-        materials.forEach(material => {
-          if (material.category && !systemCategories.includes(material.category)) {
-            customCats.add(material.category);
-          }
-        });
-        
-        userCustomCategories.value = Array.from(customCats);
-      } catch (err) {
-        console.error('Failed to load custom categories:', err);
-      }
+    // Handle AI file upload
+    const handleAiFileUpload = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      aiFileName.value = file.name;
+      
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        aiFileContent.value = e.target.result;
+      };
+      
+      reader.onerror = () => {
+        error.value = 'Failed to read the file. Please try again.';
+      };
+      
+      reader.readAsText(file);
     };
     
-    // Load frequent categories from localStorage
-    const loadFrequentCategories = () => {
-      const saved = localStorage.getItem('frequentCategories');
-      if (saved) {
-        try {
-          frequentCategories.value = JSON.parse(saved);
-        } catch (e) {
-          console.error('Failed to parse frequent categories:', e);
-          frequentCategories.value = [];
-        }
+    // Check if can generate with AI based on input
+    const canGenerateWithAi = computed(() => {
+      if (aiSourceType.value === 'text') {
+        return aiSourceText.value.trim().length > 0;
+      } else if (aiSourceType.value === 'question') {
+        return aiSourceQuestion.value.trim().length > 0;
+      } else if (aiSourceType.value === 'file') {
+        return aiFileContent.value.trim().length > 0;
       }
-    };
-    
-    // Load categories on mount
-    onMounted(() => {
-      loadUserCustomCategories();
-      loadFrequentCategories();
+      return false;
     });
     
+    // Generate materials with AI
+    const generateWithAi = async () => {
+      try {
+        // Reset any previous errors
+        error.value = '';
+        
+        // Check for folder selection
+        if (!selectedFolder.value) {
+          error.value = 'Please select a folder for your study materials';
+          return;
+        }
+        
+        // Check input content based on source type
+        let sourceContent = '';
+        if (aiSourceType.value === 'text') {
+          sourceContent = aiSourceText.value;
+          if (!sourceContent.trim()) {
+            error.value = 'Please enter some text content to generate materials';
+            return;
+          }
+        } else if (aiSourceType.value === 'question') {
+          sourceContent = aiSourceQuestion.value;
+          if (!sourceContent.trim()) {
+            error.value = 'Please enter a question to generate materials';
+            return;
+          }
+        } else if (aiSourceType.value === 'file') {
+          sourceContent = aiFileContent.value;
+          if (!sourceContent.trim()) {
+            error.value = 'The file appears to be empty. Please upload a file with content';
+            return;
+          }
+        }
+        
+        // Begin loading
+        loading.value = true;
+        
+        // Check authentication
+        if (!auth.currentUser) {
+          error.value = "You must be logged in to generate materials with AI";
+          router.push('/login');
+          return;
+        }
+        
+        try {
+          // Call service to generate study materials
+          const generatedMaterials = await DeepseekService.generateStudyMaterials(
+            sourceContent,
+            aiSourceType.value
+          );
+          
+          if (!generatedMaterials || generatedMaterials.length === 0) {
+            error.value = 'No materials could be generated. Try providing different content.';
+            return;
+          }
+          
+          // Store the generated materials
+          aiGeneratedMaterials.value = generatedMaterials;
+          
+          // Move to preview step
+          aiStep.value = 'preview';
+        } catch (innerErr) {
+          console.error('Error in AI generation:', innerErr);
+          error.value = innerErr.message || 'Failed to generate materials with AI';
+        }
+      } catch (err) {
+        console.error('Error generating materials with AI:', err);
+        error.value = err.message || 'Failed to generate materials with AI';
+      } finally {
+        loading.value = false;
+      }
+    };
+    
+    // Remove a card from generated materials
+    const removeGeneratedCard = (index) => {
+      aiGeneratedMaterials.value.splice(index, 1);
+    };
+    
+    // Save all generated materials
+    const saveGeneratedMaterials = async () => {
+      try {
+        loading.value = true;
+        error.value = '';
+        
+        // Check if user is authenticated
+        if (!auth.currentUser) {
+          console.error("No authenticated user");
+          error.value = "You must be logged in to save materials";
+          router.push('/login');
+          return;
+        }
+        
+        // Check if we have materials to save
+        if (aiGeneratedMaterials.value.length === 0) {
+          error.value = 'No materials to save';
+          return;
+        }
+        
+        // Check if folder is selected
+        if (!selectedFolder.value) {
+          error.value = 'Please select a folder for your study materials';
+          return;
+        }
+        
+        // Ensure a learning deadline is set
+        if (!deadline.value) {
+          error.value = 'Please set a learning deadline to create your study plan';
+          return;
+        }
+        
+        // Determine deadline in days if any was selected
+        const deadlineDays = getDeadlineInDays();
+        
+        // Use the selected folder for the category
+        const folderCategory = selectedFolder.value.name;
+        
+        // Save each material card
+        const savePromises = aiGeneratedMaterials.value.map(material => {
+          return StudyService.saveStudyMaterial(
+            auth.currentUser.uid,
+            material.title || 'Untitled Material',
+            material.content,
+            folderCategory,     // Use folder name as category
+            deadlineDays        // All cards will have the same learning deadline
+          );
+        });
+        
+        // Wait for all saves to complete
+        const savedMaterialIds = await Promise.all(savePromises);
+        
+        // Create an array of saved materials
+        const savedMaterials = savedMaterialIds.map((id, index) => {
+          return {
+            id: id,
+            title: aiGeneratedMaterials.value[index].title || 'Untitled Material',
+            content: aiGeneratedMaterials.value[index].content,
+            category: folderCategory,
+            folderId: selectedFolder.value.id,
+            createdAt: new Date(),
+            userId: auth.currentUser.uid,
+            deadline: deadlineDays
+          };
+        });
+        
+        // Emit the saved materials
+        if (savedMaterials.length === 1) {
+          emit('material-saved', savedMaterials[0]);
+        } else if (savedMaterials.length > 1) {
+          emit('materials-saved', savedMaterials);
+        } else {
+          error.value = 'Failed to save materials. Please try again.';
+        }
+        
+        // Reset form
+        resetForm();
+      } catch (err) {
+        console.error('Error saving generated materials:', err);
+        error.value = err.message || 'Failed to save study materials';
+      } finally {
+        loading.value = false;
+      }
+    };
+    
+    // Reset the form
+    const resetForm = () => {
+      aiStep.value = 'input';
+      aiSourceText.value = '';
+      aiSourceQuestion.value = '';
+      aiFileName.value = '';
+      aiFileContent.value = '';
+      aiGeneratedMaterials.value = [];
+      selectedFolder.value = null;
+      folderSearchTerm.value = '';
+      deadline.value = '';
+      customDeadlineDate.value = '';
+    };
+    
     return {
-      sourceType,
-      sourceContent,
-      cardCount,
-      isGenerating,
-      generatedMaterials,
-      fileInput,
-      fileUploaded,
-      fileName,
-      fileSize,
-      fileError,
-      dragOver,
-      canGenerate,
-      selectedCount,
-      allSelected,
-      selectedCategory,
+      // AI state variables
+      aiStep,
+      aiSourceType,
+      aiSourceText,
+      aiSourceQuestion,
+      aiFileName,
+      aiGeneratedMaterials,
+      // Folder variables
+      selectedFolder,
+      folders,
+      isLoadingFolders,
+      showFolderDropdown,
+      folderSearchTerm,
+      folderSearchInput,
+      filteredFolders,
+      // Common state
+      error,
+      loading,
+      // Deadline variables
       deadline,
       customDeadlineDate,
-      systemCategories,
-      userCustomCategories,
-      frequentCategories,
       minDate,
-      incrementCardCount,
-      decrementCardCount,
-      triggerFileInput,
-      handleFileChange,
-      handleFileDrop,
-      removeFile,
-      formatFileSize,
-      generateMaterials,
-      toggleMaterialSelection,
-      toggleSelectAll,
-      saveMaterials,
-      cancelGeneration,
-      formatContentForDisplay,
+      // Computed properties
+      canGenerateWithAi,
+      // Folder methods
+      toggleFolderDropdown,
+      handleFolderSearch,
+      selectFolder,
+      createNewFolder,
+      // AI methods
+      handleAiFileUpload,
+      generateWithAi,
+      removeGeneratedCard,
+      saveGeneratedMaterials,
+      // Common methods
       selectDeadline,
-      formatCustomDeadline,
-      getDeadlineInDays
+      cancel
     };
   }
 };
@@ -734,449 +740,375 @@ export default {
   margin-bottom: var(--spacing-8);
 }
 
-.option-group {
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e9ecef;
+.card-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--spacing-4);
 }
 
-.form-header {
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.form-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 0.5rem;
+.card-header h3 {
+  margin: 0 0 var(--spacing-2) 0;
+  font-weight: var(--font-weight-semibold);
 }
 
 .form-subtitle {
-  color: #666;
-  font-size: 0.95rem;
-}
-
-.source-type-selector {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 0.5rem;
-  border: 1px solid #e9ecef;
-}
-
-.source-option {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1rem 0.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.source-option:hover {
-  background-color: #e9ecef;
-}
-
-.source-option.active {
-  background-color: #6c5ce7;
-  color: white;
-}
-
-.option-icon {
-  margin-bottom: 0.5rem;
-}
-
-.option-label {
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
-.input-section {
-  margin-bottom: 1.5rem;
-}
-
-.input-label {
-  display: block;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-  color: #333;
-}
-
-.input-tip {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 400;
-  color: #6c757d;
-  margin-top: 0.25rem;
-}
-
-.input-area {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.2s ease;
-  resize: vertical;
-}
-
-.input-area:focus {
-  outline: none;
-  border-color: #6c5ce7;
-  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
-}
-
-.file-upload-area {
-  position: relative;
-  width: 100%;
-  height: 150px;
-  border: 2px dashed #ced4da;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  overflow: hidden;
-}
-
-.file-upload-area:hover {
-  border-color: #6c5ce7;
-  background-color: rgba(108, 92, 231, 0.05);
-}
-
-.file-upload-area.has-file {
-  height: auto;
-  min-height: 80px;
-  border-style: solid;
-  background-color: #f8f9fa;
-}
-
-.file-input {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.upload-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #6c757d;
-  padding: 2rem;
-}
-
-.upload-placeholder.drag-over {
-  background-color: rgba(108, 92, 231, 0.1);
-}
-
-.upload-text {
-  margin-top: 1rem;
-  text-align: center;
-}
-
-.file-info {
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  width: 100%;
-}
-
-.file-icon {
-  margin-right: 1rem;
-  color: #6c5ce7;
-}
-
-.file-details {
-  flex: 1;
-}
-
-.file-name {
-  font-weight: 500;
-  margin-bottom: 0.25rem;
-  word-break: break-all;
-}
-
-.file-size {
-  font-size: 0.85rem;
-  color: #6c757d;
-}
-
-.remove-file {
-  background: none;
-  border: none;
-  color: #dc3545;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.remove-file:hover {
-  background-color: rgba(220, 53, 69, 0.1);
-}
-
-.file-error {
-  color: #dc3545;
-  font-size: 0.85rem;
-  margin-top: 0.5rem;
-}
-
-.generate-options {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  border: 1px solid #e9ecef;
-}
-
-.counter-input {
-  display: flex;
-  align-items: center;
-  margin-top: 0.5rem;
-}
-
-.counter-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background-color: #e9ecef;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.counter-btn:hover:not(:disabled) {
-  background-color: #dee2e6;
-}
-
-.counter-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.counter-value {
-  width: 50px;
-  height: 36px;
-  text-align: center;
-  margin: 0 0.5rem;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
+  color: var(--neutral-600);
+  font-size: var(--font-size-sm);
+  margin: 0;
 }
 
 .form-actions {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 2rem;
+  margin-top: var(--spacing-8);
 }
 
-.btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+/* AI Source Options Styling */
+.ai-source-options {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+  margin-top: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.ai-source-btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-2);
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-md);
+  background-color: white;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  flex: 1;
+  min-width: 120px;
 }
 
-.btn-cancel {
-  background-color: #f8f9fa;
-  border: 1px solid #ced4da;
-  color: #495057;
+.ai-source-btn:hover {
+  border-color: var(--primary-color);
+  background-color: var(--neutral-50);
 }
 
-.btn-cancel:hover {
-  background-color: #e9ecef;
+.ai-source-btn.active {
+  border-color: var(--primary-color);
+  background-color: rgba(99, 102, 241, 0.05);
+  box-shadow: var(--shadow-sm);
 }
 
-.btn-generate {
-  background-color: #6c5ce7;
-  border: none;
-  color: white;
-  font-weight: 600;
+.ai-source-btn svg {
+  color: var(--primary-color);
 }
 
-.btn-generate:hover:not(:disabled) {
-  background-color: #5b4dc7;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(108, 92, 231, 0.2);
+.ai-source-btn span {
+  font-weight: var(--font-weight-medium);
 }
 
-.btn-generate:disabled {
-  background-color: #a29bfe;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+/* File Upload Styling */
+.file-upload-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-2);
 }
 
+.file-input {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+.file-upload-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: 0.5rem 1rem;
+  background-color: var(--neutral-100);
+  border: 1px dashed var(--neutral-400);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  font-size: var(--font-size-sm);
+  color: var(--neutral-700);
+}
+
+.file-upload-label:hover {
+  background-color: var(--neutral-200);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.file-name {
+  font-size: var(--font-size-sm);
+  color: var(--neutral-700);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+/* Loading spinner */
 .loading-spinner {
-  width: 18px;
-  height: 18px;
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   border-top-color: white;
   animation: spin 1s linear infinite;
-  margin-right: 0.5rem;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-/* Generated Materials Section */
-.generated-materials {
-  margin-top: 2rem;
-  border-top: 1px solid #e9ecef;
-  padding-top: 1.5rem;
+/* Enhanced Folder Dropdown Styling */
+.folder-dropdown-container {
+  position: relative;
+  width: 100%;
 }
 
-.preview-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.preview-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.preview-card {
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-  overflow: hidden;
-  transition: all 0.2s ease;
+.folder-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: white;
+  border: 2px solid var(--neutral-300);
+  border-radius: var(--radius-md);
   cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
 }
 
-.preview-card:hover {
-  border-color: #ced4da;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+.folder-dropdown-trigger:hover {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
-.preview-card.selected {
-  border-color: #6c5ce7;
-  box-shadow: 0 2px 12px rgba(108, 92, 231, 0.15);
+.folder-dropdown-trigger.active {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), var(--shadow-md);
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.card-title {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #333;
-}
-
-.checkbox {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #ced4da;
-  border-radius: 4px;
+.selected-folder {
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
+  gap: var(--spacing-2);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-.checkbox.checked {
-  background-color: #6c5ce7;
-  border-color: #6c5ce7;
+.placeholder-text {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--neutral-500);
+}
+
+.dropdown-icon {
+  margin-left: auto;
+  color: var(--neutral-600);
+  transition: transform var(--transition-normal);
+}
+
+.folder-dropdown-trigger.active .dropdown-icon {
+  transform: rotate(180deg);
+  color: var(--primary-color);
+}
+
+/* Folder Tag Styling */
+.folder-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   color: white;
+  background-color: var(--primary-color);
 }
 
-.card-content {
-  padding: 1rem;
-  font-size: 0.95rem;
-  color: #495057;
-  max-height: 200px;
-  overflow-y: auto;
+/* Dropdown Content Styling */
+.folder-dropdown-content {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown);
+  border: 1px solid var(--neutral-200);
+  max-height: 350px;
+  overflow-y: scroll !important;
+  animation: dropdownFadeIn 0.2s ease-out;
 }
 
-.preview-actions {
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.folder-search {
+  padding: var(--spacing-3);
+  border-bottom: 1px solid var(--neutral-200);
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1;
   display: flex;
-  justify-content: space-between;
-  margin-top: var(--spacing-6);
-  flex-wrap: wrap;
-  gap: var(--spacing-4);
-}
-
-.selection-summary {
-  flex: 1;
-}
-
-.button-group {
-  display: flex;
+  align-items: center;
   gap: var(--spacing-2);
 }
 
-.selection-info {
-  font-size: 0.9rem;
-  color: var(--neutral-600);
-  margin-bottom: var(--spacing-2);
+.search-icon {
+  color: var(--neutral-400);
 }
 
-.selection-details {
+/* Add padding at the bottom to ensure all options are visible when scrolling */
+.folder-groups::after {
+  content: '';
+  display: block;
+  height: 12px;
+}
+
+.folder-groups {
+  padding: var(--spacing-2);
+  padding-right: 10px; /* Extra space for scrollbar */
+}
+
+.folder-group {
+  margin-bottom: var(--spacing-5);
+  padding-bottom: var(--spacing-3);
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+.folder-group:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.folder-group-label {
+  padding: 0 var(--spacing-3);
+  margin-bottom: var(--spacing-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--neutral-600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: var(--neutral-50);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+  display: inline-block;
+}
+
+.folder-options {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  background-color: var(--neutral-100);
-  padding: 0.75rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--neutral-200);
-  margin-bottom: 0.5rem;
+  gap: var(--spacing-1);
 }
 
-.selection-detail-item {
+.folder-option {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
+  padding: 10px var(--spacing-3);
+  gap: var(--spacing-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--neutral-800);
+  margin-bottom: 4px;
+  min-height: 44px;
+  border: 1px solid transparent;
 }
 
-.detail-label {
+.folder-option:hover {
+  background-color: var(--neutral-100);
+  border-color: var(--neutral-300);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.folder-option.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
   font-weight: var(--font-weight-medium);
+}
+
+.folder-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.folder-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-select-icon {
+  margin-left: var(--spacing-2);
+}
+
+.no-folders-message {
+  text-align: center;
+  padding: var(--spacing-6);
   color: var(--neutral-600);
 }
 
-.detail-value {
-  color: var(--neutral-800);
-  font-weight: var(--font-weight-semibold);
-}
-
-.form-actions {
+.create-folder-btn {
   display: flex;
-  justify-content: flex-end;
-  margin-top: var(--spacing-8);
-  gap: var(--spacing-4);
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-4);
+  padding: 8px 16px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-normal);
 }
 
-.mr-2 {
-  margin-right: 0.5rem;
+.create-folder-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.loading-folders {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-6);
+  color: var(--neutral-600);
+}
+
+.folder-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid rgba(99, 102, 241, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--spacing-3);
 }
 
 /* Deadline Selection Styling */
@@ -1219,29 +1151,172 @@ export default {
   animation: fadeIn 0.3s;
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.deadline-helper {
+  font-size: var(--font-size-xs);
+  color: var(--neutral-600);
+  margin-top: var(--spacing-2);
+}
+
+/* AI Preview Container Styling */
+.ai-preview-container {
+  animation: fadeIn 0.3s ease;
+}
+
+.preview-title {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-2);
+}
+
+.preview-description {
+  color: var(--neutral-600);
+  margin-bottom: var(--spacing-6);
+}
+
+.ai-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-12) 0;
+  text-align: center;
+}
+
+.ai-loading-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 3px solid rgba(99, 102, 241, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1.5s linear infinite;
+  margin-bottom: var(--spacing-4);
+}
+
+.loading-description {
+  color: var(--neutral-500);
+  font-size: var(--font-size-sm);
+  max-width: 400px;
+  margin-top: var(--spacing-2);
+}
+
+/* Generated Card Styles */
+.ai-generated-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-8);
+}
+
+.ai-material-card {
+  background-color: white;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--neutral-200);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+}
+
+.ai-material-card:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-3px);
+}
+
+.card-header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+}
+
+.card-index {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--primary-color);
+  background-color: rgba(99, 102, 241, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+}
+
+.remove-card-btn {
+  background: none;
+  border: none;
+  color: var(--neutral-500);
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.remove-card-btn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.card-content-editable {
+  animation: fadeIn 0.3s ease;
+}
+
+.mb-2 {
+  margin-bottom: var(--spacing-2);
+}
+
+.no-cards-message {
+  text-align: center;
+  padding: var(--spacing-8);
+  background-color: var(--neutral-100);
+  border-radius: var(--radius-lg);
+  color: var(--neutral-600);
+}
+
+.preview-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-6);
+  gap: var(--spacing-4);
+}
+
+.action-group {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+}
+
+.mr-2 {
+  margin-right: var(--spacing-2);
+}
+
+.ml-2 {
+  margin-left: var(--spacing-2);
+}
+
+/* Responsive styles */
 @media (max-width: 768px) {
-  .source-type-selector {
+  .form-actions, .preview-actions {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--spacing-4);
   }
   
-  .preview-cards {
-    grid-template-columns: 1fr;
-  }
-  
-  .form-actions, .save-actions {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  
-  .selection-info {
-    margin-right: 0;
-    margin-bottom: 0.5rem;
-  }
-  
-  .btn {
+  .form-actions .btn, .preview-actions .btn {
     width: 100%;
-    justify-content: center;
+  }
+  
+  .deadline-presets {
+    flex-direction: column;
+  }
+  
+  .ai-source-options {
+    flex-direction: column;
   }
 }
 </style>

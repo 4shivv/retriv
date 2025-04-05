@@ -26,15 +26,92 @@
         </div>
         
         <div class="form-group">
+          <label class="form-label">Source Type</label>
+          <div class="source-options">
+            <button 
+              type="button" 
+              @click="manualSourceType = 'text'" 
+              class="source-btn" 
+              :class="{ active: manualSourceType === 'text' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="17" y1="10" x2="3" y2="10"></line>
+                <line x1="21" y1="6" x2="3" y2="6"></line>
+                <line x1="21" y1="14" x2="3" y2="14"></line>
+                <line x1="17" y1="18" x2="3" y2="18"></line>
+              </svg>
+              <span>Paste Text</span>
+            </button>
+            
+            <button 
+              type="button" 
+              @click="manualSourceType = 'file'" 
+              class="source-btn" 
+              :class="{ active: manualSourceType === 'file' }"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <span>Upload File</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Text Input Source -->
+        <div v-if="manualSourceType === 'text'" class="form-group">
           <label for="content" class="form-label">Content</label>
           <textarea
             id="content"
             v-model="content"
             class="form-control"
             rows="10"
-            placeholder="Enter the content for your study card"
+            placeholder="Paste or type the content you want to study"
             required
           ></textarea>
+        </div>
+        
+        <!-- File Input Source -->
+        <div v-if="manualSourceType === 'file'" class="form-group">
+          <label class="form-label">Upload File</label>
+          <div class="file-upload-container">
+            <input
+              type="file"
+              id="file-upload"
+              @change="handleFileUpload"
+              class="file-input"
+              accept=".txt,.md,.doc,.docx"
+              :disabled="loading"
+            />
+            <label for="file-upload" class="file-upload-label">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span>Choose file</span>
+            </label>
+            <span v-if="fileName" class="file-name">{{ fileName }}</span>
+          </div>
+          <p class="form-text">
+            Supported file types: .txt, .md, .doc, .docx
+          </p>
+          <div v-if="content" class="file-preview">
+            <div class="file-preview-header">
+              <h4>File Content Preview</h4>
+              <button type="button" class="preview-edit-btn" @click="manualSourceType = 'text'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                <span>Edit content</span>
+              </button>
+            </div>
+            <div class="file-preview-content">{{ content.slice(0, 300) }}{{ content.length > 300 ? '...' : '' }}</div>
+          </div>
         </div>
         
         <div class="form-group">
@@ -174,6 +251,8 @@ export default {
     const content = ref('');
     const error = ref('');
     const loading = ref(false);
+    const manualSourceType = ref('text');
+    const fileName = ref('');
     
     // Folder-related state
     const selectedFolder = ref(null);
@@ -288,6 +367,33 @@ export default {
       return deadline.value === 'custom' ? null : parseInt(deadline.value);
     };
     
+    // Handle file upload
+    const handleFileUpload = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      fileName.value = file.name;
+      
+      // For MVP, we'll just read text files
+      // In a real app, you'd need more sophisticated file handling
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        content.value = e.target.result;
+        
+        // Set title from filename if title is empty
+        if (!title.value) {
+          title.value = file.name.split('.')[0];
+        }
+      };
+      
+      reader.onerror = () => {
+        error.value = 'Failed to read the file. Please try again.';
+      };
+      
+      reader.readAsText(file);
+    };
+    
     // Form submission
     const handleSubmit = async () => {
       try {
@@ -348,9 +454,6 @@ export default {
           };
           
           emit('material-saved', materialObj);
-          
-          // Navigate back to dashboard or study view
-          router.push('/dashboard');
         } else {
           error.value = 'Failed to save study card. Please try again.';
         }
@@ -366,7 +469,6 @@ export default {
     // Cancel creation
     const cancel = () => {
       emit('cancel');
-      router.push('/dashboard');
     };
     
     return {
@@ -374,6 +476,8 @@ export default {
       content,
       error,
       loading,
+      manualSourceType,
+      fileName,
       selectedFolder,
       folders,
       isLoadingFolders,
@@ -389,6 +493,7 @@ export default {
       customDeadlineDate,
       minDate,
       selectDeadline,
+      handleFileUpload,
       handleSubmit,
       cancel
     };
@@ -422,6 +527,165 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-top: var(--spacing-8);
+}
+
+/* Source Type Selection */
+.source-options {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+  margin-top: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.source-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-md);
+  background-color: white;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  min-width: 120px;
+  flex: 1;
+}
+
+.source-btn:hover {
+  border-color: var(--primary-color);
+  background-color: var(--neutral-50);
+  box-shadow: var(--shadow-sm);
+}
+
+.source-btn.active {
+  border-color: var(--primary-color);
+  background-color: rgba(99, 102, 241, 0.05);
+  box-shadow: var(--shadow-md);
+}
+
+.source-btn svg {
+  color: var(--primary-color);
+}
+
+.source-btn span {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--neutral-700);
+}
+
+/* File Upload Styling */
+.file-upload-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-2);
+}
+
+.file-input {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+.file-upload-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: 0.5rem 1rem;
+  background-color: var(--neutral-100);
+  border: 1px dashed var(--neutral-400);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  font-size: var(--font-size-sm);
+  color: var(--neutral-700);
+}
+
+.file-upload-label:hover {
+  background-color: var(--neutral-200);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.file-name {
+  font-size: var(--font-size-sm);
+  color: var(--neutral-700);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* File Preview */
+.file-preview {
+  margin-top: var(--spacing-4);
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.file-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-3);
+  background-color: var(--neutral-100);
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+.file-preview-header h4 {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.preview-edit-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: 0.25rem 0.5rem;
+  background-color: var(--neutral-50);
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  color: var(--neutral-700);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.preview-edit-btn:hover {
+  background-color: var(--neutral-200);
+  border-color: var(--neutral-300);
+}
+
+.file-preview-content {
+  padding: var(--spacing-3);
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  color: var(--neutral-700);
+  background-color: white;
 }
 
 /* Deadline Selection Styling */
@@ -717,10 +981,6 @@ export default {
   border-top-color: var(--primary-color);
   animation: spin 1s linear infinite;
   margin-bottom: var(--spacing-3);
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 /* Responsive styles */

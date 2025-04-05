@@ -179,7 +179,19 @@ export default {
     
     const userInitials = computed(() => {
       const user = store.getters['auth/user'];
-      if (!user || !user.email) return '';
+      if (!user) return '';
+      
+      // If user has a displayName, use first and last character of displayName
+      if (user.displayName && user.displayName.length > 0) {
+        if (user.displayName.length === 1) {
+          return user.displayName.charAt(0).toUpperCase();
+        } else {
+          return (user.displayName.charAt(0) + user.displayName.charAt(user.displayName.length - 1)).toUpperCase();
+        }
+      }
+      
+      // Fallback to email if no displayName
+      if (!user.email) return '';
       
       const email = user.email;
       const parts = email.split('@');
@@ -594,19 +606,21 @@ export default {
   width: 40px;
   height: 40px;
   border-radius: var(--radius-full);
-  background: var(--primary-gradient);
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
+  box-shadow: var(--shadow-sm);
+  letter-spacing: -0.02em;
 }
 
 .user-menu-toggle:hover .avatar {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
-  border-color: var(--primary-light);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .user-dropdown {

@@ -307,15 +307,16 @@
       const userInitials = computed(() => {
         if (!displayName.value && !email.value) return '';
         
-        if (displayName.value) {
-          const names = displayName.value.split(' ');
-          if (names.length >= 2) {
-            return (names[0][0] + names[1][0]).toUpperCase();
+        if (displayName.value && displayName.value.length > 0) {
+          if (displayName.value.length === 1) {
+            return displayName.value.charAt(0).toUpperCase();
+          } else {
+            return (displayName.value.charAt(0) + displayName.value.charAt(displayName.value.length - 1)).toUpperCase();
           }
-          return displayName.value.substring(0, 2).toUpperCase();
         }
         
         // Use email if no display name
+        if (!email.value) return '';
         const parts = email.value.split('@');
         return parts[0].substring(0, 2).toUpperCase();
       });
@@ -642,16 +643,20 @@
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 50%;
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
     color: white;
-    font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-bold);
     font-size: var(--font-size-md);
+    box-shadow: var(--shadow-sm);
+    letter-spacing: -0.02em;
   }
   
   .avatar-xl {
     width: 5rem;
     height: 5rem;
     font-size: var(--font-size-xl);
+    box-shadow: var(--shadow-md);
+    border: 3px solid rgba(255, 255, 255, 0.2);
   }
   
   /* Form Actions */

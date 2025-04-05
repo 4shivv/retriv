@@ -24,11 +24,11 @@
         </div>
       </router-link>
       <button @click="toggleCollapse" class="collapse-toggle" :class="{ 'logo-position': collapsed }">
-        <svg v-if="collapsed" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg v-if="collapsed" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="13 17 18 12 13 7"></polyline>
           <polyline points="6 17 11 12 6 7"></polyline>
         </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="11 17 6 12 11 7"></polyline>
           <polyline points="18 17 13 12 18 7"></polyline>
         </svg>
@@ -422,7 +422,7 @@ export default {
 .sidebar.is-collapsed .sidebar-header {
   justify-content: center;
   height: 60px; /* Return to original height when collapsed */
-  padding: var(--spacing-4) var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-2);
 }
 
 .sidebar-logo {
@@ -473,8 +473,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-md);
   border: 1px solid var(--neutral-200);
   background-color: white;
@@ -484,8 +484,8 @@ export default {
 }
 
 .collapse-toggle.logo-position {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   margin: 0;
   position: relative;
   left: 0;
@@ -495,6 +495,8 @@ export default {
   background-color: var(--neutral-100);
   border-color: var(--neutral-300);
   color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .sidebar-nav {

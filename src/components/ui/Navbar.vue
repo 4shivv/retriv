@@ -61,20 +61,40 @@
             </template>
             <template v-else>
               
-              <!-- Add New Material Button (moved from dashboard) -->
-              <button @click="handleAddNew" class="btn btn-primary add-new-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                <span class="btn-text">Add New</span>
-              </button>
+              <!-- Add New Material Button with Dropdown -->
+              <div class="add-new-dropdown" v-click-outside="closeAddNewDropdown">
+                <button @click="toggleAddNewDropdown" class="btn btn-primary add-new-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                </button>
+                <div class="add-new-dropdown-menu" v-show="addNewDropdownOpen">
+                  <div class="dropdown-item" @click="handleAddNew">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Material
+                  </div>
+                  <div class="dropdown-item" @click="handleStudyCard">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Study Card
+                  </div>
+                </div>
+              </div>
               
               <!-- User Menu Toggle (moved from sidebar) -->
               <div class="user-menu" v-click-outside="closeUserMenu">
                 <button class="user-menu-toggle" @click="toggleUserMenu" :title="userEmail">
                   <div class="avatar">
-                    {{ userInitials }}
+                    <span class="avatar-text">{{ userInitials }}</span>
                   </div>
                 </button>
                 <div class="user-dropdown" v-show="userMenuOpen">
@@ -138,15 +158,18 @@ export default {
       }
     }
   },
+  emits: ['open-study-card-modal'],
   
-  setup() {
+  setup(props, { emit }) {
     const router = useRouter();
     const route = useRoute();
     const store = useStore();
     const menuOpen = ref(false);
     const userMenuOpen = ref(false);
+    const addNewDropdownOpen = ref(false);
     const scrolled = ref(false);
     const searchQuery = ref('');
+    const showStudyCardModal = ref(false);
     
     // Check if on home page (but never for authenticated users)
     const isHomePage = computed(() => {
@@ -233,6 +256,19 @@ export default {
       userMenuOpen.value = false;
     };
     
+    const toggleAddNewDropdown = (event) => {
+      event.stopPropagation();
+      addNewDropdownOpen.value = !addNewDropdownOpen.value;
+      // Close user menu if open
+      if (userMenuOpen.value) {
+        userMenuOpen.value = false;
+      }
+    };
+    
+    const closeAddNewDropdown = () => {
+      addNewDropdownOpen.value = false;
+    };
+    
     const navigateToHomeWithHash = (hash) => {
       // If user is authenticated, redirect to dashboard instead
       if (isAuthenticated.value) {
@@ -258,7 +294,19 @@ export default {
       if (userMenuOpen.value) {
         closeUserMenu();
       }
+      closeAddNewDropdown();
       router.push('/dashboard?action=create');
+    };
+    
+    const handleStudyCard = () => {
+      if (userMenuOpen.value) {
+        closeUserMenu();
+      }
+      closeAddNewDropdown();
+      // Toggle the study card modal visibility
+      showStudyCardModal.value = true;
+      // Emit an event to open the study card modal
+      emit('open-study-card-modal');
     };
     
     // Handle search input changes
@@ -322,6 +370,8 @@ export default {
       userRole,
       menuOpen,
       userMenuOpen,
+      addNewDropdownOpen,
+      showStudyCardModal,
       scrolled,
       isHomePage,
       searchQuery,
@@ -329,8 +379,11 @@ export default {
       closeMenu,
       toggleUserMenu,
       closeUserMenu,
+      toggleAddNewDropdown,
+      closeAddNewDropdown,
       navigateToHomeWithHash,
       handleAddNew,
+      handleStudyCard,
       handleLogout,
       handleSearch
     };
@@ -563,31 +616,69 @@ export default {
 }
 
 /* Add New Button Styling */
+.add-new-dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
 .add-new-btn {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
-  padding: 0.5rem 1rem;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
   font-size: var(--font-size-sm);
   background-color: var(--primary-color);
   border-radius: var(--radius-md);
   border: none;
   color: white;
   font-weight: var(--font-weight-medium);
+  box-shadow: var(--shadow-md);
+  position: relative;
 }
 
 .add-new-btn .icon {
   transition: transform var(--transition-normal);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .add-new-btn:hover .icon {
-  transform: rotate(90deg);
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.add-new-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.add-new-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: 180px;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  z-index: 1500;
+  animation: scaleIn 0.2s var(--transition-bounce);
+  transform-origin: top right;
+  overflow: hidden;
+  border: 1px solid var(--neutral-200);
 }
 
 /* User Menu Styling */
 .user-menu {
   position: relative;
   z-index: 1400;
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 .user-menu-toggle {
@@ -611,10 +702,19 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.avatar-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
-  box-shadow: var(--shadow-sm);
   letter-spacing: -0.02em;
+  line-height: 1;
 }
 
 .user-menu-toggle:hover .avatar {

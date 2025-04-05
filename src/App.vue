@@ -1,35 +1,47 @@
 <template>
   <div id="app" :class="{ 'dark-theme': darkMode, 'with-sidebar': isAuthenticated, 'sidebar-collapsed': sidebarCollapsed }">
-    <AppSidebar v-if="isAuthenticated" @sidebar-toggle="handleSidebarToggle" />
+    <AppSidebar v-if="isAuthenticated" @sidebar-toggle="handleSidebarToggle" @open-study-card-modal="openStudyCardModal" />
     <div class="main-container" :class="{ 'with-sidebar': isAuthenticated }">
-      <AppNavbar />
+      <AppNavbar @open-study-card-modal="openStudyCardModal" />
       <main class="app-main">
         <router-view />
       </main>
     </div>
     <AppFooter />
+    
+    <!-- Study Card Modal -->
+    <StudyCardModal 
+      :is-open="showStudyCardModal"
+      @close="closeStudyCardModal"
+      @select-option="handleStudyCardOption"
+    />
   </div>
 </template>
 
 <script>
 import { computed, ref, onMounted } from 'vue';
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 import AppNavbar from '@/components/ui/Navbar.vue';
 import AppSidebar from '@/components/ui/Sidebar';
 import AppFooter from '@/components/ui/Footer.vue';
+import StudyCardModal from '@/components/study/StudyCardModal.vue';
 
 export default {
   name: 'App',
   components: {
     AppNavbar,
     AppSidebar,
-    AppFooter
+    AppFooter,
+    StudyCardModal
   },
   
   setup() {
     // Auth state is initialized in main.js before mounting
     const store = useStore();
+    const router = useRouter();
     const sidebarCollapsed = ref(false);
+    const showStudyCardModal = ref(false);
     
     const isAuthenticated = computed(() => {
       return store.getters['auth/isAuthenticated'];
@@ -55,10 +67,31 @@ export default {
       }
     });
     
+    // Study Card Modal functions
+    const openStudyCardModal = () => {
+      showStudyCardModal.value = true;
+    };
+    
+    const closeStudyCardModal = () => {
+      showStudyCardModal.value = false;
+    };
+    
+    const handleStudyCardOption = (option) => {
+      if (option === 'manual') {
+        router.push('/study/create');
+      } else if (option === 'ai') {
+        router.push('/study/create-with-ai');
+      }
+    };
+    
     return {
       isAuthenticated,
       sidebarCollapsed,
-      handleSidebarToggle
+      showStudyCardModal,
+      handleSidebarToggle,
+      openStudyCardModal,
+      closeStudyCardModal,
+      handleStudyCardOption
     };
   }
 }

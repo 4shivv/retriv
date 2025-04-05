@@ -6,6 +6,8 @@ import RegisterPage from '@/views/RegisterPage.vue';
 import DashboardPage from '@/views/DashboardPage.vue';
 import ProfilePage from '@/views/ProfilePage.vue';
 import FolderPage from '@/views/folders/FolderPage.vue';
+import CreateStudyCardView from '@/views/Study/CreateStudyCardView.vue';
+import CreateWithAIView from '@/views/Study/CreateWithAIView.vue';
 import FAQPage from '@/views/FAQPage.vue';
 import BlogPage from '@/views/BlogPage.vue';
 import TermsPage from '@/views/TermsPage.vue';
@@ -69,6 +71,24 @@ const routes = [
     meta: { 
       requiresAuth: true,
       title: 'Folder - Retriv' 
+    }
+  },
+  {
+    path: '/study/create',
+    name: 'CreateStudyCard',
+    component: CreateStudyCardView,
+    meta: { 
+      requiresAuth: true,
+      title: 'Create Study Card - Retriv' 
+    }
+  },
+  {
+    path: '/study/create-with-ai',
+    name: 'CreateWithAI',
+    component: CreateWithAIView,
+    meta: { 
+      requiresAuth: true,
+      title: 'Create with AI - Retriv' 
     }
   },
   {

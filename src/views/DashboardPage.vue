@@ -163,7 +163,7 @@
               </div>
             </div>
 
-            <!-- Now using the MaterialList component here -->
+            <!-- Now using the MaterialList component here with the same behavior as in folder -->
             <MaterialList 
               :materials="materials"
               :filtered-materials="filteredMaterials"

@@ -53,40 +53,14 @@
             :key="material.id"
             class="material-card"
             :class="{ 'has-review': material.hasReview }"
+            @click="viewMaterial(material)"
           >
             <div class="material-header">
               <div class="material-category">{{ material.category || 'Uncategorized' }}</div>
-              <div class="material-actions-menu">
-                <button class="action-menu-button" @click.stop="toggleActionMenu(material.id)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="1"></circle>
-                    <circle cx="12" cy="5" r="1"></circle>
-                    <circle cx="12" cy="19" r="1"></circle>
-                  </svg>
-                </button>
-                <div v-if="activeActionMenu === material.id" class="action-menu">
-                  <button class="action-menu-item" @click.stop="editMaterial(material)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                    <span>Edit</span>
-                  </button>
-                  <button class="action-menu-item danger" @click.stop="deleteMaterial(material)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="3 6 5 6 21 6"></polyline>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                      <line x1="10" y1="11" x2="10" y2="17"></line>
-                      <line x1="14" y1="11" x2="14" y2="17"></line>
-                    </svg>
-                    <span>Delete</span>
-                  </button>
-                </div>
-              </div>
             </div>
             <div class="material-date">{{ formatDate(material.createdAt) }}</div>
-            <h3 class="material-title" @click="viewMaterial(material)">{{ material.title }}</h3>
-            <p class="material-excerpt" @click="viewMaterial(material)">{{ truncateText(material.content, 120) }}</p>
+            <h3 class="material-title">{{ material.title }}</h3>
+            <p class="material-excerpt">{{ truncateText(material.content, 120) }}</p>
             <div v-if="material.nextReview" class="material-review-info">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -98,30 +72,7 @@
                 Review: {{ formatReviewDate(material.nextReview) }}
               </span>
             </div>
-            <div class="material-footer">
-            <div class="material-actions">
-              <button 
-                  @click.stop="startBlurting(material)" 
-                    class="btn btn-primary btn-sm material-action-btn"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                    <span>Blurting</span>
-                  </button>
-                  <button 
-                    @click.stop="startFeynman(material)" 
-                    class="btn btn-outline btn-sm material-action-btn"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M23 6l-9.5 9.5-5-5L1 18"></path>
-                      <path d="M17 6h6v6"></path>
-                    </svg>
-                    <span>Feynman</span>
-                  </button>
-                </div>
-              </div>
+            <div class="material-footer"></div>
           </div>
         </div>
       </div>
@@ -140,6 +91,33 @@
       </div>
       
       <div class="material-view-card">
+        <div class="material-actions-menu">
+          <button class="action-menu-button" @click.stop="toggleActionMenu(selectedMaterial.id)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="12" cy="5" r="1"></circle>
+              <circle cx="12" cy="19" r="1"></circle>
+            </svg>
+          </button>
+          <div v-if="activeActionMenu === selectedMaterial.id" class="action-menu">
+            <button class="action-menu-item" @click.stop="editMaterial(selectedMaterial)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              <span>Edit</span>
+            </button>
+            <button class="action-menu-item danger" @click.stop="deleteMaterial(selectedMaterial)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+              <span>Delete</span>
+            </button>
+          </div>
+        </div>
         <div class="material-view-header">
           <div class="title-area">
             <div class="material-category-badge">{{ selectedMaterial.category || 'Uncategorized' }}</div>
@@ -977,6 +955,7 @@ export default {
   position: relative;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
 }
 
 .material-card:hover {
@@ -1006,19 +985,15 @@ export default {
   font-size: var(--font-size-lg);
   margin-bottom: var(--spacing-3);
   color: var(--neutral-900);
-  cursor: pointer;
 }
 
-.material-title:hover {
-  color: var(--primary-color);
-}
+
 
 .material-excerpt {
   font-size: var(--font-size-sm);
   color: var(--neutral-600);
   margin-bottom: var(--spacing-4);
   line-height: 1.6;
-  cursor: pointer;
   flex-grow: 1;
 }
 
@@ -1195,6 +1170,45 @@ export default {
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   margin-bottom: var(--spacing-8);
+  position: relative;
+}
+
+.material-view-card .material-actions-menu {
+  position: absolute;
+  top: var(--spacing-6);
+  right: var(--spacing-6);
+  z-index: 10;
+  background-color: var(--neutral-50);
+  padding: 8px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+}
+
+.material-view-card .material-actions-menu:hover {
+  background-color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.material-view-card .action-menu-button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--neutral-600);
+}
+
+.material-view-card .action-menu-button:hover {
+  color: var(--primary-color);
+  background-color: var(--neutral-100);
+  transform: scale(1.1);
+}
+
+.material-view-card .action-menu {
+  top: calc(100% + 5px);
+  right: 0;
+  width: 180px;
 }
 
 .material-view-header {

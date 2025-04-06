@@ -1347,13 +1347,15 @@ export default {
 .review-phase .btn-primary {
   padding: 0.75rem 2rem;
   font-size: var(--font-size-md);
-  background-color: #6c5ce7;
+  background-color: var(--primary-color);
   transition: all 0.3s ease;
 }
 
 .review-phase .btn-primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(108, 92, 231, 0.2);
+  box-shadow: 0 6px 15px rgba(213, 141, 32, 0.2);
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
 }
 
 /* Textarea with Speech Controls */
@@ -2074,7 +2076,9 @@ export default {
 }
 
 .ai-chat-btn:hover {
-  background-color: rgba(99, 102, 241, 0.1);
+  background-color: rgba(213, 141, 32, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(213, 141, 32, 0.15);
 }
 
 .mr-2 {
@@ -2292,6 +2296,7 @@ export default {
 .send-button:hover {
   background-color: var(--primary-dark);
   transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(213, 141, 32, 0.25);
 }
 
 .send-button:active {
@@ -2301,7 +2306,7 @@ export default {
 .btn-primary {
   display: flex;
   align-items: center;
-  background-color: #6c5ce7;
+  background-color: var(--primary-color);
   color: white;
 }
 

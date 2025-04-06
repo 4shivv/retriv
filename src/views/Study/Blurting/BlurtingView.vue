@@ -616,6 +616,7 @@ export default {
 .send-button:hover {
   background-color: var(--primary-dark);
   transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(213, 141, 32, 0.25);
 }
 
 .send-button:active {

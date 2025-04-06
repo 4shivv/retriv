@@ -1,14 +1,7 @@
 <template>
   <div class="feynman-form card">
     <div class="card-header">
-      <h3>Feynman Technique</h3>
-      <div class="technique-badge">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 6l-12 12"></path>
-          <path d="M6 6l12 12"></path>
-        </svg>
-        <span>Active Learning</span>
-      </div>
+      <h3>{{ title }}</h3>
     </div>
     
     <div class="card-body">
@@ -162,18 +155,9 @@
         
         <div class="step3-actions">
           <button @click="handleDone" class="btn btn-outline">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-              <path d="M10 3H6a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V9"></path>
-              <path d="M14 3v6h6"></path>
-              <path d="M9 14l2 2 4-4"></path>
-            </svg>
             Study Something Else
           </button>
           <button @click="currentStep = 1" class="btn btn-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-              <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
             Revise My Explanation
           </button>
         </div>

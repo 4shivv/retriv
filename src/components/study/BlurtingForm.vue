@@ -108,42 +108,7 @@
           <p>
             Now, try to recall the content you just studied. Type as much as you can remember without looking at the original material. This "blurting" technique helps strengthen your memory.
           </p>
-          <div v-if="pastAttempts && pastAttempts.length > 0" class="past-attempts-summary">
-            <h4>Your Past Performance</h4>
-            <div class="past-attempts-stats">
-              <div class="stat-card attempts-card">
-                <div class="stat-value">{{ pastAttempts.length }}</div>
-                <div class="stat-label">Total Attempts</div>
-              </div>
-              <div class="stat-card score-card" v-if="pastAttempts.length > 0">
-                <div class="stat-value">{{ pastAttempts[0].matchPercentage }}%</div>
-                <div class="stat-label">Latest Score</div>
-              </div>
-              <div class="stat-card streak-card" v-if="pastAttempts.length > 1">
-                <div class="stat-value">{{ isImproving ? '↑' : (isDecreasing ? '↓' : '→') }}</div>
-                <div class="stat-label">{{ performanceTrendText }}</div>
-              </div>
-            </div>
-            <div v-if="performanceInsight" class="performance-insight">
-              <div class="insight-icon" :class="getInsightIconClass">
-                <svg v-if="isImproving" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-                <svg v-else-if="isDecreasing" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="12"></line>
-                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="16" x2="12" y2="12"></line>
-                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                </svg>
-              </div>
-              <div class="insight-content">{{ performanceInsight }}</div>
-            </div>
-          </div>
+
         </div>
         
         <form @submit.prevent="handleSubmitRecall">
@@ -271,25 +236,6 @@
         />
         
         <div class="next-steps">
-          <h5>Your Personalized Learning Journey</h5>
-          <p class="schedule-intro">
-            We've created a review schedule based on your performance pattern. This personalized plan helps maximize your long-term retention with minimal time investment.
-          </p>
-          
-          <!-- Review Schedule Cards -->
-          <div class="review-schedule-container">
-            <h6>Your Upcoming Review Schedule</h6>
-            <div class="schedule-grid">
-              <div v-for="(date, index) in reviewSchedule.slice(0, 5)" :key="'schedule-' + index" class="schedule-card" :class="getScheduleCardClass(date, index)">
-                <div class="schedule-card-header">
-                  <div class="schedule-tag" :class="getScheduleTagClass(date)">{{ getScheduleTagText(date) }}</div>
-                  <div class="schedule-time">{{ formatReviewDate(date) }}</div>
-                </div>
-                <div class="schedule-interval">{{ getIntervalLabel(date) }}</div>
-                <div class="schedule-note">{{ getScheduleNote(date) }}</div>
-              </div>
-            </div>
-          </div>
           
           <div class="actions-row">
             <button @click="handleReset" class="btn btn-outline">

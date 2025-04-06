@@ -127,53 +127,14 @@
             </div>
           </div>
           
-          <div class="next-review-badge" v-if="nextReviewDate">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-            <span>Next Review: {{ formatDateWithTime(nextReviewDate) }}</span>
-          </div>
+
         </div>
         
         <div class="material-view-content">
           <p>{{ selectedMaterial.content }}</p>
         </div>
         
-        <!-- Study Attempts History -->
-        <div v-if="studyAttempts && studyAttempts.length > 0" class="study-history-section">
-          <h4>Study History</h4>
-          <div class="attempts-list">
-            <div v-for="(attempt, index) in studyAttempts" :key="index" class="attempt-item">
-              <div class="attempt-header">
-                <div class="attempt-score">
-                  <div class="score-badge" :class="getScoreClass(attempt.matchPercentage)">
-                    {{ attempt.matchPercentage }}%
-                  </div>
-                </div>
-                <div class="attempt-date">
-                  {{ formatDateWithTime(attempt.timestamp) }}
-                  <span v-if="index === 0" class="latest-badge">Latest</span>
-                </div>
-              </div>
-              
-              <!-- Display the review schedule if available -->
-              <div v-if="attempt.reviewSchedule && attempt.reviewSchedule.length > 0" class="review-schedule">
-                <p class="schedule-heading">Review Schedule:</p>
-                <ul class="schedule-list">
-                  <li v-for="(date, i) in attempt.reviewSchedule" :key="i" class="schedule-item" :class="{ 'past-date': isPastDate(date), 'current-date': isCurrentDate(date) }">
-                    {{ formatDateWithTime(date) }}
-                    <span v-if="isPastDate(date)" class="status-badge completed">Completed</span>
-                    <span v-else-if="isCurrentDate(date)" class="status-badge due">Due Today</span>
-                    <span v-else class="status-badge upcoming">Upcoming</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
+
         
         <div class="material-view-actions">
         <div class="study-technique-buttons">
@@ -192,24 +153,7 @@
           Feynman Technique
         </button>
         </div>
-          <div class="management-buttons">
-              <button @click="editMaterial" class="btn btn-outline">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </svg>
-                Edit Material
-              </button>
-              <button @click="deleteMaterial(selectedMaterial)" class="btn btn-danger">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  <line x1="10" y1="11" x2="10" y2="17"></line>
-                  <line x1="14" y1="11" x2="14" y2="17"></line>
-                </svg>
-                Delete Material
-              </button>
-            </div>
+
           </div>
       </div>
     </div>

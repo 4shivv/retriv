@@ -8,7 +8,6 @@ import ProfilePage from '@/views/ProfilePage.vue';
 import FolderPage from '@/views/folders/FolderPage.vue';
 import CreateStudyCardView from '@/views/Study/CreateStudyCardView.vue';
 import CreateWithAIView from '@/views/Study/CreateWithAIView.vue';
-import StudySessionView from '@/views/Study/StudySession/StudySessionView.vue';
 import BlurtingView from '@/views/Study/Blurting/BlurtingView.vue';
 import FeynmanView from '@/views/Study/Feynman/FeynmanView.vue';
 import FAQPage from '@/views/FAQPage.vue';
@@ -92,15 +91,6 @@ const routes = [
     meta: { 
       requiresAuth: true,
       title: 'Create with AI - Retriv' 
-    }
-  },
-  {
-    path: '/study/session/:id',
-    name: 'StudySession',
-    component: StudySessionView,
-    meta: { 
-      requiresAuth: true,
-      title: 'Study Session - Retriv' 
     }
   },
   {

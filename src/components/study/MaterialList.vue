@@ -99,19 +99,39 @@
               </span>
             </div>
             <div class="material-footer">
-              <div class="material-actions">
-                <button 
-                  @click.stop="studyDirectly(material)" 
-                  class="btn btn-primary btn-sm material-action-btn"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
-                  <span>Study</span>
-                </button>
+            <div class="material-actions">
+            <button 
+            @click.stop="studyDirectly(material)" 
+            class="btn btn-primary btn-sm material-action-btn"
+            >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <span>Study</span>
+            </button>
+              <button 
+                  @click.stop="startBlurting(material)" 
+                    class="btn btn-outline btn-sm material-action-btn"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    <span>Blurting</span>
+                  </button>
+                  <button 
+                    @click.stop="startFeynman(material)" 
+                    class="btn btn-outline btn-sm material-action-btn"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M23 6l-9.5 9.5-5-5L1 18"></path>
+                      <path d="M17 6h6v6"></path>
+                    </svg>
+                    <span>Feynman</span>
+                  </button>
+                </div>
               </div>
-            </div>
           </div>
         </div>
       </div>
@@ -188,30 +208,48 @@
         </div>
         
         <div class="material-view-actions">
-          <button @click="studyMaterial" class="btn btn-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-            </svg>
+        <div class="study-technique-buttons">
+        <button @click="studyMaterial" class="btn btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          </svg>
             Start Study Session
           </button>
-          <button @click="editMaterial" class="btn btn-outline">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-            </svg>
-            Edit Material
+        <button @click="blurtingMaterial" class="btn btn-outline">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+            Blurting Technique
           </button>
-          <button @click="deleteMaterial(selectedMaterial)" class="btn btn-danger">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              <line x1="10" y1="11" x2="10" y2="17"></line>
-              <line x1="14" y1="11" x2="14" y2="17"></line>
-            </svg>
-            Delete Material
-          </button>
+        <button @click="feynmanMaterial" class="btn btn-outline">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 6l-9.5 9.5-5-5L1 18"></path>
+          <path d="M17 6h6v6"></path>
+        </svg>
+          Feynman Technique
+        </button>
         </div>
+          <div class="management-buttons">
+              <button @click="editMaterial" class="btn btn-outline">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Edit Material
+              </button>
+              <button @click="deleteMaterial(selectedMaterial)" class="btn btn-danger">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+                Delete Material
+              </button>
+            </div>
+          </div>
       </div>
     </div>
     
@@ -340,6 +378,7 @@
 
 <script>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { useRouter } from 'vue-router';
 import StudyService from '@/services/study.service';
 
 export default {
@@ -361,6 +400,7 @@ export default {
   emits: ['select-material', 'create-new', 'material-edited', 'material-deleted', 'category-deleted'],
   
   setup(props, { emit }) {
+    const router = useRouter();
     const viewMode = ref(false);
     const editMode = ref(false);
     const selectedMaterial = ref(null);
@@ -593,14 +633,37 @@ export default {
     // Study material
     const studyMaterial = () => {
       if (selectedMaterial.value) {
-        emit('select-material', selectedMaterial.value);
-        viewMode.value = false;
+        router.push(`/study/session/${selectedMaterial.value.id}`);
+      }
+    };
+    
+    // Blurting technique from material view
+    const blurtingMaterial = () => {
+      if (selectedMaterial.value) {
+        router.push(`/study/blurting/${selectedMaterial.value.id}`);
+      }
+    };
+    
+    // Feynman technique from material view
+    const feynmanMaterial = () => {
+      if (selectedMaterial.value) {
+        router.push(`/study/feynman/${selectedMaterial.value.id}`);
       }
     };
     
     // Study directly from list
     const studyDirectly = (material) => {
-      emit('select-material', material);
+      router.push(`/study/session/${material.id}`);
+    };
+    
+    // Start blurting technique
+    const startBlurting = (material) => {
+      router.push(`/study/blurting/${material.id}`);
+    };
+    
+    // Start Feynman technique
+    const startFeynman = (material) => {
+      router.push(`/study/feynman/${material.id}`);
     };
     
     // Edit material
@@ -752,7 +815,11 @@ export default {
       viewMaterial,
       closeView,
       studyMaterial,
+      blurtingMaterial,
+      feynmanMaterial,
       studyDirectly,
+      startBlurting,
+      startFeynman,
       editMaterial,
       cancelEdit,
       saveEdit,
@@ -1010,7 +1077,8 @@ export default {
 .material-actions {
   display: flex;
   gap: var(--spacing-2);
-  justify-content: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .material-action-btn {
@@ -1352,9 +1420,22 @@ export default {
 
 .material-view-actions {
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
   gap: var(--spacing-4);
   padding: 0 var(--spacing-6) var(--spacing-6);
+}
+
+.study-technique-buttons {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-2);
+}
+
+.management-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-4);
 }
 
 .material-view-actions .btn {

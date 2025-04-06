@@ -10,6 +10,7 @@ import CreateStudyCardView from '@/views/Study/CreateStudyCardView.vue';
 import CreateWithAIView from '@/views/Study/CreateWithAIView.vue';
 import BlurtingView from '@/views/Study/Blurting/BlurtingView.vue';
 import FeynmanView from '@/views/Study/Feynman/FeynmanView.vue';
+import MaterialCardView from '@/views/Study/Material/MaterialCardView.vue';
 import FAQPage from '@/views/FAQPage.vue';
 import BlogPage from '@/views/BlogPage.vue';
 import TermsPage from '@/views/TermsPage.vue';
@@ -109,6 +110,15 @@ const routes = [
     meta: { 
       requiresAuth: true,
       title: 'Feynman Technique - Retriv' 
+    }
+  },
+  {
+    path: '/study/material/:id',
+    name: 'MaterialCardView',
+    component: MaterialCardView,
+    meta: { 
+      requiresAuth: true,
+      title: 'Study Material - Retriv' 
     }
   },
   {

@@ -502,28 +502,8 @@ export default {
     
     // Review a material
     const reviewMaterial = (review) => {
-      // Find the corresponding material
-      const material = materials.value.find(m => m.id === review.materialId);
-      if (material) {
-        // Add the review status to the material for reference
-        const materialWithReviewStatus = {
-          ...material,
-          isOverdue: review.isOverdue,
-          dueLabel: review.dueLabel,
-          nextReview: review.nextReview
-        };
-        handleSelectMaterial(materialWithReviewStatus);
-      } else {
-        // Use the review info to create a placeholder material
-        handleSelectMaterial({
-          id: review.id,
-          title: review.title,
-          content: "This is a placeholder content for the review. In a real application, this would be the actual content of the material.",
-          isOverdue: review.isOverdue,
-          dueLabel: review.dueLabel,
-          nextReview: review.nextReview
-        });
-      }
+      // Navigate directly to the material card view page
+      router.push(`/study/material/${review.materialId}`);
     };
     
     // View all due reviews by filtering the materials

@@ -286,6 +286,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import StudyService from '@/services/study.service';
 
+
 export default {
   name: 'MaterialList',
   props: {
@@ -498,40 +499,20 @@ export default {
       activeActionMenu.value = null;
     };
     
-    // Fetch study attempts for a material
-    const fetchStudyAttempts = async (materialId) => {
-      try {
-        isLoading.value = true;
-        const attempts = await StudyService.getStudyAttempts(materialId);
-        studyAttempts.value = attempts;
-        
-        // Fetch next review date
-        const nextReview = await StudyService.getNextReviewDate(materialId);
-        nextReviewDate.value = nextReview;
-        
-      } catch (err) {
-        console.error('Failed to fetch study attempts:', err);
-        error.value = err.message || 'Failed to load study history';
-      } finally {
-        isLoading.value = false;
-      }
-    };
+    // No longer needed since we're using the MaterialCardView component
+    // This comment is left intentionally to document the change
     
     // View material
     const viewMaterial = async (material) => {
-      selectedMaterial.value = material;
-      viewMode.value = true;
-      editMode.value = false;
-      activeActionMenu.value = null;
-      
-      // Fetch study attempts for this material
-      await fetchStudyAttempts(material.id);
+      // Navigate to material card view page instead of showing inline
+      router.push(`/study/material/${material.id}`);
     };
     
     // Close view
     const closeView = () => {
       viewMode.value = false;
       selectedMaterial.value = null;
+      // Reset study attempts
       studyAttempts.value = [];
     };
     

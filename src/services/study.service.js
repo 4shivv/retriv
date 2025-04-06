@@ -1135,6 +1135,40 @@ const StudyService = {
     }
   },
 
+  async getStudyMaterial(materialId) {
+    // First check if the user is authenticated
+    if (!auth.currentUser) {
+      throw new Error("You must be logged in to view materials");
+    }
+    
+    try {
+      const materialRef = doc(db, 'materials', materialId);
+      
+      // Get the material to verify ownership
+      const materialSnap = await getDoc(materialRef);
+      
+      if (!materialSnap.exists()) {
+        throw new Error("Material not found");
+      }
+      
+      const materialData = materialSnap.data();
+      
+      // Verify the material belongs to the current user
+      if (materialData.userId !== auth.currentUser.uid) {
+        throw new Error("You do not have permission to view this material");
+      }
+      
+      // Return the material with its ID
+      return {
+        id: materialId,
+        ...materialData
+      };
+    } catch (error) {
+      console.error("Error fetching material:", error);
+      throw new Error(`Failed to fetch material: ${error.message}`);
+    }
+  },
+
   async getStudyMaterialsByCategory(category) {
     if (!auth.currentUser) {
       throw new Error("You must be logged in to view materials");

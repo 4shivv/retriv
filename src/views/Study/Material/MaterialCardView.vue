@@ -4,14 +4,14 @@
       <!-- Page Header -->
       <header class="page-header">
         <div class="header-content">
-          <h1 class="page-title">Study Material</h1>
+          <h1 class="page-title">Feynman Card</h1>
         </div>
       </header>
 
       <!-- Loading State -->
       <div v-if="loading" class="loading-container">
         <div class="loading-spinner-large"></div>
-        <p>Loading material...</p>
+        <p>Loading Feynman Card...</p>
       </div>
 
       <!-- Material View Content -->
@@ -108,11 +108,11 @@
     <div v-if="showDeleteModal" class="delete-modal-backdrop" @click="cancelDelete">
       <div class="delete-modal" @click.stop>
         <div class="delete-modal-header">
-          <h4>Delete Material</h4>
+        <h4>Delete Feynman Card</h4>
         </div>
         <div class="delete-modal-body">
           <p>Are you sure you want to delete "{{ material?.title }}"?</p>
-          <p class="text-danger">This action cannot be undone and will delete all study history associated with this material.</p>
+          <p class="text-danger">This action cannot be undone and will delete all study history associated with this Feynman Card.</p>
         </div>
         <div class="delete-modal-footer">
           <button @click="cancelDelete" class="btn btn-outline">Cancel</button>
@@ -144,7 +144,7 @@
                 type="text"
                 v-model="editForm.title"
                 class="form-control"
-                placeholder="Enter a title for this material"
+                placeholder="Enter a title for this Feynman Card"
                 required
               />
             </div>
@@ -243,7 +243,7 @@
                 v-model="editForm.content"
                 class="form-control"
                 rows="10"
-                placeholder="Paste or type the content you want to learn"
+                placeholder="Paste or type the content for your Feynman Card"
                 required
               ></textarea>
             </div>

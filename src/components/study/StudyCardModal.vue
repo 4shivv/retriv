@@ -3,7 +3,7 @@
     <div v-if="isOpen" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h3>Create Study Card</h3>
+          <h3>Create Feynman Card</h3>
           <button class="close-btn" @click="closeModal">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -22,7 +22,7 @@
                 </svg>
               </div>
               <h4 class="option-title">Make Your Own</h4>
-              <p class="option-description">Create a study card manually by entering your own content.</p>
+              <p class="option-description">Create a Feynman Card manually by entering your own content.</p>
             </div>
             
             <div class="option-card" @click="selectOption('ai')">
@@ -36,7 +36,7 @@
                 </svg>
               </div>
               <h4 class="option-title">Create with AI</h4>
-              <p class="option-description">Let AI generate study cards based on your input or questions.</p>
+              <p class="option-description">Let AI generate Feynman Cards based on your input or questions.</p>
             </div>
           </div>
         </div>

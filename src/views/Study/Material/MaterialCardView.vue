@@ -99,7 +99,7 @@
           </svg>
         </div>
         <h2>Material Not Found</h2>
-        <p>The study material you're looking for does not exist or has been deleted.</p>
+        <p>The Feynman Card you're looking for does not exist or has been deleted.</p>
         <button @click="goBack" class="btn btn-primary">Return to Dashboard</button>
       </div>
     </div>
@@ -128,7 +128,7 @@
     <div v-if="showEditModal" class="edit-modal-backdrop" @click="cancelEdit">
       <div class="edit-modal" @click.stop>
         <div class="edit-modal-header">
-          <h4>Edit Study Material</h4>
+          <h4>Edit Feynman Card</h4>
         </div>
         <div class="edit-modal-body">
           <div v-if="error" class="alert alert-danger">
@@ -243,7 +243,7 @@
                 v-model="editForm.content"
                 class="form-control"
                 rows="10"
-                placeholder="Paste or type the content you want to study"
+                placeholder="Paste or type the content you want to learn"
                 required
               ></textarea>
             </div>

@@ -1,8 +1,8 @@
 <template>
   <div class="study-page">
     <div class="study-header">
-      <h1>Create Study Card</h1>
-      <p class="study-description">Create a study card by entering your own content</p>
+      <h1>Create Manually</h1>
+      <p class="study-description">Create a Feynman Card by entering your own content</p>
     </div>
     
     <!-- Main Content Area -->
@@ -22,7 +22,7 @@
             id="title"
             v-model="title"
             class="full-input"
-            placeholder="Enter a title for this study card"
+            placeholder="Enter a title for this Feynman Card"
           />
         </div>
       </div>
@@ -73,7 +73,7 @@
             v-model="content"
             class="full-input content-textarea"
             rows="10"
-            placeholder="Paste or type the content you want to study"
+            placeholder="Paste or type the content you want to learn"
           ></textarea>
         </div>
       </div>
@@ -231,7 +231,7 @@
         <button type="button" class="btn btn-outline btn-lg" @click="cancel">Cancel</button>
         <button type="button" @click="handleSubmit" class="btn btn-primary btn-lg" :disabled="loading">
           <span v-if="loading" class="loading-spinner"></span>
-          <span v-else>Save Study Card</span>
+          <span v-else>Save Feynman Card</span>
         </button>
       </div>
     </div>
@@ -414,7 +414,7 @@ export default {
         
         // Ensure we have content before saving
         if (!content.value.trim()) {
-          error.value = 'Please enter content for your study card';
+          error.value = 'Please enter content for your Feynman Card';
           return;
         }
         
@@ -441,19 +441,19 @@ export default {
           getDeadlineInDays()
         );
         
-        console.log("Study card saved with ID:", materialId);
+        console.log("Feynman Card saved with ID:", materialId);
         
         // Ensure we have materialId before navigating
         if (materialId) {
           // Navigate to the study view for the new material
           router.push(`/study/${materialId}`);
         } else {
-          error.value = 'Failed to save study card. Please try again.';
+          error.value = 'Failed to save Feynman Card. Please try again.';
         }
         
       } catch (err) {
         console.error('Error in handleSubmit:', err);
-        error.value = err.message || 'Failed to save study card';
+        error.value = err.message || 'Failed to save Feynman Card';
       } finally {
         loading.value = false;
       }

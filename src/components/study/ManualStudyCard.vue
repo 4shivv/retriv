@@ -1,8 +1,8 @@
 <template>
   <div class="study-input-form card">
     <div class="card-header">
-      <h3>Create Study Card</h3>
-      <p class="form-subtitle">Create a study card by entering your own content</p>
+      <h3>Create Feynman Card</h3>
+      <p class="form-subtitle">Create a Feynman Card by entering your own content</p>
     </div>
     
     <div class="card-body">
@@ -20,7 +20,7 @@
             id="title"
             v-model="title"
             class="form-control"
-            placeholder="Enter a title for this study card"
+            placeholder="Enter a title for this Feynman Card"
             required
           />
         </div>
@@ -224,7 +224,7 @@
           <button type="button" class="btn btn-outline btn-lg" @click="cancel">Cancel</button>
           <button type="submit" class="btn btn-primary btn-lg" :disabled="loading">
             <span v-if="loading" class="loading-spinner"></span>
-            <span v-else>Save Study Card</span>
+            <span v-else>Save Feynman Card</span>
           </button>
         </div>
       </form>
@@ -410,7 +410,7 @@ export default {
         
         // Ensure we have content before saving
         if (!content.value.trim()) {
-          error.value = 'Please enter content for your study card';
+          error.value = 'Please enter content for your Feynman Card';
           return;
         }
         
@@ -437,7 +437,7 @@ export default {
           getDeadlineInDays()
         );
         
-        console.log("Study card saved with ID:", materialId);
+        console.log("Feynman Card saved with ID:", materialId);
         
         // Ensure we have materialId before emitting
         if (materialId) {
@@ -455,12 +455,12 @@ export default {
           
           emit('material-saved', materialObj);
         } else {
-          error.value = 'Failed to save study card. Please try again.';
+          error.value = 'Failed to save Feynman Card. Please try again.';
         }
         
       } catch (err) {
         console.error('Error in handleSubmit:', err);
-        error.value = err.message || 'Failed to save study card';
+        error.value = err.message || 'Failed to save Feynman Card';
       } finally {
         loading.value = false;
       }

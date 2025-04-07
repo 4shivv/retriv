@@ -262,6 +262,18 @@ export default {
       }, 100);
     };
     
+    // Add event listener for the navbar folder button
+    const handleFolderEvent = () => {
+      showCreateFolderModal.value = true;
+      setTimeout(() => {
+        if (folderNameInput.value) {
+          folderNameInput.value.focus();
+        }
+      }, 100);
+    };
+    
+    window.addEventListener('open-create-folder-modal', handleFolderEvent);
+    
     const closeCreateFolderModal = () => {
       showCreateFolderModal.value = false;
       newFolderName.value = '';
@@ -395,6 +407,7 @@ export default {
     onBeforeUnmount(() => {
       window.removeEventListener('resize', checkMobile);
       window.removeEventListener('folder-deleted', handleFolderDeleted);
+      window.removeEventListener('open-create-folder-modal', handleFolderEvent);
     });
     
     return {

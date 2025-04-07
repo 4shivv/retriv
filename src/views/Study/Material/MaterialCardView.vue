@@ -56,11 +56,11 @@
           </div>
           <div class="material-view-header">
             <div class="title-area">
-              <div class="material-category-badge">{{ material.category || 'Uncategorized' }}</div>
-              <h3>{{ material.title }}</h3>
-              <div class="material-view-meta">
-                <span>Created on {{ formatDate(material.createdAt) }}</span>
-              </div>
+            <div class="material-category-badge" :style="{ backgroundColor: getFolderColor(material.category) }">{{ material.category || 'Uncategorized' }}</div>
+            <h3>{{ material.title }}</h3>
+            <div class="material-view-meta">
+            <span>Created on {{ formatDate(material.createdAt) }}</span>
+            </div>
             </div>
           </div>
           
@@ -137,7 +137,7 @@
             </div>
           </div>
           
-          <form @submit.prevent>
+          <form @submit.prevent="saveEdit">
             <div class="form-group">
               <label class="form-label">Title</label>
               <input
@@ -150,22 +150,90 @@
             </div>
             
             <div class="form-group">
-              <label class="form-label">Category</label>
-              <div class="category-select-container">
-                <select
-                  v-model="editForm.category"
-                  class="form-control"
-                  required
-                >
-                  <option value="" disabled>Select a category</option>
-                  <option value="Programming">Programming</option>
-                  <option value="Languages">Languages</option>
-                  <option value="Science">Science</option>
-                  <option value="Math">Math</option>
-                  <option value="History">History</option>
-                  <option value="Art">Art</option>
-                  <option value="Other">Other</option>
-                </select>
+              <label for="folder" class="form-label">Folder</label>
+              <div class="folder-dropdown-container">
+                <!-- Custom Dropdown Trigger -->
+                <div class="folder-dropdown-trigger" @click="toggleFolderDropdown" :class="{ 'active': showFolderDropdown }">
+                  <div class="selected-folder">
+                    <div v-if="selectedFolder" class="folder-tag" :style="{ backgroundColor: selectedFolder.color || '#6366F1' }">
+                      <span>{{ selectedFolder.name }}</span>
+                    </div>
+                    <span v-else class="placeholder-text">Select a folder</span>
+                  </div>
+                  <div class="dropdown-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Folder Dropdown Content -->
+                <div v-if="showFolderDropdown" class="folder-dropdown-content">
+                  <div class="folder-search">
+                    <div class="search-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                      </svg>
+                    </div>
+                    <input 
+                      type="text" 
+                      v-model="folderSearchTerm" 
+                      class="form-control" 
+                      placeholder="Search folders"
+                      @input="handleFolderSearch"
+                      ref="folderSearchInput"
+                    />
+                  </div>
+                  
+                  <div class="folder-groups">
+                    <!-- User's Folders -->
+                    <div class="folder-group" v-if="filteredFolders.length > 0">
+                      <div class="folder-group-label">Your Folders</div>
+                      <div class="folder-options">
+                        <div 
+                          v-for="folder in filteredFolders" 
+                          :key="folder.id" 
+                          class="folder-option" 
+                          @click="selectFolder(folder)"
+                          :class="{ 'active': selectedFolder && selectedFolder.id === folder.id }"
+                          :style="{ borderLeft: `3px solid ${folder.color || '#6366F1'}` }"
+                        >
+                          <div class="folder-icon" :style="{ color: folder.color || '#6366F1' }">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11z"></path>
+                            </svg>
+                          </div>
+                          <span class="folder-name">{{ folder.name }}</span>
+                          <span class="folder-select-icon" v-if="selectedFolder && selectedFolder.id === folder.id">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- No Folders Message -->
+                    <div v-if="!filteredFolders.length && !isLoadingFolders" class="no-folders-message">
+                      <p>No folders found. Create a folder first to organize your materials.</p>
+                      <button type="button" class="create-folder-btn" @click="createNewFolder">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11z"></path>
+                          <line x1="12" y1="11" x2="12" y2="17"></line>
+                          <line x1="9" y1="14" x2="15" y2="14"></line>
+                        </svg>
+                        Create New Folder
+                      </button>
+                    </div>
+
+                    <!-- Loading Indicator -->
+                    <div v-if="isLoadingFolders" class="loading-folders">
+                      <div class="folder-spinner"></div>
+                      <p>Loading folders...</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -179,14 +247,35 @@
                 required
               ></textarea>
             </div>
+            
+            <div class="form-group">
+              <label for="deadline" class="form-label">Learning Deadline</label>
+              <div class="deadline-selection">
+                <div class="deadline-presets">
+                  <button type="button" class="deadline-preset-button" :class="{ 'active': editForm.deadline === '1' }" @click="selectDeadline('1')">1 Day</button>
+                  <button type="button" class="deadline-preset-button" :class="{ 'active': editForm.deadline === '3' }" @click="selectDeadline('3')">3 Days</button>
+                  <button type="button" class="deadline-preset-button" :class="{ 'active': editForm.deadline === '7' }" @click="selectDeadline('7')">1 Week</button>
+                  <button type="button" class="deadline-preset-button" :class="{ 'active': editForm.deadline === '14' }" @click="selectDeadline('14')">2 Weeks</button>
+                  <button type="button" class="deadline-preset-button" :class="{ 'active': editForm.deadline === '30' }" @click="selectDeadline('30')">1 Month</button>
+                  <button type="button" class="deadline-preset-button" :class="{ 'active': editForm.deadline === 'custom' }" @click="selectDeadline('custom')">Custom</button>
+                </div>
+                <div v-if="editForm.deadline === 'custom'" class="custom-deadline-input">
+                  <input type="date" v-model="customDeadlineDate" class="form-control" :min="minDate">
+                </div>
+              </div>
+              <p class="form-text deadline-helper">Setting a deadline helps the app create an optimized review schedule for maximum retention by your target date.</p>
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" @click="cancelEdit" class="btn btn-outline">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary" :disabled="isLoading">
+                <span v-if="isLoading" class="loading-spinner"></span>
+                <span v-else>Save Changes</span>
+              </button>
+            </div>
           </form>
-        </div>
-        <div class="edit-modal-footer">
-          <button @click="cancelEdit" class="btn btn-outline">Cancel</button>
-          <button @click="saveEdit" class="btn btn-primary" :disabled="isLoading">
-            <span v-if="isLoading" class="loading-spinner"></span>
-            <span v-else>Save Changes</span>
-          </button>
         </div>
       </div>
     </div>
@@ -194,10 +283,12 @@
 </template>
 
 <script>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 import StudyService from '@/services/study.service';
+import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '@/services/firebase';
 
 export default {
   name: 'MaterialCardView',
@@ -221,7 +312,31 @@ export default {
     const editForm = ref({
       title: '',
       content: '',
-      category: ''
+      folder: '',
+      deadline: ''
+    });
+    
+    // Folder-related state
+    const selectedFolder = ref(null);
+    const folders = ref([]);
+    const isLoadingFolders = ref(false);
+    const showFolderDropdown = ref(false);
+    const folderSearchTerm = ref('');
+    const folderSearchInput = ref(null);
+    const filteredFolders = computed(() => {
+      if (!folderSearchTerm.value) return folders.value;
+      return folders.value.filter(folder => 
+        folder.name.toLowerCase().includes(folderSearchTerm.value.toLowerCase())
+      );
+    });
+    
+    // Deadline related variables
+    const customDeadlineDate = ref('');
+    
+    // Compute minimum date for custom deadline (today)
+    const minDate = computed(() => {
+      const today = new Date();
+      return today.toISOString().split('T')[0];
     });
 
     // Format date helper function
@@ -281,20 +396,128 @@ export default {
     };
     
     // Edit material
-    const editMaterial = () => {
+    const editMaterial = async () => {
       showActionMenu.value = false;
+      
+      // Load folders if not already loaded
+      if (folders.value.length === 0) {
+        await loadFolders();
+      }
       
       // Initialize edit form with current material data
       editForm.value.title = material.value.title;
       editForm.value.content = material.value.content;
-      editForm.value.category = material.value.category || '';
+      
+      // Find and set the folder based on category
+      if (material.value.category) {
+        const folder = folders.value.find(f => f.name === material.value.category);
+        if (folder) {
+          selectedFolder.value = folder;
+        }
+      }
+      
+      // Set deadline if available
+      if (material.value.deadline) {
+        if ([1, 3, 7, 14, 30].includes(material.value.deadline)) {
+          editForm.value.deadline = material.value.deadline.toString();
+        } else {
+          editForm.value.deadline = 'custom';
+          const deadlineDate = new Date();
+          deadlineDate.setDate(deadlineDate.getDate() + material.value.deadline);
+          customDeadlineDate.value = deadlineDate.toISOString().split('T')[0];
+        }
+      }
       
       showEditModal.value = true;
+    };
+    
+    // Toggle folder dropdown
+    const toggleFolderDropdown = () => {
+      showFolderDropdown.value = !showFolderDropdown.value;
+      
+      if (showFolderDropdown.value) {
+        folderSearchTerm.value = '';
+        nextTick(() => {
+          folderSearchInput.value?.focus();
+        });
+      }
+    };
+    
+    // Handle folder search
+    const handleFolderSearch = () => {
+      // Implementation is handled by the computed property
+    };
+    
+    // Select a folder
+    const selectFolder = (folder) => {
+      selectedFolder.value = folder;
+      showFolderDropdown.value = false;
+    };
+    
+    // Create a new folder
+    const createNewFolder = () => {
+      // Navigate to dashboard with create folder action
+      router.push('/dashboard?action=createFolder');
+    };
+    
+    // Function to handle deadline selection
+    const selectDeadline = (value) => {
+      editForm.value.deadline = value;
+      if (value !== 'custom') {
+        customDeadlineDate.value = '';
+      } else {
+        // Set default custom date to 2 weeks from now if none selected yet
+        if (!customDeadlineDate.value) {
+          const defaultDate = new Date();
+          defaultDate.setDate(defaultDate.getDate() + 14);
+          customDeadlineDate.value = defaultDate.toISOString().split('T')[0];
+        }
+      }
+    };
+    
+    // Convert deadline selection to days for the API
+    const getDeadlineInDays = () => {
+      if (!editForm.value.deadline) return null;
+      
+      if (editForm.value.deadline === 'custom' && customDeadlineDate.value) {
+        const selectedDate = new Date(customDeadlineDate.value);
+        const today = new Date();
+        const diffTime = Math.abs(selectedDate - today);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+      }
+      
+      return editForm.value.deadline === 'custom' ? null : parseInt(editForm.value.deadline);
+    };
+    
+    // Load folders from localStorage
+    const loadFolders = async () => {
+      isLoadingFolders.value = true;
+      try {
+        const savedFolders = localStorage.getItem('user-folders');
+        if (savedFolders) {
+          folders.value = JSON.parse(savedFolders);
+        }
+      } catch (err) {
+        console.error('Error loading folders:', err);
+      } finally {
+        isLoadingFolders.value = false;
+      }
+    };
+    
+    // Get folder color based on category name
+    const getFolderColor = (categoryName) => {
+      if (!categoryName) return 'var(--primary-color)';
+      
+      // Find folder with matching name
+      const folder = folders.value.find(f => f.name === categoryName);
+      return folder?.color || 'var(--primary-color)';
     };
     
     // Cancel edit
     const cancelEdit = () => {
       showEditModal.value = false;
+      showFolderDropdown.value = false;
     };
     
     // Save edit
@@ -303,12 +526,75 @@ export default {
         isLoading.value = true;
         error.value = '';
         
-        // Update material in database
-        await StudyService.updateStudyMaterial(
+        // Ensure a folder is selected
+        if (!selectedFolder.value) {
+          error.value = 'Please select a folder to organize your material';
+          isLoading.value = false;
+          return;
+        }
+        
+        // Ensure a learning deadline is set
+        if (!editForm.value.deadline) {
+          error.value = 'Please set a learning deadline to create your study plan';
+          isLoading.value = false;
+          return;
+        }
+        
+        // Get the deadline in days
+        const deadlineDays = getDeadlineInDays();
+        if (editForm.value.deadline === 'custom' && !deadlineDays) {
+          error.value = 'Please select a valid custom deadline';
+          isLoading.value = false;
+          return;
+        }
+        
+        // Create a custom update method since StudyService.updateStudyMaterial doesn't support folder and deadline
+        const updateStudyMaterialWithFolderAndDeadline = async (materialId, title, content, category, deadline) => {
+          // First check if the user is authenticated
+          if (!auth.currentUser) {
+            throw new Error("You must be logged in to update materials");
+          }
+          
+          try {
+            const materialRef = doc(db, 'materials', materialId);
+            
+            // Get the material to verify ownership
+            const materialSnap = await getDoc(materialRef);
+            
+            if (!materialSnap.exists()) {
+              throw new Error("Material not found");
+            }
+            
+            const materialData = materialSnap.data();
+            
+            // Verify the material belongs to the current user
+            if (materialData.userId !== auth.currentUser.uid) {
+              throw new Error("You do not have permission to edit this material");
+            }
+            
+            // Update the material with all fields
+            await updateDoc(materialRef, {
+              title,
+              content,
+              category,
+              deadline,
+              updatedAt: serverTimestamp()
+            });
+            
+            return materialId;
+          } catch (error) {
+            console.error("Error updating material:", error);
+            throw new Error(`Failed to update material: ${error.message}`);
+          }
+        };
+        
+        // Update material in database with the folder (category) and deadline
+        await updateStudyMaterialWithFolderAndDeadline(
           material.value.id,
           editForm.value.title,
           editForm.value.content,
-          editForm.value.category
+          selectedFolder.value.name,  // Use the folder name as category
+          deadlineDays               // Include deadline
         );
         
         // Update the local material object
@@ -316,7 +602,8 @@ export default {
           ...material.value,
           title: editForm.value.title,
           content: editForm.value.content,
-          category: editForm.value.category,
+          category: selectedFolder.value.name,
+          deadline: deadlineDays,
           updatedAt: new Date()
         };
         
@@ -384,7 +671,8 @@ export default {
       // Add event listener to close action menu when clicking outside
       document.addEventListener('click', closeActionMenu);
       
-      // Fetch material data
+      // Load folders first, then fetch material
+      await loadFolders();
       await fetchMaterial();
     });
     
@@ -413,7 +701,24 @@ export default {
       cancelDelete,
       deleteMaterial,
       blurtingMaterial,
-      feynmanMaterial
+      feynmanMaterial,
+      // Folder related properties and methods
+      selectedFolder,
+      folders,
+      isLoadingFolders,
+      showFolderDropdown,
+      folderSearchTerm,
+      folderSearchInput,
+      filteredFolders,
+      toggleFolderDropdown,
+      handleFolderSearch,
+      selectFolder,
+      createNewFolder,
+      getFolderColor,
+      // Deadline related properties and methods
+      customDeadlineDate,
+      minDate,
+      selectDeadline
     };
   }
 }
@@ -811,6 +1116,13 @@ export default {
 }
 
 /* Form Styles */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-6);
+}
+
 .form-group {
   margin-bottom: var(--spacing-4);
 }
@@ -840,6 +1152,301 @@ export default {
 textarea.form-control {
   resize: vertical;
   min-height: 200px;
+}
+
+/* Folder Dropdown Styling */
+.folder-dropdown-container {
+  position: relative;
+  width: 100%;
+}
+
+.folder-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: white;
+  border: 2px solid var(--neutral-300);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-sm);
+}
+
+.folder-dropdown-trigger:hover {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.folder-dropdown-trigger.active {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), var(--shadow-md);
+}
+
+.selected-folder {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.placeholder-text {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--neutral-500);
+}
+
+.dropdown-icon {
+  margin-left: auto;
+  color: var(--neutral-600);
+  transition: transform var(--transition-normal);
+}
+
+.folder-dropdown-trigger.active .dropdown-icon {
+  transform: rotate(180deg);
+  color: var(--primary-color);
+}
+
+/* Folder Tag Styling */
+.folder-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: white;
+  background-color: var(--primary-color);
+}
+
+/* Dropdown Content Styling */
+.folder-dropdown-content {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown);
+  border: 1px solid var(--neutral-200);
+  max-height: 350px;
+  overflow-y: scroll !important;
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.folder-search {
+  padding: var(--spacing-3);
+  border-bottom: 1px solid var(--neutral-200);
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.search-icon {
+  color: var(--neutral-400);
+}
+
+/* Add padding at the bottom to ensure all options are visible when scrolling */
+.folder-groups::after {
+  content: '';
+  display: block;
+  height: 12px;
+}
+
+.folder-groups {
+  padding: var(--spacing-2);
+  padding-right: 10px; /* Extra space for scrollbar */
+}
+
+.folder-group {
+  margin-bottom: var(--spacing-5);
+  padding-bottom: var(--spacing-3);
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+.folder-group:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.folder-group-label {
+  padding: 0 var(--spacing-3);
+  margin-bottom: var(--spacing-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--neutral-600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: var(--neutral-50);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+  display: inline-block;
+}
+
+.folder-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.folder-option {
+  display: flex;
+  align-items: center;
+  padding: 10px var(--spacing-3);
+  gap: var(--spacing-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--neutral-800);
+  margin-bottom: 4px;
+  min-height: 44px;
+  border: 1px solid transparent;
+}
+
+.folder-option:hover {
+  background-color: var(--neutral-100);
+  border-color: var(--neutral-300);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.folder-option.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  font-weight: var(--font-weight-medium);
+}
+
+.folder-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.folder-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-select-icon {
+  margin-left: var(--spacing-2);
+}
+
+.no-folders-message {
+  text-align: center;
+  padding: var(--spacing-6);
+  color: var(--neutral-600);
+}
+
+.create-folder-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-4);
+  padding: 8px 16px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-normal);
+}
+
+.create-folder-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.loading-folders {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-6);
+  color: var(--neutral-600);
+}
+
+.folder-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid rgba(99, 102, 241, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--spacing-3);
+}
+
+/* Deadline Selection Styling */
+.deadline-selection {
+  margin-bottom: var(--spacing-2);
+}
+
+.deadline-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+}
+
+.deadline-preset-button {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--neutral-300);
+  background-color: var(--neutral-50);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  color: var(--neutral-700);
+}
+
+.deadline-preset-button:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(99, 102, 241, 0.05);
+}
+
+.deadline-preset-button.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.custom-deadline-input {
+  max-width: 300px;
+  margin-top: var(--spacing-2);
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.deadline-helper {
+  font-size: var(--font-size-xs);
+  color: var(--neutral-600);
+  margin-top: var(--spacing-2);
 }
 
 .alert {

@@ -56,7 +56,7 @@
             @click="viewMaterial(material)"
           >
             <div class="material-header">
-              <div class="material-category">{{ material.category || 'Uncategorized' }}</div>
+              <div class="material-category" :style="{ backgroundColor: getFolderColor(material.category, '0.1'), color: getFolderColor(material.category) }">{{ material.category || 'Uncategorized' }}</div>
             </div>
             <div class="material-date">{{ formatDate(material.createdAt) }}</div>
             <h3 class="material-title">{{ material.title }}</h3>
@@ -120,7 +120,7 @@
         </div>
         <div class="material-view-header">
           <div class="title-area">
-            <div class="material-category-badge">{{ selectedMaterial.category || 'Uncategorized' }}</div>
+          <div class="material-category-badge" :style="{ backgroundColor: getFolderColor(selectedMaterial.category) }">{{ selectedMaterial.category || 'Uncategorized' }}</div>
             <h3>{{ selectedMaterial.title }}</h3>
             <div class="material-view-meta">
               <span>Created on {{ formatDate(selectedMaterial.createdAt) }}</span>
@@ -328,6 +328,36 @@ export default {
       content: '',
       category: ''
     });
+    
+    // Get folder color based on category name
+    const getFolderColor = (categoryName, opacity = null) => {
+      if (!categoryName) return opacity ? 'rgba(99, 102, 241, ' + opacity + ')' : 'var(--primary-color)';
+      
+      // Try to get folders from localStorage
+      try {
+        const savedFolders = localStorage.getItem('user-folders');
+        if (savedFolders) {
+          const folders = JSON.parse(savedFolders);
+          // Find folder with matching name
+          const folder = folders.find(f => f.name === categoryName);
+          if (folder?.color) {
+            if (opacity) {
+              // Convert hex to rgba
+              const hex = folder.color.replace('#', '');
+              const r = parseInt(hex.substring(0, 2), 16);
+              const g = parseInt(hex.substring(2, 4), 16);
+              const b = parseInt(hex.substring(4, 6), 16);
+              return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+            }
+            return folder.color;
+          }
+        }
+      } catch (err) {
+        console.error('Error getting folder color:', err);
+      }
+      
+      return opacity ? 'rgba(99, 102, 241, ' + opacity + ')' : 'var(--primary-color)';
+    };
     
     // Category management for the list component
     
@@ -702,7 +732,8 @@ export default {
       confirmDelete,
       confirmDeleteCategory,
       cancelCategoryDelete,
-      deleteCategory
+      deleteCategory,
+      getFolderColor
     };
   }
 }

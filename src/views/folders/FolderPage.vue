@@ -62,23 +62,16 @@
 
       <!-- Folder Content -->
       <div v-else class="folder-content">
-        <!-- Materials Grid -->
-        <div class="materials-grid">
-          <div 
-            v-for="material in materials" 
-            :key="material.id" 
-            class="material-card"
-            @click="handleSelectMaterial(material)"
-          >
-            <div class="material-card-content">
-              <h3 class="material-title">{{ material.title }}</h3>
-              <p class="material-excerpt">{{ getExcerpt(material.content) }}</p>
-            </div>
-            <div class="material-footer">
-              <span class="material-date">{{ formatDate(material.createdAt) }}</span>
-            </div>
-          </div>
-        </div>
+        <!-- Using the same MaterialList component from dashboard -->
+        <MaterialList 
+          :materials="materials"
+          :filtered-materials="materials"
+          :loading="loading"
+          @select-material="handleSelectMaterial"
+          @create-new="handleAddNew"
+          @material-edited="handleMaterialEdited"
+          @material-deleted="handleMaterialDeleted"
+        />
       </div>
     </div>
     
@@ -182,9 +175,14 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import StudyService from '@/services/study.service';
+import MaterialList from '@/components/study/MaterialList.vue';
 
 export default {
   name: 'FolderPage',
+  
+  components: {
+    MaterialList
+  },
   
   setup() {
     const route = useRoute();
@@ -325,6 +323,22 @@ export default {
       router.push(`/dashboard?action=create&folderId=${folderId.value}`);
     };
     
+    // Handle material edited
+    const handleMaterialEdited = async (updatedMaterial) => {
+      const index = materials.value.findIndex(m => m.id === updatedMaterial.id);
+      if (index !== -1) {
+        materials.value[index] = updatedMaterial;
+      }
+      
+      // Reload materials to ensure consistency
+      await loadMaterials();
+    };
+    
+    // Handle material deleted
+    const handleMaterialDeleted = (materialId) => {
+      materials.value = materials.value.filter(m => m.id !== materialId);
+    };
+    
     // Folder rename functionality
     const openRenameModal = () => {
       showRenameModal.value = true;
@@ -455,7 +469,9 @@ export default {
       renameFolder,
       confirmDeleteFolder,
       cancelDeleteFolder,
-      deleteFolder
+      deleteFolder,
+      handleMaterialEdited,
+      handleMaterialDeleted
     };
   }
 };

@@ -100,7 +100,10 @@
               Back
             </button>
             <button @click="evaluateExplanation" class="btn btn-primary" :disabled="!canProceed || loading">
-              <span v-if="loading" class="loading-spinner"></span>
+              <span v-if="loading" class="button-content-loading">
+                <span class="loading-spinner"></span>
+                <span>Generating...</span>
+              </span>
               <span v-else>Analyze My Explanation</span>
             </button>
           </div>
@@ -1164,6 +1167,18 @@ export default {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Button loading state */
+.button-content-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+}
+
+.button-content-loading .loading-spinner {
+  margin-right: 0;
 }
 
 /* Alert styling */

@@ -1,8 +1,8 @@
 <template>
   <div id="app" :class="{ 'dark-theme': darkMode, 'with-sidebar': isAuthenticated, 'sidebar-collapsed': sidebarCollapsed }">
-    <AppSidebar v-if="isAuthenticated" @sidebar-toggle="handleSidebarToggle" @open-study-card-modal="openStudyCardModal" />
+    <AppSidebar v-if="isAuthenticated" @sidebar-toggle="handleSidebarToggle" @open-study-card-modal="openStudyCardModal" @open-practice-test-modal="openPracticeTestModal" />
     <div class="main-container" :class="{ 'with-sidebar': isAuthenticated }">
-      <AppNavbar @open-study-card-modal="openStudyCardModal" />
+      <AppNavbar @open-study-card-modal="openStudyCardModal" @open-practice-test-modal="openPracticeTestModal" />
       <main class="app-main">
         <router-view />
       </main>
@@ -15,17 +15,21 @@
       @close="closeStudyCardModal"
       @select-option="handleStudyCardOption"
     />
+    
+    <!-- Global Modals Component -->
+    <GlobalModals />
   </div>
 </template>
 
 <script>
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import AppNavbar from '@/components/ui/Navbar.vue';
 import AppSidebar from '@/components/ui/Sidebar';
 import AppFooter from '@/components/ui/Footer.vue';
 import StudyCardModal from '@/components/study/StudyCardModal.vue';
+import GlobalModals from '@/components/modals/GlobalModals.vue';
 
 export default {
   name: 'App',
@@ -33,7 +37,8 @@ export default {
     AppNavbar,
     AppSidebar,
     AppFooter,
-    StudyCardModal
+    StudyCardModal,
+    GlobalModals
   },
   
   setup() {
@@ -42,6 +47,7 @@ export default {
     const router = useRouter();
     const sidebarCollapsed = ref(false);
     const showStudyCardModal = ref(false);
+    const showPracticeTestModal = ref(false);
     
     const isAuthenticated = computed(() => {
       return store.getters['auth/isAuthenticated'];
@@ -54,10 +60,21 @@ export default {
     
     // Initialize sidebar state from localStorage
     onMounted(() => {
+      // Load sidebar state from localStorage
       const savedState = localStorage.getItem('sidebar-collapsed');
       if (savedState !== null) {
         sidebarCollapsed.value = savedState === 'true';
       }
+      
+      // Listen for the custom practice test modal event
+      window.addEventListener('open-practice-test-modal', () => {
+        openPracticeTestModal();
+      });
+    });
+    
+    // Cleanup custom event listener
+    onBeforeUnmount(() => {
+      window.removeEventListener('open-practice-test-modal', openPracticeTestModal);
     });
     
     // Watch for changes in localStorage outside of this component
@@ -84,6 +101,11 @@ export default {
       }
     };
     
+    // Practice Test Modal functions
+    const openPracticeTestModal = () => {
+      store.dispatch('modals/openPracticeTestModal');
+    };
+    
     return {
       isAuthenticated,
       sidebarCollapsed,
@@ -91,7 +113,8 @@ export default {
       handleSidebarToggle,
       openStudyCardModal,
       closeStudyCardModal,
-      handleStudyCardOption
+      handleStudyCardOption,
+      openPracticeTestModal
     };
   }
 }

@@ -80,6 +80,13 @@
                     </svg>
                     Feynman Card
                   </div>
+                  <div class="dropdown-item" @click="handlePracticeTest">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 11.08V8l-6-6H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h6"></path>
+                      <path d="M14 3v5h5M16 16l-3.56 3.56a1.5 1.5 0 0 1-2.12 0l-.74-.74a1.5 1.5 0 0 1 0-2.12l3.56-3.56a1.5 1.5 0 0 1 2.12 0l.74.74a1.5 1.5 0 0 1 0 2.12z"></path>
+                    </svg>
+                    Practice Test
+                  </div>
                   <div class="dropdown-item" @click="handleCreateFolder">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11z"></path>
@@ -159,7 +166,7 @@ export default {
       }
     }
   },
-  emits: ['open-study-card-modal'],
+  emits: ['open-study-card-modal', 'open-practice-test-modal'],
   
   setup(props, { emit }) {
     const router = useRouter();
@@ -310,6 +317,15 @@ export default {
       emit('open-study-card-modal');
     };
     
+    const handlePracticeTest = () => {
+      if (userMenuOpen.value) {
+        closeUserMenu();
+      }
+      closeAddNewDropdown();
+      // Dispatch action to open practice test modal through the store
+      store.dispatch('modals/openPracticeTestModal');
+    };
+    
     const handleCreateFolder = () => {
       if (userMenuOpen.value) {
         closeUserMenu();
@@ -394,6 +410,7 @@ export default {
       navigateToHomeWithHash,
       handleAddNew,
       handleStudyCard,
+      handlePracticeTest,
       handleCreateFolder,
       handleLogout,
       handleSearch

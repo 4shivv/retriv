@@ -11,6 +11,9 @@ import CreateWithAIView from '@/views/Study/CreateWithAIView.vue';
 import BlurtingView from '@/views/Study/Blurting/BlurtingView.vue';
 import FeynmanView from '@/views/Study/Feynman/FeynmanView.vue';
 import MaterialCardView from '@/views/Study/Material/MaterialCardView.vue';
+import PracticeTestPasteView from '@/views/Study/PracticeTest/PracticeTestPasteView.vue';
+import PracticeTestAIView from '@/views/Study/PracticeTest/PracticeTestAIView.vue';
+import PracticeTestTakeView from '@/views/Study/PracticeTest/PracticeTestTakeView.vue';
 import FAQPage from '@/views/FAQPage.vue';
 import BlogPage from '@/views/BlogPage.vue';
 import TermsPage from '@/views/TermsPage.vue';
@@ -119,6 +122,35 @@ const routes = [
     meta: { 
       requiresAuth: true,
       title: 'Study Material - Retriv' 
+    }
+  },
+  // Route for practice test has been removed as requested
+  // Now handled through modal dialogs
+  {
+    path: '/study/practice-test/paste',
+    name: 'PracticeTestManual',
+    component: PracticeTestPasteView,
+    meta: { 
+      requiresAuth: true,
+      title: 'Create Practice Test - Retriv' 
+    }
+  },
+  {
+    path: '/study/practice-test/ai',
+    name: 'PracticeTestAI',
+    component: PracticeTestAIView,
+    meta: { 
+      requiresAuth: true,
+      title: 'Generate Practice Test - Retriv' 
+    }
+  },
+  {
+    path: '/study/practice-test/take/:id',
+    name: 'PracticeTestTake',
+    component: PracticeTestTakeView,
+    meta: { 
+      requiresAuth: true,
+      title: 'Take Practice Test - Retriv' 
     }
   },
   {

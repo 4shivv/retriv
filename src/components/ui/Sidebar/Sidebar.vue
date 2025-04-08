@@ -89,6 +89,15 @@
                 <span v-if="!collapsed">Feynman Card</span>
               </button>
             </li>
+            <li class="nav-item">
+              <button @click="openPracticeTestModal" class="nav-link" title="Practice Test">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 11.08V8l-6-6H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h6"></path>
+                  <path d="M14 3v5h5M16 16l-3.56 3.56a1.5 1.5 0 0 1-2.12 0l-.74-.74a1.5 1.5 0 0 1 0-2.12l3.56-3.56a1.5 1.5 0 0 1 2.12 0l.74.74a1.5 1.5 0 0 1 0 2.12z"></path>
+                </svg>
+                <span v-if="!collapsed">Practice Test</span>
+              </button>
+            </li>
           </ul>
         </li>
       </ul>
@@ -178,7 +187,7 @@ export default {
     }
   },
   
-  emits: ['sidebar-toggle', 'open-study-card-modal'],
+  emits: ['sidebar-toggle', 'open-study-card-modal', 'open-practice-test-modal'],
   
   setup(props, { emit }) {
     const router = useRouter();
@@ -330,6 +339,16 @@ export default {
       emit('open-study-card-modal');
     };
     
+    // Open Practice Test Modal
+    const openPracticeTestModal = () => {
+      // Close mobile sidebar if open
+      if (isMobile.value && isMobileSidebarOpen.value) {
+        closeMobileSidebar();
+      }
+      // Dispatch action to open practice test modal through the store
+      store.dispatch('modals/openPracticeTestModal');
+    };
+    
     // Load folders from localStorage
     const loadFolders = () => {
       const savedFolders = localStorage.getItem('user-folders');
@@ -436,6 +455,7 @@ export default {
       closeCreateFolderModal,
       createFolder,
       openStudyCardModal,
+      openPracticeTestModal,
     };
   }
 }

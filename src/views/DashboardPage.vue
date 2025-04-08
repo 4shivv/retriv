@@ -102,11 +102,21 @@
             </div>
           </section>
 
+
+          
           <!-- Materials Library Section -->
           <section class="materials-section">
             <div class="section-header">
               <h2 class="section-title">Your Study Materials</h2>
               <div class="materials-filter">
+                <button @click="openPracticeTestModal" class="btn btn-primary btn-with-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  <span>Create Practice Test</span>
+                </button>
+                
                 <button @click="showFilterMenu = !showFilterMenu" class="filter-toggle-btn" :class="{ active: showFilterMenu }">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
@@ -296,6 +306,9 @@ export default {
     const materialsLoading = ref(false);
     const searchQuery = ref('');
     const showFilterMenu = ref(false);
+    
+    // Practice tests state
+    const practiceTests = ref([]);
     
     const filters = ref({
       dueReview: false,
@@ -787,6 +800,15 @@ export default {
       fetchMaterials();
     };
     
+    // Practice Test Modal function
+    const openPracticeTestModal = () => {
+      store.dispatch('modals/openPracticeTestModal');
+    };
+    
+
+    
+
+    
     // Update material categories based on current materials
     const updateMaterialCategories = () => {
       materialCategories.value = extractRealCategories(materials.value);
@@ -874,6 +896,7 @@ export default {
       materialCategories,
       showFilterMenu,
       activeCategory,
+      practiceTests,
       
       // Methods
       handleSelectMaterial,
@@ -891,6 +914,7 @@ export default {
       reviewMaterial,
       viewAllDueReviews,
       navigateToCreate,
+      openPracticeTestModal,
     };
   }
 }
@@ -1219,6 +1243,18 @@ export default {
 .view-all-btn:hover {
   border-color: var(--primary-color);
   color: var(--primary-color);
+}
+
+/* Section Actions - general purpose styles */
+.section-actions {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.btn-with-icon {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
 }
 
 /* Materials Section */

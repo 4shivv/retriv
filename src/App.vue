@@ -47,7 +47,6 @@ export default {
     const router = useRouter();
     const sidebarCollapsed = ref(false);
     const showStudyCardModal = ref(false);
-    const showPracticeTestModal = ref(false);
     
     const isAuthenticated = computed(() => {
       return store.getters['auth/isAuthenticated'];

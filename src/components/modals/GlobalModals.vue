@@ -76,7 +76,7 @@ export default {
     const handlePracticeTestOption = (option) => {
       closePracticeTestModal();
       
-      // Open the appropriate modal based on the selected option
+      // Navigate to the appropriate page based on the selected option
       switch(option) {
         case 'paste':
           store.dispatch('modals/openPasteTextModal');

@@ -14,6 +14,9 @@ import MaterialCardView from '@/views/Study/Material/MaterialCardView.vue';
 import PracticeTestPasteView from '@/views/Study/PracticeTest/PracticeTestPasteView.vue';
 import PracticeTestAIView from '@/views/Study/PracticeTest/PracticeTestAIView.vue';
 import PracticeTestTakeView from '@/views/Study/PracticeTest/PracticeTestTakeView.vue';
+import PasteTextView from '@/views/Study/PasteTextView.vue';
+import UploadFileView from '@/views/Study/UploadFileView.vue';
+import CreateSimilarTestView from '@/views/Study/CreateSimilarTestView.vue';
 import FAQPage from '@/views/FAQPage.vue';
 import BlogPage from '@/views/BlogPage.vue';
 import TermsPage from '@/views/TermsPage.vue';
@@ -126,6 +129,33 @@ const routes = [
   },
   // Route for practice test has been removed as requested
   // Now handled through modal dialogs
+  {
+    path: '/study/paste-text',
+    name: 'PasteText',
+    component: PasteTextView,
+    meta: { 
+      requiresAuth: true,
+      title: 'Paste Text - Retriv' 
+    }
+  },
+  {
+    path: '/study/upload-file',
+    name: 'UploadFile',
+    component: UploadFileView,
+    meta: { 
+      requiresAuth: true,
+      title: 'Upload File - Retriv' 
+    }
+  },
+  {
+    path: '/study/create-similar-test',
+    name: 'CreateSimilarTest',
+    component: CreateSimilarTestView,
+    meta: { 
+      requiresAuth: true,
+      title: 'Create Similar Test - Retriv' 
+    }
+  },
   {
     path: '/study/practice-test/paste',
     name: 'PracticeTestManual',

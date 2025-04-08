@@ -1,4 +1,6 @@
 // src/store/modules/modals.js
+import router from '@/router';
+
 const state = {
   isPracticeTestModalOpen: false,
   isPasteTextModalOpen: false,
@@ -48,19 +50,25 @@ const actions = {
     commit('CLOSE_PRACTICE_TEST_MODAL');
   },
   openPasteTextModal({ commit }) {
-    commit('OPEN_PASTE_TEXT_MODAL');
+    commit('CLOSE_ALL_MODALS');
+    // Navigate to paste text page instead
+    router.push('/study/paste-text');
   },
   closePasteTextModal({ commit }) {
     commit('CLOSE_PASTE_TEXT_MODAL');
   },
   openUploadFileModal({ commit }) {
-    commit('OPEN_UPLOAD_FILE_MODAL');
+    commit('CLOSE_ALL_MODALS');
+    // Navigate to upload file page instead
+    router.push('/study/upload-file');
   },
   closeUploadFileModal({ commit }) {
     commit('CLOSE_UPLOAD_FILE_MODAL');
   },
   openCreateSimilarTestModal({ commit }) {
-    commit('OPEN_CREATE_SIMILAR_TEST_MODAL');
+    commit('CLOSE_ALL_MODALS');
+    // Navigate to create similar test page instead
+    router.push('/study/create-similar-test');
   },
   closeCreateSimilarTestModal({ commit }) {
     commit('CLOSE_CREATE_SIMILAR_TEST_MODAL');

@@ -5,6 +5,7 @@ import LoginPage from '@/views/LoginPage.vue';
 import RegisterPage from '@/views/RegisterPage.vue';
 import DashboardPage from '@/views/DashboardPage.vue';
 import ProfilePage from '@/views/ProfilePage.vue';
+import LibraryPage from '@/views/Library/LibraryPage.vue';
 import FolderPage from '@/views/folders/FolderPage.vue';
 import CreateStudyCardView from '@/views/Study/CreateStudyCardView.vue';
 import CreateWithAIView from '@/views/Study/CreateWithAIView.vue';
@@ -28,6 +29,15 @@ import MobileAppPage from '@/views/MobileAppPage.vue';
 import PricingPage from '@/views/PricingPage.vue';
 
 const routes = [
+  {
+    path: '/library',
+    name: 'Library',
+    component: LibraryPage,
+    meta: { 
+      requiresAuth: true,
+      title: 'Learning Library - Retriv' 
+    }
+  },
   {
     path: '/',
     name: 'Home',

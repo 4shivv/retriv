@@ -104,6 +104,29 @@
 
 
           
+          <!-- Practice Tests Section -->
+          <section class="practice-tests-section">
+            <div class="section-header">
+              <h2 class="section-title">Practice Tests</h2>
+              <button @click="openPracticeTestModal" class="btn btn-primary btn-with-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Create Test</span>
+              </button>
+            </div>
+            
+            <PracticeTestList 
+              :loading="practiceTestsLoading" 
+              :practice-tests="practiceTests.slice(0, 3)" 
+              :view-all="false"
+              @create-test="openPracticeTestModal"
+              @delete-test="handleDeleteTest"
+              @view-all="viewAllPracticeTests"
+            />
+          </section>
+          
           <!-- Materials Library Section -->
           <section class="materials-section">
             <div class="section-header">
@@ -285,6 +308,7 @@ import MaterialList from '@/components/study/MaterialList.vue';
 import BlurtingForm from '@/components/study/BlurtingForm.vue';
 // Calendar integration removed
 import FeynmanTechnique from '@/components/study/feynman/FeynmanTechnique.vue';
+import PracticeTestList from '@/components/study/practicetest/PracticeTestList.vue';
 import StudyService from '@/services/study.service';
 
 export default {
@@ -293,7 +317,8 @@ export default {
     MaterialList,
     BlurtingForm,
     // Calendar integration removed
-    FeynmanTechnique
+    FeynmanTechnique,
+    PracticeTestList
   },
   
   setup() {
@@ -309,6 +334,7 @@ export default {
     
     // Practice tests state
     const practiceTests = ref([]);
+    const practiceTestsLoading = ref(false);
     
     const filters = ref({
       dueReview: false,
@@ -378,6 +404,40 @@ export default {
       ).length;
     });
     
+    // View all practice tests
+    const viewAllPracticeTests = () => {
+      router.push('/study/practice-test');
+    };
+    
+    // Delete a practice test
+    const handleDeleteTest = (testId) => {
+      store.dispatch('practiceTests/deleteTest', testId);
+      
+      // Refresh the list
+      fetchPracticeTests();
+    };
+    
+    // Fetch practice tests from the store
+    const fetchPracticeTests = () => {
+      practiceTestsLoading.value = true;
+      
+      try {
+        // Get practice tests from Vuex store
+        practiceTests.value = store.getters['practiceTests/allTests'];
+        
+        // Sort tests by creation date (newest first)
+        practiceTests.value.sort((a, b) => {
+          const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+          const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+          return dateB - dateA;
+        });
+      } catch (error) {
+        console.error('Error fetching practice tests:', error);
+      } finally {
+        practiceTestsLoading.value = false;
+      }
+    };
+
     // Handle category deletion with confirmation
     const handleCategoryDeleteClick = (categoryName) => {
       if (confirm(`Are you sure you want to delete the category "${categoryName}"? \nMaterials in this category will be set to "Uncategorized".`)) {
@@ -846,6 +906,9 @@ export default {
         // Load materials first (this will also call generateDueReviews internally)
         await fetchMaterials();
         
+        // Fetch practice tests
+        fetchPracticeTests();
+        
         // Check if there's a query parameter to create a new material
         const route = router.currentRoute.value;
         if (route.query.action === 'create') {
@@ -897,6 +960,9 @@ export default {
       showFilterMenu,
       activeCategory,
       practiceTests,
+      practiceTestsLoading,
+      viewAllPracticeTests,
+      handleDeleteTest,
       
       // Methods
       handleSelectMaterial,
@@ -1255,6 +1321,11 @@ export default {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
+}
+
+/* Practice Tests Section */
+.practice-tests-section {
+  margin-bottom: var(--spacing-12);
 }
 
 /* Materials Section */

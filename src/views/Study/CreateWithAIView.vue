@@ -2,7 +2,7 @@
   <div class="study-page">
     <div class="study-header">
       <h1>Create With AI</h1>
-      <p class="study-description">Let AI create Feynman Cards based on your content or questions</p>
+      <p class="study-description">Let AI create Blurt Cards based on your content or questions</p>
     </div>
     
     <!-- Main Content Area -->
@@ -35,7 +35,7 @@
               </div>
               <div class="option-content">
                 <h3>Paste Text</h3>
-                <p>Paste your text content and AI will generate Feynman Cards</p>
+                <p>Paste your text content and AI will generate Blurt Cards</p>
               </div>
             </div>
             
@@ -53,7 +53,7 @@
               </div>
               <div class="option-content">
                 <h3>Ask Question</h3>
-                <p>Ask a question and AI will create Feynman Cards with answers</p>
+                <p>Ask a question and AI will create Blurt Cards with answers</p>
               </div>
             </div>
             
@@ -73,7 +73,7 @@
               </div>
               <div class="option-content">
                 <h3>Upload File</h3>
-                <p>Upload a document and AI will extract Feynman Cards</p>
+                <p>Upload a document and AI will extract Blurt Cards</p>
               </div>
             </div>
           </div>
@@ -266,7 +266,7 @@
       <!-- AI Result Preview Step -->
       <div v-if="aiStep === 'preview'" class="ai-preview-container">
         <div class="preview-header">
-          <h2 class="preview-title">AI-Generated Feynman Cards</h2>
+          <h2 class="preview-title">AI-Generated Blurt Cards</h2>
           <p class="preview-description">Review the generated materials below. You can edit, remove, or save them as is.</p>
         </div>
         

@@ -64,7 +64,7 @@
               <!-- Add New Material Button with Dropdown -->
               <div class="add-new-dropdown" v-click-outside="closeAddNewDropdown">
                 <button @click="toggleAddNewDropdown" class="btn btn-primary add-new-btn">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                   </svg>
@@ -212,13 +212,9 @@ export default {
       const user = store.getters['auth/user'];
       if (!user) return '';
       
-      // If user has a displayName, use first and last character of displayName
+      // If user has a displayName, use only the first letter
       if (user.displayName && user.displayName.length > 0) {
-        if (user.displayName.length === 1) {
-          return user.displayName.charAt(0).toUpperCase();
-        } else {
-          return (user.displayName.charAt(0) + user.displayName.charAt(user.displayName.length - 1)).toUpperCase();
-        }
+        return user.displayName.charAt(0).toUpperCase();
       }
       
       // Fallback to email if no displayName
@@ -226,7 +222,7 @@ export default {
       
       const email = user.email;
       const parts = email.split('@');
-      return parts[0].substring(0, 2).toUpperCase();
+      return parts[0].charAt(0).toUpperCase();
     });
     
     const toggleMenu = () => {
@@ -739,7 +735,7 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   letter-spacing: -0.02em;
   line-height: 1;

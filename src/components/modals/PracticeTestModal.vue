@@ -22,7 +22,7 @@
               </svg>
             </div>
             <h3>Paste Text</h3>
-            <p>Paste your own questions and answers to create a custom practice test.</p>
+            <p>Generate open-ended short answer questions from your pasted source material.</p>
           </div>
           
           <div class="option-card" @click="selectOption('upload')">
@@ -34,7 +34,7 @@
               </svg>
             </div>
             <h3>Upload File</h3>
-            <p>Upload a document with questions and answers to create a practice test.</p>
+            <p>Generate open-ended short answer questions from your uploaded source material.</p>
           </div>
           
           <div class="option-card" @click="selectOption('ai')">
@@ -50,7 +50,7 @@
               </svg>
             </div>
             <h3>Create Similar Test</h3>
-            <p>Use AI to generate a practice test based on similar questions and style.</p>
+            <p>Create similar open-ended short answer questions based on your source material.</p>
           </div>
         </div>
       </div>

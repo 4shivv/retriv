@@ -11,7 +11,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <p class="modal-description">Paste your text source material to generate practice questions.</p>
+        <p class="modal-description">Paste your text source material to generate open-ended short answer questions covering all content.</p>
         
         <div class="form-group">
           <label for="title" class="form-label">Title</label>
@@ -33,21 +33,6 @@
             rows="10" 
             placeholder="Paste your text here..."
           ></textarea>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Difficulty Level</label>
-          <div class="difficulty-selector">
-            <button 
-              v-for="level in difficultyLevels" 
-              :key="level.value" 
-              @click="selectedDifficulty = level.value" 
-              class="difficulty-btn" 
-              :class="{ active: selectedDifficulty === level.value }"
-            >
-              {{ level.label }}
-            </button>
-          </div>
         </div>
         
         <div class="modal-actions">
@@ -78,14 +63,7 @@ export default {
     const isVisible = ref(props.visible);
     const title = ref('');
     const content = ref('');
-    const selectedDifficulty = ref('medium');
     const isLoading = ref(false);
-    
-    const difficultyLevels = [
-      { value: 'easy', label: 'Easy' },
-      { value: 'medium', label: 'Medium' },
-      { value: 'hard', label: 'Hard' }
-    ];
     
     // Update isVisible when props.visible changes
     watch(() => props.visible, (newValue) => {
@@ -94,7 +72,6 @@ export default {
         // Reset form when opening
         title.value = '';
         content.value = '';
-        selectedDifficulty.value = 'medium';
       }
     });
     
@@ -115,8 +92,7 @@ export default {
       // Prepare data for submission
       const formData = {
         title: title.value,
-        content: content.value,
-        difficulty: selectedDifficulty.value
+        content: content.value
       };
       
       // Emit the data to the parent component
@@ -133,8 +109,6 @@ export default {
       isVisible,
       title,
       content,
-      selectedDifficulty,
-      difficultyLevels,
       isLoading,
       isValid,
       closeModal,
@@ -249,34 +223,6 @@ export default {
 .form-textarea {
   resize: vertical;
   min-height: 200px;
-}
-
-.difficulty-selector {
-  display: flex;
-  gap: var(--spacing-2);
-  flex-wrap: wrap;
-}
-
-.difficulty-btn {
-  padding: var(--spacing-2) var(--spacing-4);
-  background-color: var(--neutral-100);
-  border: 1px solid var(--neutral-300);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  font-size: var(--font-size-sm);
-  color: var(--neutral-700);
-}
-
-.difficulty-btn:hover {
-  background-color: var(--neutral-200);
-  border-color: var(--neutral-400);
-}
-
-.difficulty-btn.active {
-  background-color: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
 }
 
 .modal-actions {

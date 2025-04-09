@@ -11,7 +11,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <p class="modal-description">Upload a file to generate practice questions based on its content.</p>
+        <p class="modal-description">Upload a file to generate open-ended short answer questions covering all its content.</p>
         
         <div class="form-group">
           <label for="title" class="form-label">Title</label>
@@ -70,21 +70,6 @@
           </div>
         </div>
         
-        <div class="form-group">
-          <label class="form-label">Difficulty Level</label>
-          <div class="difficulty-selector">
-            <button 
-              v-for="level in difficultyLevels" 
-              :key="level.value" 
-              @click="selectedDifficulty = level.value" 
-              class="difficulty-btn" 
-              :class="{ active: selectedDifficulty === level.value }"
-            >
-              {{ level.label }}
-            </button>
-          </div>
-        </div>
-        
         <div class="modal-actions">
           <button class="btn btn-secondary" @click="closeModal">Cancel</button>
           <button class="btn btn-primary" @click="handleSubmit" :disabled="!isValid || isLoading">
@@ -114,14 +99,7 @@ export default {
     const title = ref('');
     const selectedFile = ref(null);
     const fileContent = ref('');
-    const selectedDifficulty = ref('medium');
     const isLoading = ref(false);
-    
-    const difficultyLevels = [
-      { value: 'easy', label: 'Easy' },
-      { value: 'medium', label: 'Medium' },
-      { value: 'hard', label: 'Hard' }
-    ];
     
     // Update isVisible when props.visible changes
     watch(() => props.visible, (newValue) => {
@@ -131,7 +109,6 @@ export default {
         title.value = '';
         selectedFile.value = null;
         fileContent.value = '';
-        selectedDifficulty.value = 'medium';
       }
     });
     
@@ -190,8 +167,7 @@ export default {
       const formData = {
         title: title.value,
         file: selectedFile.value,
-        fileContent: fileContent.value,
-        difficulty: selectedDifficulty.value
+        fileContent: fileContent.value
       };
       
       // Emit the data to the parent component
@@ -208,8 +184,6 @@ export default {
       isVisible,
       title,
       selectedFile,
-      selectedDifficulty,
-      difficultyLevels,
       isLoading,
       isValid,
       closeModal,
@@ -417,34 +391,6 @@ export default {
   font-size: var(--font-size-sm);
   color: var(--neutral-600);
   margin-top: var(--spacing-2);
-}
-
-.difficulty-selector {
-  display: flex;
-  gap: var(--spacing-2);
-  flex-wrap: wrap;
-}
-
-.difficulty-btn {
-  padding: var(--spacing-2) var(--spacing-4);
-  background-color: var(--neutral-100);
-  border: 1px solid var(--neutral-300);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  font-size: var(--font-size-sm);
-  color: var(--neutral-700);
-}
-
-.difficulty-btn:hover {
-  background-color: var(--neutral-200);
-  border-color: var(--neutral-400);
-}
-
-.difficulty-btn.active {
-  background-color: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
 }
 
 .modal-actions {

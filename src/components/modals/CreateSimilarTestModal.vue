@@ -11,7 +11,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <p class="modal-description">Generate similar questions based on your existing questions and answers.</p>
+        <p class="modal-description">Generate similar open-ended short answer questions based on your source material.</p>
         
         <div class="form-group">
           <label for="title" class="form-label">Test Title</label>
@@ -55,25 +55,13 @@
               </svg>
               <span>Upload File</span>
             </button>
-            
-            <button 
-              @click="sourceType = 'existing'" 
-              class="source-btn" 
-              :class="{ active: sourceType === 'existing' }"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-              </svg>
-              <span>Existing Tests</span>
-            </button>
           </div>
         </div>
         
         <!-- Manual input form -->
         <div v-if="sourceType === 'manual'" class="form-group">
           <label for="questions" class="form-label">Enter Questions and Answers</label>
-          <div class="help-text">Enter each question-answer pair separated by a blank line.</div>
+          <div class="help-text">Enter your source questions and answers. AI will generate a similar set of open-ended short answer questions.</div>
           <textarea 
             id="questions" 
             v-model="manualQuestions" 
@@ -134,81 +122,6 @@ Answer: William Shakespeare"
           </div>
         </div>
         
-        <!-- Existing tests selector -->
-        <div v-if="sourceType === 'existing'" class="form-group">
-          <label class="form-label">Select Existing Test</label>
-          <div v-if="isLoadingTests" class="loading-message">
-            <div class="spinner-sm"></div>
-            <span>Loading your tests...</span>
-          </div>
-          <div v-else-if="existingTests.length === 0" class="no-tests-message">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <span>You don't have any existing tests. Please use another source type.</span>
-          </div>
-          <div v-else class="tests-list">
-            <div 
-              v-for="test in existingTests" 
-              :key="test.id" 
-              class="test-item" 
-              :class="{ active: selectedTestId === test.id }"
-              @click="selectTest(test.id)"
-            >
-              <div class="test-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-              </div>
-              <div class="test-details">
-                <div class="test-title">{{ test.title }}</div>
-                <div class="test-meta">{{ test.questionCount }} questions • Created {{ formatDate(test.createdAt) }}</div>
-              </div>
-              <div class="test-select-indicator" v-if="selectedTestId === test.id">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Number of Questions</label>
-          <div class="question-count-selector">
-            <button 
-              v-for="count in questionCountOptions" 
-              :key="count" 
-              @click="questionCount = count" 
-              class="count-btn" 
-              :class="{ active: questionCount === count }"
-            >
-              {{ count }}
-            </button>
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Difficulty Level</label>
-          <div class="difficulty-selector">
-            <button 
-              v-for="level in difficultyLevels" 
-              :key="level.value" 
-              @click="selectedDifficulty = level.value" 
-              class="difficulty-btn" 
-              :class="{ active: selectedDifficulty === level.value }"
-            >
-              {{ level.label }}
-            </button>
-          </div>
-        </div>
-        
         <div class="modal-actions">
           <button class="btn btn-secondary" @click="closeModal">Cancel</button>
           <button class="btn btn-primary" @click="handleSubmit" :disabled="!isValid || isLoading">
@@ -240,20 +153,7 @@ export default {
     const manualQuestions = ref('');
     const selectedFile = ref(null);
     const fileContent = ref('');
-    const isLoadingTests = ref(false);
-    const existingTests = ref([]);
-    const selectedTestId = ref(null);
-    const questionCount = ref(10);
-    const selectedDifficulty = ref('medium');
     const isLoading = ref(false);
-    
-    const questionCountOptions = [5, 10, 15, 20, 25];
-    
-    const difficultyLevels = [
-      { value: 'easy', label: 'Easy' },
-      { value: 'medium', label: 'Medium' },
-      { value: 'hard', label: 'Hard' }
-    ];
     
     // Update isVisible when props.visible changes
     watch(() => props.visible, (newValue) => {
@@ -261,8 +161,6 @@ export default {
       if (newValue) {
         // Reset form when opening
         resetForm();
-        // Load existing tests when modal opens
-        loadExistingTests();
       }
     });
     
@@ -272,29 +170,6 @@ export default {
       manualQuestions.value = '';
       selectedFile.value = null;
       fileContent.value = '';
-      selectedTestId.value = null;
-      questionCount.value = 10;
-      selectedDifficulty.value = 'medium';
-    };
-    
-    // Mock function to load existing tests - replace with actual API call
-    const loadExistingTests = async () => {
-      isLoadingTests.value = true;
-      try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Mock data - replace with actual API call
-        existingTests.value = [
-          { id: '1', title: 'Biology Midterm', questionCount: 15, createdAt: new Date('2023-09-10') },
-          { id: '2', title: 'Chemistry Final Exam', questionCount: 20, createdAt: new Date('2023-10-05') },
-          { id: '3', title: 'History Quiz', questionCount: 8, createdAt: new Date('2023-10-12') }
-        ];
-      } catch (error) {
-        console.error('Error loading tests:', error);
-      } finally {
-        isLoadingTests.value = false;
-      }
     };
     
     const isValid = computed(() => {
@@ -305,8 +180,6 @@ export default {
           return manualQuestions.value.trim() !== '';
         case 'file':
           return selectedFile.value !== null;
-        case 'existing':
-          return selectedTestId.value !== null;
         default:
           return false;
       }
@@ -354,35 +227,28 @@ export default {
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
     
-    const selectTest = (testId) => {
-      selectedTestId.value = testId;
-      
-      // Auto-populate title if empty
-      if (!title.value.trim()) {
-        const selectedTest = existingTests.value.find(test => test.id === testId);
-        if (selectedTest) {
-          title.value = `Similar to ${selectedTest.title}`;
-        }
-      }
-    };
-    
-    const formatDate = (date) => {
-      if (!date) return '';
-      
-      const options = { year: 'numeric', month: 'short', day: 'numeric' };
-      return new Date(date).toLocaleDateString(undefined, options);
-    };
-    
     const handleSubmit = () => {
       if (!isValid.value) return;
       
       isLoading.value = true;
       
+      // Count questions in source to determine how many to generate
+      let questionCount = 0;
+      
+      if (sourceType.value === 'manual') {
+        // Estimate question count from manual input
+        const matches = manualQuestions.value.match(/question|q:/gi);
+        questionCount = matches ? matches.length : 5; // Default to 5 if can't determine
+      } else if (sourceType.value === 'file') {
+        // Estimate question count from file content
+        const matches = fileContent.value.match(/question|q:/gi);
+        questionCount = matches ? matches.length : 5; // Default to 5 if can't determine
+      }
+      
       // Prepare data for submission based on sourceType
       let formData = {
         title: title.value,
-        questionCount: questionCount.value,
-        difficulty: selectedDifficulty.value
+        estimatedQuestionCount: questionCount
       };
       
       switch (sourceType.value) {
@@ -394,10 +260,6 @@ export default {
           formData.sourceType = 'file';
           formData.file = selectedFile.value;
           formData.fileContent = fileContent.value;
-          break;
-        case 'existing':
-          formData.sourceType = 'existing';
-          formData.testId = selectedTestId.value;
           break;
       }
       
@@ -417,21 +279,12 @@ export default {
       sourceType,
       manualQuestions,
       selectedFile,
-      isLoadingTests,
-      existingTests,
-      selectedTestId,
-      questionCount,
-      questionCountOptions,
-      selectedDifficulty,
-      difficultyLevels,
       isLoading,
       isValid,
       closeModal,
       handleFileUpload,
       removeFile,
       formatFileSize,
-      selectTest,
-      formatDate,
       handleSubmit
     };
   }
@@ -687,113 +540,6 @@ export default {
   font-size: var(--font-size-sm);
   color: var(--neutral-600);
   margin-top: var(--spacing-2);
-}
-
-.loading-message, .no-tests-message {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-4);
-  background-color: var(--neutral-50);
-  border-radius: var(--radius-md);
-  color: var(--neutral-600);
-}
-
-.spinner-sm {
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid rgba(99, 102, 241, 0.2);
-  border-radius: 50%;
-  border-top-color: var(--primary-color);
-  animation: spin 1s linear infinite;
-}
-
-.tests-list {
-  max-height: 300px;
-  overflow-y: auto;
-  border: 1px solid var(--neutral-200);
-  border-radius: var(--radius-md);
-}
-
-.test-item {
-  display: flex;
-  align-items: center;
-  padding: var(--spacing-3) var(--spacing-4);
-  border-bottom: 1px solid var(--neutral-200);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.test-item:last-child {
-  border-bottom: none;
-}
-
-.test-item:hover {
-  background-color: var(--neutral-100);
-}
-
-.test-item.active {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-.test-icon {
-  margin-right: var(--spacing-3);
-  color: var(--primary-color);
-}
-
-.test-item.active .test-icon {
-  color: white;
-}
-
-.test-details {
-  flex: 1;
-}
-
-.test-title {
-  font-weight: var(--font-weight-medium);
-  margin-bottom: var(--spacing-1);
-}
-
-.test-meta {
-  font-size: var(--font-size-sm);
-  color: var(--neutral-600);
-}
-
-.test-item.active .test-meta {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.test-select-indicator {
-  color: white;
-}
-
-.question-count-selector, .difficulty-selector {
-  display: flex;
-  gap: var(--spacing-2);
-  flex-wrap: wrap;
-}
-
-.count-btn, .difficulty-btn {
-  padding: var(--spacing-2) var(--spacing-4);
-  background-color: var(--neutral-100);
-  border: 1px solid var(--neutral-300);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  font-size: var(--font-size-sm);
-  color: var(--neutral-700);
-}
-
-.count-btn:hover, .difficulty-btn:hover {
-  background-color: var(--neutral-200);
-  border-color: var(--neutral-400);
-}
-
-.count-btn.active, .difficulty-btn.active {
-  background-color: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
 }
 
 .modal-actions {

@@ -2,7 +2,7 @@
   <div class="study-page">
     <div class="study-header">
       <h1>Create Similar Test</h1>
-      <p class="study-description">Generate a practice test with similar questions to your existing ones</p>
+      <p class="study-description">Generate open-ended short answer questions similar to your source material</p>
     </div>
     
     <!-- Main Content Area -->
@@ -59,25 +59,13 @@
             </svg>
             <span>Upload File</span>
           </button>
-          
-          <button 
-            @click="sourceType = 'existing'" 
-            class="source-btn" 
-            :class="{ active: sourceType === 'existing' }"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-            </svg>
-            <span>Existing Tests</span>
-          </button>
         </div>
       </div>
       
       <!-- Manual input form -->
       <div v-if="sourceType === 'manual'" class="content-section">
         <label for="questions" class="section-label">Enter Questions and Answers</label>
-        <div class="helper-text mb-2">Enter each question-answer pair separated by a blank line.</div>
+        <div class="helper-text mb-2">Enter your source questions and answers. AI will generate a similar set of open-ended short answer questions.</div>
         <textarea 
           id="questions" 
           v-model="manualQuestions" 
@@ -94,6 +82,7 @@ Answer: William Shakespeare"
       <!-- File upload form -->
       <div v-if="sourceType === 'file'" class="content-section">
         <label class="section-label">Upload Questions File</label>
+        <div class="helper-text mb-2">Upload a file with your source questions. AI will generate a similar set of open-ended short answer questions.</div>
         <div class="file-upload-container">
           <input
             type="file"
@@ -140,80 +129,92 @@ Answer: William Shakespeare"
         </div>
       </div>
       
-      <!-- Existing tests selector -->
-      <div v-if="sourceType === 'existing'" class="content-section">
-        <label class="section-label">Select Existing Test</label>
-        <div v-if="isLoadingTests" class="loading-message">
-          <div class="spinner-sm"></div>
-          <span>Loading your tests...</span>
-        </div>
-        <div v-else-if="existingTests.length === 0" class="no-tests-message">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-          </svg>
-          <span>You don't have any existing tests. Please use another source type.</span>
-        </div>
-        <div v-else class="tests-list">
-          <div 
-            v-for="test in existingTests" 
-            :key="test.id" 
-            class="test-item" 
-            :class="{ active: selectedTestId === test.id }"
-            @click="selectTest(test.id)"
-          >
-            <div class="test-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
+      <!-- Folder Selection -->
+      <div class="content-section">
+        <label for="folder" class="section-label">Folder</label>
+        <div class="folder-dropdown-container">
+          <!-- Custom Dropdown Trigger -->
+          <div class="folder-dropdown-trigger" @click="toggleFolderDropdown" :class="{ 'active': showFolderDropdown }">
+            <div class="selected-folder">
+              <div v-if="selectedFolder" class="folder-tag" :style="{ backgroundColor: selectedFolder.color || '#6366F1' }">
+                <span>{{ selectedFolder.name }}</span>
+              </div>
+              <span v-else class="placeholder-text">Select a folder</span>
             </div>
-            <div class="test-details">
-              <div class="test-title">{{ test.title }}</div>
-              <div class="test-meta">{{ test.questionCount }} questions • Created {{ formatDate(test.createdAt) }}</div>
-            </div>
-            <div class="test-select-indicator" v-if="selectedTestId === test.id">
+            <div class="dropdown-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
+                <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </div>
           </div>
-        </div>
-      </div>
-      
-      <!-- Number of Questions Section -->
-      <div class="content-section">
-        <label class="section-label">Number of Questions</label>
-        <div class="question-count-selector">
-          <button 
-            v-for="count in questionCountOptions" 
-            :key="count" 
-            @click="questionCount = count" 
-            class="count-btn" 
-            :class="{ active: questionCount === count }"
-          >
-            {{ count }}
-          </button>
-        </div>
-      </div>
-      
-      <!-- Difficulty Level Section -->
-      <div class="content-section">
-        <label class="section-label">Difficulty Level</label>
-        <div class="difficulty-selector">
-          <button 
-            v-for="level in difficultyLevels" 
-            :key="level.value" 
-            @click="selectedDifficulty = level.value" 
-            class="difficulty-btn" 
-            :class="{ active: selectedDifficulty === level.value }"
-          >
-            {{ level.label }}
-          </button>
+
+          <!-- Folder Dropdown Content -->
+          <div v-if="showFolderDropdown" class="folder-dropdown-content">
+            <div class="folder-search">
+              <div class="search-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </div>
+              <input 
+                type="text" 
+                v-model="folderSearchTerm" 
+                class="form-control" 
+                placeholder="Search folders"
+                @input="handleFolderSearch"
+                ref="folderSearchInput"
+              />
+            </div>
+            
+            <div class="folder-groups">
+              <!-- User's Folders -->
+              <div class="folder-group" v-if="filteredFolders.length > 0">
+                <div class="folder-group-label">Your Folders</div>
+                <div class="folder-options">
+                  <div 
+                    v-for="folder in filteredFolders" 
+                    :key="folder.id" 
+                    class="folder-option" 
+                    @click="selectFolder(folder)"
+                    :class="{ 'active': selectedFolder && selectedFolder.id === folder.id }"
+                    :style="{ borderLeft: `3px solid ${folder.color || '#6366F1'}` }"
+                  >
+                    <div class="folder-icon" :style="{ color: folder.color || '#6366F1' }">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11z"></path>
+                      </svg>
+                    </div>
+                    <span class="folder-name">{{ folder.name }}</span>
+                    <span class="folder-select-icon" v-if="selectedFolder && selectedFolder.id === folder.id">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- No Folders Message -->
+              <div v-if="!filteredFolders.length && !isLoadingFolders" class="no-folders-message">
+                <p>No folders found. Create a folder first to organize your materials.</p>
+                <button type="button" class="create-folder-btn" @click="createNewFolder">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v11z"></path>
+                    <line x1="12" y1="11" x2="12" y2="17"></line>
+                    <line x1="9" y1="14" x2="15" y2="14"></line>
+                  </svg>
+                  Create New Folder
+                </button>
+              </div>
+
+              <!-- Loading Indicator -->
+              <div v-if="isLoadingFolders" class="loading-folders">
+                <div class="folder-spinner"></div>
+                <p>Loading folders...</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -230,8 +231,8 @@ Answer: William Shakespeare"
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted, nextTick } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 
 export default {
@@ -239,68 +240,97 @@ export default {
   
   setup() {
     const router = useRouter();
+    const route = useRoute();
     const store = useStore();
     const title = ref('');
     const sourceType = ref('manual');
     const manualQuestions = ref('');
     const selectedFile = ref(null);
     const fileContent = ref('');
-    const isLoadingTests = ref(false);
-    const existingTests = ref([]);
-    const selectedTestId = ref(null);
-    const questionCount = ref(10);
-    const selectedDifficulty = ref('medium');
     const isLoading = ref(false);
     const error = ref('');
     
-    const questionCountOptions = [5, 10, 15, 20, 25];
+    // Folder-related state
+    const selectedFolder = ref(null);
+    const folders = ref([]);
+    const isLoadingFolders = ref(false);
+    const showFolderDropdown = ref(false);
+    const folderSearchTerm = ref('');
+    const folderSearchInput = ref(null);
+    const filteredFolders = computed(() => {
+      if (!folderSearchTerm.value) return folders.value;
+      return folders.value.filter(folder => 
+        folder.name.toLowerCase().includes(folderSearchTerm.value.toLowerCase())
+      );
+    });
     
-    const difficultyLevels = [
-      { value: 'easy', label: 'Easy' },
-      { value: 'medium', label: 'Medium' },
-      { value: 'hard', label: 'Hard' }
-    ];
+    // Check if we have a folderId in the URL query params
+    onMounted(() => {
+      const { folderId } = route.query;
+      if (folderId) {
+        loadFolders().then(() => {
+          const folder = folders.value.find(f => f.id === folderId);
+          if (folder) {
+            selectedFolder.value = folder;
+          }
+        });
+      } else {
+        loadFolders();
+      }
+    });
     
-    // Mock function to load existing tests - replace with actual API call
-    const loadExistingTests = async () => {
-      isLoadingTests.value = true;
+    // Load folders from localStorage
+    const loadFolders = async () => {
+      isLoadingFolders.value = true;
       try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // In a real app, fetch from store or API
-        existingTests.value = store.getters['practiceTests/allTests'] || [];
-        
-        // If no tests in store, use mock data for demo
-        if (existingTests.value.length === 0) {
-          existingTests.value = [
-            { id: '1', title: 'Biology Midterm', questionCount: 15, createdAt: new Date('2023-09-10') },
-            { id: '2', title: 'Chemistry Final Exam', questionCount: 20, createdAt: new Date('2023-10-05') },
-            { id: '3', title: 'History Quiz', questionCount: 8, createdAt: new Date('2023-10-12') }
-          ];
+        const savedFolders = localStorage.getItem('user-folders');
+        if (savedFolders) {
+          folders.value = JSON.parse(savedFolders);
         }
-      } catch (error) {
-        console.error('Error loading tests:', error);
+      } catch (err) {
+        console.error('Error loading folders:', err);
       } finally {
-        isLoadingTests.value = false;
+        isLoadingFolders.value = false;
       }
     };
     
-    // Load tests on component mount
-    onMounted(() => {
-      loadExistingTests();
-    });
+    // Toggle folder dropdown
+    const toggleFolderDropdown = () => {
+      showFolderDropdown.value = !showFolderDropdown.value;
+      
+      if (showFolderDropdown.value) {
+        folderSearchTerm.value = '';
+        nextTick(() => {
+          folderSearchInput.value?.focus();
+        });
+      }
+    };
+    
+    // Handle folder search
+    const handleFolderSearch = () => {
+      // Implementation is handled by the computed property
+    };
+    
+    // Select a folder
+    const selectFolder = (folder) => {
+      selectedFolder.value = folder;
+      showFolderDropdown.value = false;
+    };
+    
+    // Create a new folder
+    const createNewFolder = () => {
+      // Navigate to dashboard with create folder action
+      router.push('/dashboard?action=createFolder');
+    };
     
     const isValid = computed(() => {
       if (!title.value.trim()) return false;
       
       switch (sourceType.value) {
         case 'manual':
-          return manualQuestions.value.trim() !== '';
+          return manualQuestions.value.trim() !== '' && selectedFolder.value !== null;
         case 'file':
-          return selectedFile.value !== null;
-        case 'existing':
-          return selectedTestId.value !== null;
+          return selectedFile.value !== null && selectedFolder.value !== null;
         default:
           return false;
       }
@@ -343,32 +373,20 @@ export default {
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
     
-    const selectTest = (testId) => {
-      selectedTestId.value = testId;
-      
-      // Auto-populate title if empty
-      if (!title.value.trim()) {
-        const selectedTest = existingTests.value.find(test => test.id === testId);
-        if (selectedTest) {
-          title.value = `Similar to ${selectedTest.title}`;
-        }
-      }
-    };
-    
-    const formatDate = (date) => {
-      if (!date) return '';
-      
-      const options = { year: 'numeric', month: 'short', day: 'numeric' };
-      return new Date(date).toLocaleDateString(undefined, options);
-    };
-    
     const handleSubmit = async () => {
-      if (!isValid.value) {
-        if (!title.value.trim()) {
-          error.value = 'Please enter a title for the test.';
-        } else {
-          error.value = 'Please provide source questions to generate similar ones.';
-        }
+      if (!title.value.trim()) {
+        error.value = 'Please enter a title for the test.';
+        return;
+      }
+      
+      if ((sourceType.value === 'manual' && !manualQuestions.value.trim()) || 
+          (sourceType.value === 'file' && !selectedFile.value)) {
+        error.value = 'Please provide source questions to generate similar ones.';
+        return;
+      }
+      
+      if (!selectedFolder.value) {
+        error.value = 'Please select a folder for this test.';
         return;
       }
       
@@ -376,11 +394,24 @@ export default {
         isLoading.value = true;
         error.value = '';
         
+        // Count questions in source to determine how many to generate
+        let questionCount = 0;
+        
+        if (sourceType.value === 'manual') {
+          // Estimate question count from manual input
+          const matches = manualQuestions.value.match(/question|q:/gi);
+          questionCount = matches ? matches.length : 5; // Default to 5 if can't determine
+        } else if (sourceType.value === 'file') {
+          // Estimate question count from file content
+          const matches = fileContent.value.match(/question|q:/gi);
+          questionCount = matches ? matches.length : 5; // Default to 5 if can't determine
+        }
+        
         // Prepare data for submission based on sourceType
         let formData = {
           title: title.value,
-          questionCount: questionCount.value,
-          difficulty: selectedDifficulty.value
+          estimatedQuestionCount: questionCount,
+          folder: selectedFolder.value
         };
         
         switch (sourceType.value) {
@@ -392,10 +423,6 @@ export default {
             formData.sourceType = 'file';
             formData.file = selectedFile.value;
             formData.fileContent = fileContent.value;
-            break;
-          case 'existing':
-            formData.sourceType = 'existing';
-            formData.testId = selectedTestId.value;
             break;
         }
         
@@ -422,23 +449,25 @@ export default {
       manualQuestions,
       selectedFile,
       fileContent,
-      isLoadingTests,
-      existingTests,
-      selectedTestId,
-      questionCount,
-      questionCountOptions,
-      selectedDifficulty,
-      difficultyLevels,
       isLoading,
       error,
       isValid,
       handleFileUpload,
       removeFile,
       formatFileSize,
-      selectTest,
-      formatDate,
       handleSubmit,
-      cancel
+      cancel,
+      selectedFolder,
+      folders,
+      isLoadingFolders,
+      showFolderDropdown,
+      folderSearchTerm,
+      folderSearchInput,
+      filteredFolders,
+      toggleFolderDropdown,
+      handleFolderSearch,
+      selectFolder,
+      createNewFolder
     };
   }
 };
@@ -572,6 +601,242 @@ export default {
   color: var(--primary-color);
 }
 
+/* Enhanced Folder Dropdown Styling */
+.folder-dropdown-container {
+  position: relative;
+  width: 100%;
+}
+
+.folder-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: white;
+  border: 2px solid var(--neutral-300);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.folder-dropdown-trigger:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.folder-dropdown-trigger.active {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.selected-folder {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.placeholder-text {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--neutral-500);
+}
+
+.dropdown-icon {
+  margin-left: auto;
+  color: var(--neutral-600);
+  transition: transform 0.2s ease;
+}
+
+.folder-dropdown-trigger.active .dropdown-icon {
+  transform: rotate(180deg);
+  color: var(--primary-color);
+}
+
+/* Folder Tag Styling */
+.folder-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  background-color: var(--primary-color);
+}
+
+/* Dropdown Content Styling */
+.folder-dropdown-content {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 50;
+  border: 1px solid var(--neutral-200);
+  max-height: 350px;
+  overflow-y: auto;
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.folder-search {
+  padding: 1rem;
+  border-bottom: 1px solid var(--neutral-200);
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-icon {
+  color: var(--neutral-400);
+}
+
+.folder-groups {
+  padding: 0.5rem;
+}
+
+.folder-group {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+.folder-group:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.folder-group-label {
+  padding: 0 0.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--neutral-600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: var(--neutral-50);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.folder-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.folder-option {
+  display: flex;
+  align-items: center;
+  padding: 0.625rem 0.75rem;
+  gap: 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--neutral-800);
+  margin-bottom: 0.25rem;
+  min-height: 44px;
+  border: 1px solid transparent;
+}
+
+.folder-option:hover {
+  background-color: var(--neutral-100);
+  border-color: var(--neutral-300);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.folder-option.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  font-weight: 500;
+}
+
+.folder-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.folder-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-select-icon {
+  margin-left: 0.5rem;
+}
+
+.no-folders-message {
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--neutral-600);
+}
+
+.create-folder-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.create-folder-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.loading-folders {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  color: var(--neutral-600);
+}
+
+.folder-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid rgba(99, 102, 241, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s linear infinite;
+  margin-bottom: 0.75rem;
+}
+
 /* File Upload Styling */
 .file-upload-container {
   margin-bottom: var(--spacing-3);
@@ -666,144 +931,6 @@ export default {
   font-size: var(--font-size-sm);
   color: var(--neutral-600);
   margin-top: var(--spacing-2);
-}
-
-/* Test List Styling */
-.loading-message, .no-tests-message {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-4);
-  background-color: var(--neutral-50);
-  border-radius: var(--radius-md);
-  color: var(--neutral-600);
-}
-
-.spinner-sm {
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid rgba(99, 102, 241, 0.2);
-  border-radius: 50%;
-  border-top-color: var(--primary-color);
-  animation: spin 1s linear infinite;
-}
-
-.tests-list {
-  max-height: 300px;
-  overflow-y: auto;
-  border: 1px solid var(--neutral-200);
-  border-radius: var(--radius-md);
-}
-
-.test-item {
-  display: flex;
-  align-items: center;
-  padding: var(--spacing-3) var(--spacing-4);
-  border-bottom: 1px solid var(--neutral-200);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.test-item:last-child {
-  border-bottom: none;
-}
-
-.test-item:hover {
-  background-color: var(--neutral-100);
-}
-
-.test-item.active {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-.test-icon {
-  margin-right: var(--spacing-3);
-  color: var(--primary-color);
-}
-
-.test-item.active .test-icon {
-  color: white;
-}
-
-.test-details {
-  flex: 1;
-}
-
-.test-title {
-  font-weight: var(--font-weight-medium);
-  margin-bottom: var(--spacing-1);
-}
-
-.test-meta {
-  font-size: var(--font-size-sm);
-  color: var(--neutral-600);
-}
-
-.test-item.active .test-meta {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.test-select-indicator {
-  color: white;
-}
-
-/* Question Count Selector */
-.question-count-selector {
-  display: flex;
-  gap: var(--spacing-2);
-  flex-wrap: wrap;
-}
-
-.count-btn {
-  padding: var(--spacing-2) var(--spacing-4);
-  background-color: var(--neutral-100);
-  border: 1px solid var(--neutral-300);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  font-size: var(--font-size-sm);
-  color: var(--neutral-700);
-}
-
-.count-btn:hover {
-  background-color: var(--neutral-200);
-  border-color: var(--neutral-400);
-}
-
-.count-btn.active {
-  background-color: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
-}
-
-/* Difficulty Selector */
-.difficulty-selector {
-  display: flex;
-  gap: var(--spacing-2);
-  flex-wrap: wrap;
-}
-
-.difficulty-btn {
-  padding: var(--spacing-2) var(--spacing-4);
-  background-color: var(--neutral-100);
-  border: 1px solid var(--neutral-300);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  font-size: var(--font-size-sm);
-  color: var(--neutral-700);
-}
-
-.difficulty-btn:hover {
-  background-color: var(--neutral-200);
-  border-color: var(--neutral-400);
-}
-
-.difficulty-btn.active {
-  background-color: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
 }
 
 /* Action Buttons */

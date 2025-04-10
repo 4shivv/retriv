@@ -281,7 +281,7 @@
         <div v-if="loading" class="ai-loading-state">
           <div class="ai-loading-spinner"></div>
           <p>Generating your study materials...</p>
-          <p class="loading-description">The AI is analyzing your content and creating optimized Feynman Cards.</p>
+          <p class="loading-description">The AI is analyzing your content and creating optimized Blurt Cards.</p>
         </div>
         
         <!-- Result Cards -->

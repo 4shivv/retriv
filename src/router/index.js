@@ -98,7 +98,7 @@ const routes = [
     component: CreateStudyCardView,
     meta: { 
       requiresAuth: true,
-      title: 'Create Study Card - Retriv' 
+      title: 'Create Blurt Card - Retriv' 
     }
   },
   {
@@ -125,7 +125,7 @@ const routes = [
     component: FeynmanView,
     meta: { 
       requiresAuth: true,
-      title: 'Feynman Technique - Retriv' 
+      title: 'Blurt Technique - Retriv' 
     }
   },
   {
